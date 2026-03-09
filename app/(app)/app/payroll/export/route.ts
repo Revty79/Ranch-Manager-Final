@@ -7,6 +7,7 @@ import {
   getPayrollBreakdownForRange,
   getPayrollSummaryForRange,
 } from "@/lib/payroll/queries";
+import { autoCloseStaleTimeEntriesForRanch } from "@/lib/time/maintenance";
 
 function toFileSafeName(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -40,6 +41,7 @@ export async function GET(request: NextRequest) {
   const exportType = type === "breakdown" ? "breakdown" : "summary";
   const range = resolvePayrollDateRange(fromInput, toInput);
   const ranchSlug = toFileSafeName(ranchContext.ranch.slug || ranchContext.ranch.name);
+  await autoCloseStaleTimeEntriesForRanch(ranchContext.ranch.id);
 
   let csv: string;
   let filename: string;

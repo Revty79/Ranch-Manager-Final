@@ -7,6 +7,7 @@ import { db } from "@/lib/db/client";
 import { ranchMemberships, ranches, users } from "@/lib/db/schema";
 import { getPostAuthRedirectPath, requireUser } from "./context";
 import { hashPassword, verifyPassword } from "./password";
+import { autoClockOutActiveTimeForUser } from "@/lib/time/maintenance";
 import {
   clearSessionCookie,
   createSession,
@@ -220,6 +221,9 @@ export async function completeOnboardingAction(
 }
 
 export async function logoutAction() {
+  const user = await requireUser();
+  await autoClockOutActiveTimeForUser(user.id);
+
   const token = await getSessionTokenFromCookie();
   if (token) {
     await revokeSessionByToken(token);

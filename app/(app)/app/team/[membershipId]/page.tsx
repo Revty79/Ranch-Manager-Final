@@ -1,11 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EditMemberForm } from "@/components/team/edit-member-form";
+import { TimeEntryAdjustments } from "@/components/team/time-entry-adjustments";
 import { PageHeader } from "@/components/patterns/page-header";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth/context";
 import { getTeamMemberByMembership } from "@/lib/team/queries";
+import {
+  getRecentShiftsForMembership,
+  getRecentWorkSessionsForMembership,
+} from "@/lib/time/queries";
 
 function formatRole(role: "owner" | "manager" | "worker" | "seasonal_worker"): string {
   if (role === "worker") return "Regular Worker";
@@ -20,7 +25,11 @@ export default async function TeamMemberDetailPage({
 }) {
   const context = await requireRole(["owner", "manager"]);
   const { membershipId } = await params;
-  const member = await getTeamMemberByMembership(context.ranch.id, membershipId);
+  const [member, recentShifts, recentWorkSessions] = await Promise.all([
+    getTeamMemberByMembership(context.ranch.id, membershipId),
+    getRecentShiftsForMembership(context.ranch.id, membershipId, 10),
+    getRecentWorkSessionsForMembership(context.ranch.id, membershipId, 10),
+  ]);
 
   if (!member) {
     notFound();
@@ -58,6 +67,31 @@ export default async function TeamMemberDetailPage({
             payType={member.payType}
             payRateCents={member.payRateCents}
             isActive={member.isActive}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="space-y-4 py-6">
+          <div>
+            <CardTitle className="text-base">Clock & hour adjustments</CardTitle>
+            <CardDescription>
+              Review and correct recent clock-in/clock-out history if this member missed an entry.
+            </CardDescription>
+          </div>
+          <TimeEntryAdjustments
+            membershipId={member.membershipId}
+            shiftRows={recentShifts.map((shift) => ({
+              id: shift.id,
+              startedAtIso: shift.startedAt.toISOString(),
+              endedAtIso: shift.endedAt ? shift.endedAt.toISOString() : null,
+            }))}
+            workRows={recentWorkSessions.map((entry) => ({
+              id: entry.id,
+              workOrderTitle: entry.workOrderTitle,
+              startedAtIso: entry.startedAt.toISOString(),
+              endedAtIso: entry.endedAt ? entry.endedAt.toISOString() : null,
+            }))}
           />
         </CardContent>
       </Card>
