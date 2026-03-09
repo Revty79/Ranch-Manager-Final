@@ -37,7 +37,7 @@ export const marketingContent = {
   ],
   pricing: {
     planName: "Launch Plan",
-    amount: "$149",
+    amount: "$9.99",
     cadence: "per ranch / month",
     description: "A single paid path focused on launch operations value.",
     included: [
