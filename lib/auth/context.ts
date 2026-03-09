@@ -1,0 +1,181 @@
+import { and, eq, gt } from "drizzle-orm";
+import { cache } from "react";
+import { redirect } from "next/navigation";
+import { db } from "@/lib/db/client";
+import { ranchMemberships, ranches, sessions, users, type RanchRole } from "@/lib/db/schema";
+import { getSessionTokenFromCookie, hashSessionToken } from "./session";
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  fullName: string;
+  onboardingState: "needs_ranch" | "complete";
+  lastActiveRanchId: string | null;
+}
+
+export interface RanchContext {
+  ranch: {
+    id: string;
+    name: string;
+    slug: string;
+    onboardingCompleted: boolean;
+    subscriptionStatus: string;
+    subscriptionPlanKey: string | null;
+    betaLifetimeAccess: boolean;
+  };
+  membership: {
+    id: string;
+    role: RanchRole;
+    isActive: boolean;
+  };
+}
+
+export interface AppContext extends RanchContext {
+  user: AuthUser;
+}
+
+async function getRanchContextForUser(
+  userId: string,
+  preferredRanchId: string | null,
+): Promise<RanchContext | null> {
+  const memberships = await db
+    .select({
+      membershipId: ranchMemberships.id,
+      role: ranchMemberships.role,
+      isActive: ranchMemberships.isActive,
+      ranchId: ranches.id,
+      ranchName: ranches.name,
+      ranchSlug: ranches.slug,
+      onboardingCompleted: ranches.onboardingCompleted,
+      subscriptionStatus: ranches.subscriptionStatus,
+      subscriptionPlanKey: ranches.subscriptionPlanKey,
+      betaLifetimeAccess: ranches.betaLifetimeAccess,
+    })
+    .from(ranchMemberships)
+    .innerJoin(ranches, eq(ranchMemberships.ranchId, ranches.id))
+    .where(and(eq(ranchMemberships.userId, userId), eq(ranchMemberships.isActive, true)));
+
+  if (!memberships.length) {
+    return null;
+  }
+
+  const activeMembership =
+    memberships.find((membership) => membership.ranchId === preferredRanchId) ??
+    memberships[0];
+
+  return {
+    ranch: {
+      id: activeMembership.ranchId,
+      name: activeMembership.ranchName,
+      slug: activeMembership.ranchSlug,
+      onboardingCompleted: activeMembership.onboardingCompleted,
+      subscriptionStatus: activeMembership.subscriptionStatus,
+      subscriptionPlanKey: activeMembership.subscriptionPlanKey,
+      betaLifetimeAccess: activeMembership.betaLifetimeAccess,
+    },
+    membership: {
+      id: activeMembership.membershipId,
+      role: activeMembership.role,
+      isActive: activeMembership.isActive,
+    },
+  };
+}
+
+export const getCurrentUser = cache(async (): Promise<AuthUser | null> => {
+  const token = await getSessionTokenFromCookie();
+  if (!token) {
+    return null;
+  }
+
+  const [sessionRow] = await db
+    .select({
+      userId: users.id,
+      email: users.email,
+      fullName: users.fullName,
+      onboardingState: users.onboardingState,
+      lastActiveRanchId: users.lastActiveRanchId,
+    })
+    .from(sessions)
+    .innerJoin(users, eq(sessions.userId, users.id))
+    .where(
+      and(
+        eq(sessions.tokenHash, hashSessionToken(token)),
+        gt(sessions.expiresAt, new Date()),
+      ),
+    )
+    .limit(1);
+
+  if (!sessionRow) {
+    return null;
+  }
+
+  return {
+    id: sessionRow.userId,
+    email: sessionRow.email,
+    fullName: sessionRow.fullName,
+    onboardingState: sessionRow.onboardingState,
+    lastActiveRanchId: sessionRow.lastActiveRanchId,
+  };
+});
+
+export const getCurrentRanchContext = cache(async (): Promise<RanchContext | null> => {
+  const user = await getCurrentUser();
+  if (!user) {
+    return null;
+  }
+
+  return getRanchContextForUser(user.id, user.lastActiveRanchId);
+});
+
+export async function getPostAuthRedirectPath(user: AuthUser): Promise<string> {
+  const ranchContext = await getRanchContextForUser(user.id, user.lastActiveRanchId);
+  if (
+    user.onboardingState !== "complete" ||
+    !ranchContext ||
+    !ranchContext.ranch.onboardingCompleted
+  ) {
+    return "/onboarding";
+  }
+
+  return "/app";
+}
+
+export async function requireUser(): Promise<AuthUser> {
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  return user;
+}
+
+export async function requireAppContext(): Promise<AppContext> {
+  const user = await requireUser();
+  const ranchContext = await getRanchContextForUser(user.id, user.lastActiveRanchId);
+
+  if (
+    user.onboardingState !== "complete" ||
+    !ranchContext ||
+    !ranchContext.ranch.onboardingCompleted
+  ) {
+    redirect("/onboarding");
+  }
+
+  return {
+    user,
+    ...ranchContext,
+  };
+}
+
+export async function requireRole(allowedRoles: RanchRole[]): Promise<AppContext> {
+  const context = await requireAppContext();
+  if (!allowedRoles.includes(context.membership.role)) {
+    redirect("/app/access-denied");
+  }
+
+  return context;
+}
+
+export function roleCanManageOperations(role: RanchRole): boolean {
+  return role === "owner" || role === "manager";
+}

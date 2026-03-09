@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f2efe7;
+  --background-muted: #ebe6dc;
+  --surface: #faf8f3;
+  --surface-strong: #ffffff;
+  --foreground: #1a2b28;
+  --foreground-muted: #5d6e68;
+  --border: #d5dccf;
+  --accent: #2f5d50;
+  --accent-hover: #244a40;
+  --accent-soft: #dfe8e3;
+  --warning: #a15a22;
+  --danger: #9b2f2f;
+  --ring: #35685a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-background-muted: var(--background-muted);
+  --color-surface: var(--surface);
+  --color-surface-strong: var(--surface-strong);
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-manrope);
+  --font-display: var(--font-sora);
+  --font-mono: var(--font-jetbrains-mono);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  border-color: var(--border);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-manrope), sans-serif;
+  background-image:
+    radial-gradient(circle at top right, #dce7df 0%, transparent 48%),
+    radial-gradient(circle at top left, #ece4d5 0%, transparent 42%);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-sora), sans-serif;
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  color: #f5f9f8;
+  background: #2f5d50;
+}
