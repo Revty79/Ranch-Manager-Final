@@ -34,7 +34,8 @@ export function AddMemberForm() {
           defaultValue="worker"
           className="h-10 w-full rounded-xl border bg-surface px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <option value="worker">Worker</option>
+          <option value="worker">Regular Worker</option>
+          <option value="seasonal_worker">Seasonal Worker</option>
           <option value="manager">Manager</option>
           <option value="owner">Owner</option>
         </select>
@@ -47,6 +48,7 @@ export function AddMemberForm() {
         >
           <option value="hourly">Hourly</option>
           <option value="salary">Salary</option>
+          <option value="piece_work">Piece Work (work-order hours only)</option>
         </select>
       </FormFieldShell>
       <FormFieldShell label="Pay rate">

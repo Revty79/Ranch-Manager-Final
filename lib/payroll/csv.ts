@@ -11,6 +11,17 @@ function centsToDollars(cents: number): string {
   return (cents / 100).toFixed(2);
 }
 
+function formatRole(role: "owner" | "manager" | "worker" | "seasonal_worker"): string {
+  if (role === "worker") return "regular worker";
+  if (role === "seasonal_worker") return "seasonal worker";
+  return role;
+}
+
+function formatPayType(payType: "hourly" | "salary" | "piece_work"): string {
+  if (payType === "piece_work") return "piece work";
+  return payType;
+}
+
 export function buildPayrollCsv(rows: PayrollSummaryRow[]): string {
   const header = [
     "Name",
@@ -27,8 +38,8 @@ export function buildPayrollCsv(rows: PayrollSummaryRow[]): string {
     [
       row.fullName,
       row.email,
-      row.role,
-      row.payType,
+      formatRole(row.role),
+      formatPayType(row.payType),
       centsToDollars(row.payRateCents),
       row.hoursWorked.toFixed(2),
       centsToDollars(row.estimatedPayCents),

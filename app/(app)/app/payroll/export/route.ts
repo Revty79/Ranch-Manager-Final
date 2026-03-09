@@ -20,7 +20,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "No ranch access" }, { status: 403 });
   }
 
-  if (ranchContext.membership.role === "worker") {
+  if (
+    ranchContext.membership.role === "worker" ||
+    ranchContext.membership.role === "seasonal_worker"
+  ) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

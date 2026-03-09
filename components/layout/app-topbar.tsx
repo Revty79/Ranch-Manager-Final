@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { logoutAction } from "@/lib/auth/actions";
 import type { AppContext } from "@/lib/auth/context";
+import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -9,6 +10,8 @@ interface AppTopbarProps {
 }
 
 export function AppTopbar({ context }: AppTopbarProps) {
+  const isPlatformAdmin = isPlatformAdminEmail(context.user.email);
+
   return (
     <header className="mb-6 flex flex-col gap-3 rounded-2xl border bg-surface-strong px-4 py-3 md:flex-row md:items-center md:justify-between">
       <div>
@@ -22,6 +25,11 @@ export function AppTopbar({ context }: AppTopbarProps) {
         <Link href="/app/settings" className={cn(buttonVariants({ variant: "secondary", size: "sm" }))}>
           Settings
         </Link>
+        {isPlatformAdmin ? (
+          <Link href="/admin" className={cn(buttonVariants({ variant: "secondary", size: "sm" }))}>
+            Admin
+          </Link>
+        ) : null}
         <form action={logoutAction}>
           <button
             type="submit"

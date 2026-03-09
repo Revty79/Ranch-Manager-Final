@@ -22,6 +22,17 @@ function formatMoney(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
 }
 
+function formatRole(role: "owner" | "manager" | "worker" | "seasonal_worker"): string {
+  if (role === "worker") return "Regular Worker";
+  if (role === "seasonal_worker") return "Seasonal Worker";
+  return role.charAt(0).toUpperCase() + role.slice(1);
+}
+
+function formatPayType(payType: "hourly" | "salary" | "piece_work"): string {
+  if (payType === "piece_work") return "Piece Work";
+  return payType.charAt(0).toUpperCase() + payType.slice(1);
+}
+
 export default async function PayrollPage({
   searchParams,
 }: {
@@ -41,7 +52,7 @@ export default async function PayrollPage({
       <PageHeader
         eyebrow="Payroll"
         title="Payroll Summary"
-        description="Transparent launch calculations based on tracked shift hours."
+        description="Transparent calculations based on tracked time and configured pay type."
         actions={
           <Link
             href={`/app/payroll/export?from=${range.from}&to=${range.to}`}
@@ -99,7 +110,7 @@ export default async function PayrollPage({
           <div>
             <CardTitle className="text-base">Summary by team member</CardTitle>
             <CardDescription>
-              Hourly members use `hours x rate`. Salary members use flat period amount.
+              Hourly uses shift hours. Piece work uses work-order timer hours. Salary uses a flat period amount.
             </CardDescription>
           </div>
           {summary.rows.length ? (
@@ -125,9 +136,9 @@ export default async function PayrollPage({
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="neutral">{row.role}</Badge>
+                        <Badge variant="neutral">{formatRole(row.role)}</Badge>
                       </TableCell>
-                      <TableCell>{row.payType}</TableCell>
+                      <TableCell>{formatPayType(row.payType)}</TableCell>
                       <TableCell>{formatMoney(row.payRateCents)}</TableCell>
                       <TableCell>{row.hoursWorked.toFixed(2)}</TableCell>
                       <TableCell>{formatMoney(row.estimatedPayCents)}</TableCell>

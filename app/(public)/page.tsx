@@ -21,7 +21,11 @@ export default function LandingPage() {
             {marketingContent.hero.description}
           </p>
           <div className="flex flex-wrap items-center gap-3">
-            <Link href="/signup" className={cn(buttonVariants({ size: "lg" }))}>
+            <Link
+              href="/signup"
+              className={cn(buttonVariants({ size: "lg" }), "text-white")}
+              style={{ color: "#fff" }}
+            >
               Start your ranch account
             </Link>
             <Link

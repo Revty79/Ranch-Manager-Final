@@ -145,7 +145,10 @@ export async function startWorkSessionAction(
     return { error: "Work order is unavailable for time tracking." };
   }
 
-  if (context.membership.role === "worker") {
+  if (
+    context.membership.role === "worker" ||
+    context.membership.role === "seasonal_worker"
+  ) {
     const [assignment] = await db
       .select({ id: workOrderAssignments.id })
       .from(workOrderAssignments)

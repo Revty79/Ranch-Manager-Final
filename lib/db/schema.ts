@@ -10,7 +10,12 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
-export const ranchRoleEnum = pgEnum("ranch_role", ["owner", "manager", "worker"]);
+export const ranchRoleEnum = pgEnum("ranch_role", [
+  "owner",
+  "manager",
+  "worker",
+  "seasonal_worker",
+]);
 export const onboardingStateEnum = pgEnum("onboarding_state", [
   "needs_ranch",
   "complete",
@@ -22,7 +27,10 @@ export const subscriptionStatusEnum = pgEnum("subscription_status", [
   "past_due",
   "canceled",
 ]);
-export const payTypeEnum = pgEnum("pay_type", ["hourly", "salary"]);
+export const couponGrantTypeEnum = pgEnum("coupon_grant_type", [
+  "beta_lifetime_access",
+]);
+export const payTypeEnum = pgEnum("pay_type", ["hourly", "salary", "piece_work"]);
 export const workOrderStatusEnum = pgEnum("work_order_status", [
   "draft",
   "open",
@@ -115,6 +123,55 @@ export const ranchMemberships = pgTable(
     index("ranch_memberships_ranch_idx").on(table.ranchId),
     index("ranch_memberships_user_idx").on(table.userId),
     uniqueIndex("ranch_memberships_ranch_user_uidx").on(table.ranchId, table.userId),
+  ],
+);
+
+export const billingCoupons = pgTable(
+  "billing_coupons",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: text("name").notNull(),
+    codeHash: text("code_hash").notNull().unique(),
+    grantType: couponGrantTypeEnum("grant_type")
+      .default("beta_lifetime_access")
+      .notNull(),
+    isActive: boolean("is_active").default(true).notNull(),
+    maxRedemptions: integer("max_redemptions"),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [index("billing_coupons_active_idx").on(table.isActive)],
+);
+
+export const billingCouponRedemptions = pgTable(
+  "billing_coupon_redemptions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    couponId: uuid("coupon_id")
+      .references(() => billingCoupons.id, { onDelete: "cascade" })
+      .notNull(),
+    ranchId: uuid("ranch_id")
+      .references(() => ranches.id, { onDelete: "cascade" })
+      .notNull(),
+    redeemedByUserId: uuid("redeemed_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    redeemedAt: timestamp("redeemed_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("billing_coupon_redemptions_coupon_idx").on(table.couponId),
+    index("billing_coupon_redemptions_ranch_idx").on(table.ranchId),
+    uniqueIndex("billing_coupon_redemptions_coupon_ranch_uidx").on(
+      table.couponId,
+      table.ranchId,
+    ),
   ],
 );
 
@@ -245,6 +302,7 @@ export const workTimeEntries = pgTable(
 export type RanchRole = (typeof ranchRoleEnum.enumValues)[number];
 export type OnboardingState = (typeof onboardingStateEnum.enumValues)[number];
 export type SubscriptionStatus = (typeof subscriptionStatusEnum.enumValues)[number];
+export type CouponGrantType = (typeof couponGrantTypeEnum.enumValues)[number];
 export type PayType = (typeof payTypeEnum.enumValues)[number];
 export type WorkOrderStatus = (typeof workOrderStatusEnum.enumValues)[number];
 export type WorkOrderPriority = (typeof workOrderPriorityEnum.enumValues)[number];

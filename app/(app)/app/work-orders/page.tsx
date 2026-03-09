@@ -23,6 +23,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const statusTabs = ["all", "draft", "open", "in_progress", "completed", "cancelled"] as const;
+const workerRoles = new Set(["worker", "seasonal_worker"]);
 
 function statusVariant(status: string) {
   if (status === "completed") {
@@ -62,7 +63,7 @@ export default async function WorkOrdersPage({
   const context = await requirePaidAccessContext();
   const params = await searchParams;
 
-  if (context.membership.role === "worker") {
+  if (workerRoles.has(context.membership.role)) {
     const assignedOrders = await getAssignedWorkForMembership(
       context.ranch.id,
       context.membership.id,

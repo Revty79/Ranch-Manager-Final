@@ -17,7 +17,7 @@ Demo credentials (default):
 
 1. Visit landing page (`/`) and pricing page (`/pricing`).
 2. Sign up (`/signup`) and create ranch (`/onboarding`).
-3. Open settings (`/app/settings`) and start checkout or apply beta code.
+3. Open settings (`/app/settings`) and start checkout or apply coupon code.
 4. Add team members (`/app/team`).
 5. Create and assign work orders (`/app/work-orders`).
 6. Track shift and task time (`/app/time`).

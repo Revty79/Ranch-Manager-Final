@@ -7,6 +7,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth/context";
 import { getTeamMemberByMembership } from "@/lib/team/queries";
 
+function formatRole(role: "owner" | "manager" | "worker" | "seasonal_worker"): string {
+  if (role === "worker") return "Regular Worker";
+  if (role === "seasonal_worker") return "Seasonal Worker";
+  return role.charAt(0).toUpperCase() + role.slice(1);
+}
+
 export default async function TeamMemberDetailPage({
   params,
 }: {
@@ -42,7 +48,7 @@ export default async function TeamMemberDetailPage({
             <Badge variant={member.isActive ? "success" : "warning"}>
               {member.isActive ? "Active" : "Inactive"}
             </Badge>
-            <Badge>{member.role}</Badge>
+            <Badge>{formatRole(member.role)}</Badge>
             <span className="text-sm text-foreground-muted">{member.email}</span>
           </div>
           <EditMemberForm

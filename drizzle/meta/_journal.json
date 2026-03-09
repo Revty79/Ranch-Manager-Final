@@ -43,6 +43,20 @@
       "when": 1773028341114,
       "tag": "0005_magical_bastion",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1773035911372,
+      "tag": "0006_typical_owl",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1773037147009,
+      "tag": "0007_useful_quicksilver",
+      "breakpoints": true
     }
   ]
 }

@@ -7,8 +7,8 @@ export interface TeamMemberRow {
   userId: string;
   fullName: string;
   email: string;
-  role: "owner" | "manager" | "worker";
-  payType: "hourly" | "salary";
+  role: "owner" | "manager" | "worker" | "seasonal_worker";
+  payType: "hourly" | "salary" | "piece_work";
   payRateCents: number;
   isActive: boolean;
   createdAt: Date;

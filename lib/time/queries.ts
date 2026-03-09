@@ -147,7 +147,7 @@ export async function getWorkOrderOptionsForTimeTracking(
   membershipId: string,
   role: RanchRole,
 ): Promise<WorkOrderOption[]> {
-  if (role === "worker") {
+  if (role === "worker" || role === "seasonal_worker") {
     return db
       .select({
         id: workOrders.id,

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AccessDeniedShell, BillingRequiredShell } from "@/components/patterns/access-states";
 import { PageHeader } from "@/components/patterns/page-header";
-import { BetaCodeForm } from "@/components/billing/beta-code-form";
+import { CouponCodeForm } from "@/components/billing/beta-code-form";
 import { CheckoutForm } from "@/components/billing/checkout-form";
 import { requireAppContext } from "@/lib/auth/context";
 import { hasBillingAccess } from "@/lib/billing/access";
@@ -100,7 +100,14 @@ export default async function SettingsPage({
             {isOwner ? (
               <div className="space-y-3 pt-2">
                 <CheckoutForm />
-                <BetaCodeForm />
+                <details className="rounded-xl border bg-surface p-3">
+                  <summary className="cursor-pointer text-sm font-semibold text-foreground">
+                    Have a coupon code?
+                  </summary>
+                  <div className="pt-3">
+                    <CouponCodeForm />
+                  </div>
+                </details>
               </div>
             ) : (
               <p className="text-sm text-foreground-muted">

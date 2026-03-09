@@ -20,9 +20,20 @@ import { cn } from "@/lib/utils";
 
 type TeamFilter = "active" | "inactive" | "all";
 
-function formatPay(payRateCents: number, payType: "hourly" | "salary") {
+function formatRole(role: "owner" | "manager" | "worker" | "seasonal_worker"): string {
+  if (role === "worker") return "Regular Worker";
+  if (role === "seasonal_worker") return "Seasonal Worker";
+  return role.charAt(0).toUpperCase() + role.slice(1);
+}
+
+function formatPay(
+  payRateCents: number,
+  payType: "hourly" | "salary" | "piece_work",
+) {
   const amount = (payRateCents / 100).toFixed(2);
-  return payType === "hourly" ? `$${amount} / hr` : `$${amount} / period`;
+  if (payType === "hourly") return `$${amount} / hr`;
+  if (payType === "piece_work") return `$${amount} / hr (work orders)`;
+  return `$${amount} / period`;
 }
 
 export default async function TeamPage({
@@ -108,7 +119,7 @@ export default async function TeamPage({
                     <TableCell>{member.fullName}</TableCell>
                     <TableCell className="text-foreground-muted">{member.email}</TableCell>
                     <TableCell>
-                      <Badge variant="neutral">{member.role}</Badge>
+                      <Badge variant="neutral">{formatRole(member.role)}</Badge>
                     </TableCell>
                     <TableCell>{formatPay(member.payRateCents, member.payType)}</TableCell>
                     <TableCell>

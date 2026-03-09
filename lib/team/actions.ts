@@ -1,7 +1,8 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { ranchMemberships, users } from "@/lib/db/schema";
@@ -13,8 +14,8 @@ export interface TeamActionState {
   success?: string;
 }
 
-const roleSchema = z.enum(["owner", "manager", "worker"]);
-const payTypeSchema = z.enum(["hourly", "salary"]);
+const roleSchema = z.enum(["owner", "manager", "worker", "seasonal_worker"]);
+const payTypeSchema = z.enum(["hourly", "salary", "piece_work"]);
 
 const createMemberSchema = z.object({
   fullName: z.string().trim().min(2, "Full name is required."),
@@ -36,6 +37,10 @@ const editMemberSchema = z.object({
 const toggleMemberSchema = z.object({
   membershipId: z.string().uuid(),
   setActive: z.enum(["true", "false"]),
+});
+
+const deleteMemberSchema = z.object({
+  membershipId: z.string().uuid(),
 });
 
 function toCents(value: number): number {
@@ -77,6 +82,8 @@ export async function createTeamMemberAction(
     .select({
       id: users.id,
       fullName: users.fullName,
+      onboardingState: users.onboardingState,
+      lastActiveRanchId: users.lastActiveRanchId,
     })
     .from(users)
     .where(eq(users.email, email))
@@ -116,7 +123,8 @@ export async function createTeamMemberAction(
             fullName: parsed.data.fullName,
             email,
             passwordHash: await hashPassword(tempPassword),
-            onboardingState: "needs_ranch",
+            onboardingState: "complete",
+            lastActiveRanchId: context.ranch.id,
           })
           .returning({ id: users.id })
       )[0].id;
@@ -130,6 +138,17 @@ export async function createTeamMemberAction(
       isActive: true,
       deactivatedAt: null,
     });
+
+    if (existingUser && existingUser.onboardingState !== "complete") {
+      await tx
+        .update(users)
+        .set({
+          onboardingState: "complete",
+          lastActiveRanchId: existingUser.lastActiveRanchId ?? context.ranch.id,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, userId));
+    }
   });
 
   revalidatePath("/app/team");
@@ -260,4 +279,68 @@ export async function toggleTeamMemberStatusAction(
   revalidatePath("/app/team");
   revalidatePath(`/app/team/${parsed.data.membershipId}`);
   return { success: setActive ? "Member activated." : "Member deactivated." };
+}
+
+export async function deleteTeamMemberAction(
+  _prevState: TeamActionState,
+  formData: FormData,
+): Promise<TeamActionState> {
+  const context = await requireRole(["owner", "manager"]);
+  const parsed = deleteMemberSchema.safeParse({
+    membershipId: formData.get("membershipId"),
+  });
+
+  if (!parsed.success) {
+    return { error: "Invalid delete request." };
+  }
+
+  const [target] = await db
+    .select({
+      membershipId: ranchMemberships.id,
+      targetRole: ranchMemberships.role,
+      userId: ranchMemberships.userId,
+    })
+    .from(ranchMemberships)
+    .where(
+      and(
+        eq(ranchMemberships.ranchId, context.ranch.id),
+        eq(ranchMemberships.id, parsed.data.membershipId),
+      ),
+    )
+    .limit(1);
+
+  if (!target) {
+    return { error: "Team member not found for this ranch." };
+  }
+
+  if (context.membership.role === "manager" && target.targetRole === "owner") {
+    return { error: "Managers cannot delete owner memberships." };
+  }
+
+  if (target.userId === context.user.id) {
+    return { error: "You cannot delete your own membership." };
+  }
+
+  if (target.targetRole === "owner") {
+    const [{ ownerCount }] = await db
+      .select({ ownerCount: sql<number>`count(*)::int` })
+      .from(ranchMemberships)
+      .where(
+        and(
+          eq(ranchMemberships.ranchId, context.ranch.id),
+          eq(ranchMemberships.role, "owner"),
+        ),
+      );
+
+    if (ownerCount <= 1) {
+      return { error: "Cannot delete the last owner membership." };
+    }
+  }
+
+  await db
+    .delete(ranchMemberships)
+    .where(eq(ranchMemberships.id, parsed.data.membershipId));
+
+  revalidatePath("/app/team");
+  redirect("/app/team");
 }

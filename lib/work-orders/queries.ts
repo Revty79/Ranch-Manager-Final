@@ -12,7 +12,7 @@ import {
 export interface AssignableMember {
   membershipId: string;
   fullName: string;
-  role: "owner" | "manager" | "worker";
+  role: "owner" | "manager" | "worker" | "seasonal_worker";
   isActive: boolean;
 }
 

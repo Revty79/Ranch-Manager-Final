@@ -3,6 +3,7 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
+  deleteTeamMemberAction,
   toggleTeamMemberStatusAction,
   type TeamActionState,
   updateTeamMemberAction,
@@ -15,8 +16,8 @@ import { Button } from "@/components/ui/button";
 interface EditMemberFormProps {
   membershipId: string;
   fullName: string;
-  role: "owner" | "manager" | "worker" | "Seasonal";
-  payType: "hourly" | "salary" | "piecework";
+  role: "owner" | "manager" | "worker" | "seasonal_worker";
+  payType: "hourly" | "salary" | "piece_work";
   payRateCents: number;
   isActive: boolean;
 }
@@ -37,12 +38,18 @@ export function EditMemberForm({
     toggleTeamMemberStatusAction,
     initialState,
   );
+  const [deleteState, deleteAction] = useActionState(deleteTeamMemberAction, initialState);
 
   useEffect(() => {
+    if (deleteState.success) {
+      router.push("/app/team");
+      return;
+    }
+
     if (updateState.success || toggleState.success) {
       router.refresh();
     }
-  }, [router, toggleState.success, updateState.success]);
+  }, [deleteState.success, router, toggleState.success, updateState.success]);
 
   return (
     <div className="space-y-6">
@@ -57,7 +64,8 @@ export function EditMemberForm({
             defaultValue={role}
             className="h-10 w-full rounded-xl border bg-surface px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <option value="worker">Worker</option>
+            <option value="worker">Regular Worker</option>
+            <option value="seasonal_worker">Seasonal Worker</option>
             <option value="manager">Manager</option>
             <option value="owner">Owner</option>
           </select>
@@ -70,6 +78,7 @@ export function EditMemberForm({
           >
             <option value="hourly">Hourly</option>
             <option value="salary">Salary</option>
+            <option value="piece_work">Piece Work (work-order hours only)</option>
           </select>
         </FormFieldShell>
         <FormFieldShell label="Pay rate">
@@ -104,6 +113,31 @@ export function EditMemberForm({
         ) : null}
         <Button variant={isActive ? "danger" : "secondary"} type="submit">
           {isActive ? "Deactivate member" : "Activate member"}
+        </Button>
+      </form>
+
+      <form
+        action={deleteAction}
+        className="space-y-2 rounded-xl border border-danger/40 bg-danger/10 p-4"
+        onSubmit={(event) => {
+          const confirmed = window.confirm(
+            "Delete this member permanently? This removes membership history (assignments, shifts, and work-time entries) for this ranch.",
+          );
+          if (!confirmed) {
+            event.preventDefault();
+          }
+        }}
+      >
+        <input type="hidden" name="membershipId" value={membershipId} />
+        <p className="text-sm font-semibold text-danger">Permanent delete</p>
+        <p className="text-xs text-danger">
+          Use this only when you want to fully remove this member from the ranch.
+        </p>
+        {deleteState.error ? (
+          <p className="text-sm font-medium text-danger">{deleteState.error}</p>
+        ) : null}
+        <Button variant="danger" type="submit">
+          Delete member permanently
         </Button>
       </form>
     </div>

@@ -15,7 +15,8 @@
 - `STRIPE_PRICE_ID`
 - `STRIPE_WEBHOOK_SECRET`
 - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
-- `BETA_LIFETIME_CODE` (optional)
+- `PLATFORM_ADMIN_EMAILS` (comma-separated)
+- `BILLING_COUPON_PEPPER` (optional, recommended)
 
 ## Build / Start
 

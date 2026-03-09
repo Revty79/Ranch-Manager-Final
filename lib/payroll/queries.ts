@@ -1,13 +1,13 @@
 import { and, eq, gt, isNull, lt, or } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { ranchMemberships, shifts, users } from "@/lib/db/schema";
+import { ranchMemberships, shifts, users, workTimeEntries } from "@/lib/db/schema";
 
 export interface PayrollSummaryRow {
   membershipId: string;
   fullName: string;
   email: string;
-  role: "owner" | "manager" | "worker" | "Seasonal";
-  payType: "hourly" | "salary" | "piecework";
+  role: "owner" | "manager" | "worker" | "seasonal_worker";
+  payType: "hourly" | "salary" | "piece_work";
   payRateCents: number;
   hoursWorked: number;
   estimatedPayCents: number;
@@ -29,7 +29,7 @@ export async function getPayrollSummaryForRange(
   fromDate: Date,
   toDateExclusive: Date,
 ): Promise<PayrollSummary> {
-  const [memberRows, shiftRows] = await Promise.all([
+  const [memberRows, shiftRows, workRows] = await Promise.all([
     db
       .select({
         membershipId: ranchMemberships.id,
@@ -57,9 +57,24 @@ export async function getPayrollSummaryForRange(
           or(isNull(shifts.endedAt), gt(shifts.endedAt, fromDate)),
         ),
       ),
+    db
+      .select({
+        membershipId: workTimeEntries.membershipId,
+        startedAt: workTimeEntries.startedAt,
+        endedAt: workTimeEntries.endedAt,
+      })
+      .from(workTimeEntries)
+      .where(
+        and(
+          eq(workTimeEntries.ranchId, ranchId),
+          lt(workTimeEntries.startedAt, toDateExclusive),
+          or(isNull(workTimeEntries.endedAt), gt(workTimeEntries.endedAt, fromDate)),
+        ),
+      ),
   ]);
 
-  const secondsByMembership = new Map<string, number>();
+  const shiftSecondsByMembership = new Map<string, number>();
+  const workSecondsByMembership = new Map<string, number>();
 
   for (const shift of shiftRows) {
     const boundedStart = shift.startedAt > fromDate ? shift.startedAt : fromDate;
@@ -67,21 +82,42 @@ export async function getPayrollSummaryForRange(
     const boundedEnd = endedAt < toDateExclusive ? endedAt : toDateExclusive;
 
     if (boundedEnd > boundedStart) {
-      const current = secondsByMembership.get(shift.membershipId) ?? 0;
-      secondsByMembership.set(
+      const current = shiftSecondsByMembership.get(shift.membershipId) ?? 0;
+      shiftSecondsByMembership.set(
         shift.membershipId,
         current + secondsBetween(boundedStart, boundedEnd),
       );
     }
   }
 
+  for (const entry of workRows) {
+    const boundedStart = entry.startedAt > fromDate ? entry.startedAt : fromDate;
+    const endedAt = entry.endedAt ?? new Date();
+    const boundedEnd = endedAt < toDateExclusive ? endedAt : toDateExclusive;
+
+    if (boundedEnd > boundedStart) {
+      const current = workSecondsByMembership.get(entry.membershipId) ?? 0;
+      workSecondsByMembership.set(
+        entry.membershipId,
+        current + secondsBetween(boundedStart, boundedEnd),
+      );
+    }
+  }
+
   const rows: PayrollSummaryRow[] = memberRows
-    .filter((member) => member.isActive || (secondsByMembership.get(member.membershipId) ?? 0) > 0)
+    .filter((member) => {
+      const hasTrackedTime =
+        (shiftSecondsByMembership.get(member.membershipId) ?? 0) > 0 ||
+        (workSecondsByMembership.get(member.membershipId) ?? 0) > 0;
+      return member.isActive || hasTrackedTime;
+    })
     .map((member) => {
-      const seconds = secondsByMembership.get(member.membershipId) ?? 0;
-      const hoursWorked = Number((seconds / 3600).toFixed(2));
+      const shiftSeconds = shiftSecondsByMembership.get(member.membershipId) ?? 0;
+      const workSeconds = workSecondsByMembership.get(member.membershipId) ?? 0;
+      const paidSeconds = member.payType === "piece_work" ? workSeconds : shiftSeconds;
+      const hoursWorked = Number((paidSeconds / 3600).toFixed(2));
       const estimatedPayCents =
-        member.payType === "hourly"
+        member.payType === "hourly" || member.payType === "piece_work"
           ? Math.round(hoursWorked * member.payRateCents)
           : member.isActive
             ? member.payRateCents

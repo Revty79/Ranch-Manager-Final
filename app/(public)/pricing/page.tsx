@@ -28,7 +28,11 @@ export default function PricingPage() {
             <p className="font-display text-4xl font-semibold">{pricing.amount}</p>
             <p className="text-sm text-foreground-muted">{pricing.cadence}</p>
             <CardDescription>{pricing.description}</CardDescription>
-            <Link href="/checkout" className={cn(buttonVariants({ size: "lg" }), "mt-2")}>
+            <Link
+              href="/checkout"
+              className={cn(buttonVariants({ size: "lg" }), "mt-2 text-white")}
+              style={{ color: "#fff" }}
+            >
               Start paid checkout
             </Link>
             <p className="text-xs text-foreground-muted">

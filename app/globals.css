@@ -8,12 +8,13 @@
   --foreground: #1a2b28;
   --foreground-muted: #5d6e68;
   --border: #d5dccf;
-  --accent: #2f5d50;
-  --accent-hover: #244a40;
+  --accent: #3d7564;
+  --accent-foreground: #ffffff;
+  --accent-hover: #335f52;
   --accent-soft: #dfe8e3;
   --warning: #a15a22;
   --danger: #9b2f2f;
-  --ring: #35685a;
+  --ring: #3a6f60;
 }
 
 @theme inline {
@@ -25,6 +26,7 @@
   --color-foreground-muted: var(--foreground-muted);
   --color-border: var(--border);
   --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
   --color-accent-hover: var(--accent-hover);
   --color-accent-soft: var(--accent-soft);
   --color-warning: var(--warning);
@@ -66,7 +68,12 @@ a {
   text-decoration: none;
 }
 
+:is(a, button)[class~="bg-accent"],
+:is(a, button)[class~="bg-danger"] {
+  color: #ffffff !important;
+}
+
 ::selection {
   color: #f5f9f8;
-  background: #2f5d50;
+  background: var(--accent);
 }

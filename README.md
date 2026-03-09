@@ -56,7 +56,8 @@ Stripe billing:
 
 Optional:
 
-- `BETA_LIFETIME_CODE` (owner-entered beta lifetime access code)
+- `PLATFORM_ADMIN_EMAILS` (comma-separated allowlist for `/admin`)
+- `BILLING_COUPON_PEPPER` (optional secret for coupon hashing; falls back to `APP_SECRET`)
 - `ALLOW_DEMO_SEED=true` (required to run demo seed)
 - `DEMO_SEED_PASSWORD` (override default demo password)
 
@@ -79,6 +80,15 @@ npm run db:studio
 
 Drizzle schema source: `lib/db/schema.ts`.
 Migration output: `drizzle/`.
+
+## Admin Console
+
+- Set `PLATFORM_ADMIN_EMAILS` with one or more login emails.
+- Sign in through normal auth, then open `/admin`.
+- Admin can:
+  - review all users/ranches
+  - set ranch billing state and beta lifetime access
+  - create and manage internal coupon codes
 
 ## Demo Seed
 

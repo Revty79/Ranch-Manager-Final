@@ -42,6 +42,10 @@ function formatDuration(startedAt: Date, endedAt: Date | null): string {
   return `${hours}h ${minutes}m`;
 }
 
+function isWorkerRole(role: "owner" | "manager" | "worker" | "seasonal_worker"): boolean {
+  return role === "worker" || role === "seasonal_worker";
+}
+
 export default async function TimePage() {
   const context = await requirePaidAccessContext();
   const [activeShift, activeWork, recentShifts, recentWorkSessions, workOrderOptions] =
@@ -58,7 +62,7 @@ export default async function TimePage() {
     ]);
 
   const activeShiftRoster =
-    context.membership.role === "worker"
+    isWorkerRole(context.membership.role)
       ? []
       : await getActiveShiftRosterForRanch(context.ranch.id);
 
@@ -183,7 +187,7 @@ export default async function TimePage() {
         </Card>
       </section>
 
-      {context.membership.role !== "worker" ? (
+      {!isWorkerRole(context.membership.role) ? (
         <Card>
           <CardContent className="space-y-3 py-6">
             <div>

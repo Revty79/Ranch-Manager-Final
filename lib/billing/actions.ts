@@ -1,12 +1,13 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
-import { ranches } from "@/lib/db/schema";
+import { billingCouponRedemptions, billingCoupons, ranches } from "@/lib/db/schema";
+import { hashCouponCode, normalizeCouponCode } from "./coupons";
 import { getStripeClient, isStripeConfigured } from "./stripe";
 
 export interface BillingActionState {
@@ -14,8 +15,8 @@ export interface BillingActionState {
   success?: string;
 }
 
-const claimBetaSchema = z.object({
-  code: z.string().trim().min(1, "Enter a beta access code."),
+const applyCouponSchema = z.object({
+  code: z.string().trim().min(1, "Enter a coupon code."),
 });
 
 export async function createCheckoutSessionAction(
@@ -80,36 +81,109 @@ export async function createCheckoutSessionAction(
   redirect(session.url);
 }
 
-export async function claimBetaLifetimeAccessAction(
+export async function applyCouponCodeAction(
   _prevState: BillingActionState,
   formData: FormData,
 ): Promise<BillingActionState> {
   const context = await requireRole(["owner"], { requirePaid: false });
-  const parsed = claimBetaSchema.safeParse({
+  const parsed = applyCouponSchema.safeParse({
     code: formData.get("code"),
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid code." };
+    return { error: parsed.error.issues[0]?.message ?? "Invalid coupon code." };
   }
 
-  const expectedCode = process.env.BETA_LIFETIME_CODE;
-  if (!expectedCode) {
-    return { error: "Beta code flow is not configured on this environment." };
+  const normalizedCode = normalizeCouponCode(parsed.data.code);
+  let codeHash: string;
+  try {
+    codeHash = hashCouponCode(normalizedCode);
+  } catch {
+    return {
+      error:
+        "Coupon hashing is not configured. Set BILLING_COUPON_PEPPER or APP_SECRET, then restart the server.",
+    };
   }
+  const now = new Date();
 
-  if (parsed.data.code !== expectedCode) {
-    return { error: "Code did not match. Please verify and try again." };
+  const result = await db.transaction(async (tx) => {
+    const [coupon] = await tx
+      .select({
+        id: billingCoupons.id,
+        grantType: billingCoupons.grantType,
+        expiresAt: billingCoupons.expiresAt,
+        maxRedemptions: billingCoupons.maxRedemptions,
+      })
+      .from(billingCoupons)
+      .where(and(eq(billingCoupons.codeHash, codeHash), eq(billingCoupons.isActive, true)))
+      .limit(1);
+
+    if (!coupon) {
+      return { error: "Coupon code is invalid or inactive." } satisfies BillingActionState;
+    }
+
+    if (coupon.expiresAt && coupon.expiresAt <= now) {
+      return { error: "This coupon has expired." } satisfies BillingActionState;
+    }
+
+    const [existingRedemption] = await tx
+      .select({ id: billingCouponRedemptions.id })
+      .from(billingCouponRedemptions)
+      .where(
+        and(
+          eq(billingCouponRedemptions.couponId, coupon.id),
+          eq(billingCouponRedemptions.ranchId, context.ranch.id),
+        ),
+      )
+      .limit(1);
+
+    if (existingRedemption) {
+      return { success: "Coupon already applied for this ranch." } satisfies BillingActionState;
+    }
+
+    const [{ redemptionCount }] = await tx
+      .select({ redemptionCount: sql<number>`count(*)::int` })
+      .from(billingCouponRedemptions)
+      .where(eq(billingCouponRedemptions.couponId, coupon.id));
+
+    if (
+      coupon.maxRedemptions !== null &&
+      coupon.maxRedemptions !== undefined &&
+      redemptionCount >= coupon.maxRedemptions
+    ) {
+      return { error: "This coupon has reached its redemption limit." } satisfies BillingActionState;
+    }
+
+    await tx.insert(billingCouponRedemptions).values({
+      couponId: coupon.id,
+      ranchId: context.ranch.id,
+      redeemedByUserId: context.user.id,
+      redeemedAt: now,
+    });
+
+    if (coupon.grantType === "beta_lifetime_access") {
+      await tx
+        .update(ranches)
+        .set({
+          betaLifetimeAccess: true,
+          subscriptionUpdatedAt: now,
+        })
+        .where(eq(ranches.id, context.ranch.id));
+
+      return { success: "Coupon applied. Lifetime beta access is enabled." } satisfies BillingActionState;
+    }
+
+    return { error: "Coupon grant type is not supported." } satisfies BillingActionState;
+  });
+
+  if (result.error) {
+    return result;
   }
-
-  await db
-    .update(ranches)
-    .set({
-      betaLifetimeAccess: true,
-      subscriptionUpdatedAt: new Date(),
-    })
-    .where(eq(ranches.id, context.ranch.id));
 
   revalidatePath("/app/settings");
-  return { success: "Beta lifetime access enabled." };
+  revalidatePath("/app/billing-required");
+  revalidatePath("/billing-required");
+  return result;
 }
+
+export const claimBetaLifetimeAccessAction = applyCouponCodeAction;

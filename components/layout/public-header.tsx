@@ -20,11 +20,19 @@ export function PublicHeader() {
               {item.label}
             </Link>
           ))}
-          <Link href="/signup" className={cn(buttonVariants({ size: "sm" }))}>
+          <Link
+            href="/signup"
+            className={cn(buttonVariants({ size: "sm" }), "text-white")}
+            style={{ color: "#fff" }}
+          >
             Start trial
           </Link>
         </nav>
-        <Link href="/signup" className={cn(buttonVariants({ size: "sm" }), "md:hidden")}>
+        <Link
+          href="/signup"
+          className={cn(buttonVariants({ size: "sm" }), "text-white md:hidden")}
+          style={{ color: "#fff" }}
+        >
           Start
         </Link>
       </div>

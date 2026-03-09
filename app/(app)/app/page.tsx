@@ -1,11 +1,13 @@
+import Link from "next/link";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { PageHeader } from "@/components/patterns/page-header";
 import { SectionHeader } from "@/components/patterns/section-header";
 import { StatCard } from "@/components/patterns/stat-card";
 import { DataTableShell } from "@/components/patterns/data-table-shell";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { ClipboardList } from "lucide-react";
 import { requirePaidAccessContext } from "@/lib/auth/context";
+import { cn } from "@/lib/utils";
 
 export default async function AppHomePage() {
   await requirePaidAccessContext();
@@ -16,7 +18,11 @@ export default async function AppHomePage() {
         eyebrow="App Home"
         title="Operations Dashboard"
         description="A clean snapshot of crew, work orders, active shifts, and payroll visibility."
-        actions={<Button>New Work Order</Button>}
+        actions={
+          <Link href="/app/work-orders" className={cn(buttonVariants())}>
+            New Work Order
+          </Link>
+        }
       />
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

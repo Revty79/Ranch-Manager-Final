@@ -139,11 +139,7 @@ export const getCurrentRanchContext = cache(async (): Promise<RanchContext | nul
 
 export async function getPostAuthRedirectPath(user: AuthUser): Promise<string> {
   const ranchContext = await getRanchContextForUser(user.id, user.lastActiveRanchId);
-  if (
-    user.onboardingState !== "complete" ||
-    !ranchContext ||
-    !ranchContext.ranch.onboardingCompleted
-  ) {
+  if (!ranchContext || !ranchContext.ranch.onboardingCompleted) {
     return "/onboarding";
   }
 
@@ -163,11 +159,7 @@ export async function requireAppContext(): Promise<AppContext> {
   const user = await requireUser();
   const ranchContext = await getRanchContextForUser(user.id, user.lastActiveRanchId);
 
-  if (
-    user.onboardingState !== "complete" ||
-    !ranchContext ||
-    !ranchContext.ranch.onboardingCompleted
-  ) {
+  if (!ranchContext || !ranchContext.ranch.onboardingCompleted) {
     redirect("/onboarding");
   }
 
