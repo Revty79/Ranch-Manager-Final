@@ -1,10 +1,11 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { FormFieldShell } from "@/components/patterns/form-field-shell";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import type { WorkOrderIncentiveTimerType } from "@/lib/db/schema";
 import { createWorkOrderAction, type WorkOrderActionState } from "@/lib/work-orders/actions";
 import type { AssignableMember } from "@/lib/work-orders/queries";
 
@@ -16,6 +17,8 @@ export function CreateWorkOrderForm({
   members: AssignableMember[];
 }) {
   const [state, formAction] = useActionState(createWorkOrderAction, initialState);
+  const [incentiveTimerType, setIncentiveTimerType] =
+    useState<WorkOrderIncentiveTimerType>("none");
   const activeMembers = members.filter((member) => member.isActive);
 
   return (
@@ -53,6 +56,44 @@ export function CreateWorkOrderForm({
       <FormFieldShell label="Description" className="md:col-span-2">
         <Textarea name="description" placeholder="Scope, materials, and context..." />
       </FormFieldShell>
+      <FormFieldShell
+        label="Incentive pay (optional)"
+        hint="If set above $0, choose an incentive timer to make it earnable."
+      >
+        <Input name="incentivePay" type="number" step="0.01" min="0" defaultValue="0" />
+      </FormFieldShell>
+      <FormFieldShell label="Incentive timer">
+        <select
+          name="incentiveTimerType"
+          value={incentiveTimerType}
+          onChange={(event) =>
+            setIncentiveTimerType(event.target.value as WorkOrderIncentiveTimerType)
+          }
+          className="h-10 w-full rounded-xl border bg-surface px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <option value="none">No timer</option>
+          <option value="hours">Set by hours</option>
+          <option value="deadline">Set by specific date</option>
+        </select>
+      </FormFieldShell>
+      {incentiveTimerType === "hours" ? (
+        <FormFieldShell
+          label="Incentive countdown hours"
+          className="md:col-span-2"
+          hint="Countdown starts when this work order is created."
+        >
+          <Input name="incentiveHours" type="number" min="1" step="1" defaultValue="24" required />
+        </FormFieldShell>
+      ) : null}
+      {incentiveTimerType === "deadline" ? (
+        <FormFieldShell
+          label="Incentive deadline"
+          className="md:col-span-2"
+          hint="Incentive is available until this date and time."
+        >
+          <Input name="incentiveDeadlineAt" type="datetime-local" required />
+        </FormFieldShell>
+      ) : null}
       <FormFieldShell
         label="Assign to"
         hint={activeMembers.length ? "Choose one or more active members." : "No active members yet."}

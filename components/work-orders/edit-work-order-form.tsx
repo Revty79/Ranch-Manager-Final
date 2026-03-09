@@ -1,11 +1,12 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { FormFieldShell } from "@/components/patterns/form-field-shell";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import type { WorkOrderIncentiveTimerType } from "@/lib/db/schema";
 import { updateWorkOrderAction, type WorkOrderActionState } from "@/lib/work-orders/actions";
 import type { AssignableMember, WorkOrderDetail } from "@/lib/work-orders/queries";
 
@@ -29,6 +30,9 @@ export function EditWorkOrderForm({
 }) {
   const router = useRouter();
   const [state, formAction] = useActionState(updateWorkOrderAction, initialState);
+  const [incentiveTimerType, setIncentiveTimerType] = useState<WorkOrderIncentiveTimerType>(
+    workOrder.incentiveTimerType,
+  );
   const activeMembers = members.filter((member) => member.isActive);
 
   useEffect(() => {
@@ -73,6 +77,62 @@ export function EditWorkOrderForm({
       <FormFieldShell label="Description" className="md:col-span-2">
         <Textarea name="description" defaultValue={workOrder.description ?? ""} />
       </FormFieldShell>
+      <FormFieldShell
+        label="Incentive pay (optional)"
+        hint="If set above $0, choose an incentive timer to make it earnable."
+      >
+        <Input
+          name="incentivePay"
+          type="number"
+          step="0.01"
+          min="0"
+          defaultValue={(workOrder.incentivePayCents / 100).toFixed(2)}
+        />
+      </FormFieldShell>
+      <FormFieldShell label="Incentive timer">
+        <select
+          name="incentiveTimerType"
+          value={incentiveTimerType}
+          onChange={(event) =>
+            setIncentiveTimerType(event.target.value as WorkOrderIncentiveTimerType)
+          }
+          className="h-10 w-full rounded-xl border bg-surface px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <option value="none">No timer</option>
+          <option value="hours">Set by hours</option>
+          <option value="deadline">Set by specific date</option>
+        </select>
+      </FormFieldShell>
+      {incentiveTimerType === "hours" ? (
+        <FormFieldShell
+          label="Incentive countdown hours"
+          className="md:col-span-2"
+          hint="Saving resets the countdown from now."
+        >
+          <Input
+            name="incentiveHours"
+            type="number"
+            min="1"
+            step="1"
+            defaultValue={workOrder.incentiveDurationHours ?? 24}
+            required
+          />
+        </FormFieldShell>
+      ) : null}
+      {incentiveTimerType === "deadline" ? (
+        <FormFieldShell
+          label="Incentive deadline"
+          className="md:col-span-2"
+          hint="Incentive is available until this date and time."
+        >
+          <Input
+            name="incentiveDeadlineAt"
+            type="datetime-local"
+            defaultValue={toDateTimeLocal(workOrder.incentiveEndsAt)}
+            required
+          />
+        </FormFieldShell>
+      ) : null}
       <FormFieldShell
         label="Assign to"
         hint={activeMembers.length ? "Choose active assignees." : "No active members yet."}

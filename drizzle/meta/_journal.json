@@ -57,6 +57,27 @@
       "when": 1773037147009,
       "tag": "0007_useful_quicksilver",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1773066947254,
+      "tag": "0008_work_order_incentives",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1773067372405,
+      "tag": "0009_shift_pause_state",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1773069239586,
+      "tag": "0010_work_order_completion_timestamp",
+      "breakpoints": true
     }
   ]
 }

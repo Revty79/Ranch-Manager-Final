@@ -1,9 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getCurrentRanchContext, getCurrentUser } from "@/lib/auth/context";
 import { hasBillingAccess } from "@/lib/billing/access";
-import { buildPayrollCsv } from "@/lib/payroll/csv";
+import { buildPayrollBreakdownCsv, buildPayrollCsv } from "@/lib/payroll/csv";
 import { resolvePayrollDateRange } from "@/lib/payroll/date-range";
-import { getPayrollSummaryForRange } from "@/lib/payroll/queries";
+import {
+  getPayrollBreakdownForRange,
+  getPayrollSummaryForRange,
+} from "@/lib/payroll/queries";
 
 function toFileSafeName(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -33,15 +36,31 @@ export async function GET(request: NextRequest) {
 
   const fromInput = request.nextUrl.searchParams.get("from") ?? undefined;
   const toInput = request.nextUrl.searchParams.get("to") ?? undefined;
+  const type = request.nextUrl.searchParams.get("type");
+  const exportType = type === "breakdown" ? "breakdown" : "summary";
   const range = resolvePayrollDateRange(fromInput, toInput);
-  const summary = await getPayrollSummaryForRange(
-    ranchContext.ranch.id,
-    range.fromDate,
-    range.toDateExclusive,
-  );
-  const csv = buildPayrollCsv(summary.rows);
   const ranchSlug = toFileSafeName(ranchContext.ranch.slug || ranchContext.ranch.name);
-  const filename = `payroll-${ranchSlug || "ranch"}-${range.from}-to-${range.to}.csv`;
+
+  let csv: string;
+  let filename: string;
+
+  if (exportType === "breakdown") {
+    const breakdown = await getPayrollBreakdownForRange(
+      ranchContext.ranch.id,
+      range.fromDate,
+      range.toDateExclusive,
+    );
+    csv = buildPayrollBreakdownCsv(breakdown);
+    filename = `payroll-breakdown-${ranchSlug || "ranch"}-${range.from}-to-${range.to}.csv`;
+  } else {
+    const summary = await getPayrollSummaryForRange(
+      ranchContext.ranch.id,
+      range.fromDate,
+      range.toDateExclusive,
+    );
+    csv = buildPayrollCsv(summary.rows);
+    filename = `payroll-${ranchSlug || "ranch"}-${range.from}-to-${range.to}.csv`;
+  }
 
   return new NextResponse(csv, {
     headers: {

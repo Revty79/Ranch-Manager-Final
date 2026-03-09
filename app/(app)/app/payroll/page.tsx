@@ -52,15 +52,24 @@ export default async function PayrollPage({
       <PageHeader
         eyebrow="Payroll"
         title="Payroll Summary"
-        description="Transparent calculations based on tracked time and configured pay type."
+        description="Transparent calculations based on tracked time and configured pay type. Use breakdown export for daily clock in/out detail."
         actions={
-          <Link
-            href={`/app/payroll/export?from=${range.from}&to=${range.to}`}
-            className="inline-flex items-center gap-2 rounded-xl border bg-surface px-3 py-2 text-sm font-semibold text-foreground-muted hover:bg-accent-soft hover:text-foreground"
-          >
-            <Download className="h-4 w-4" />
-            Export CSV
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href={`/app/payroll/export?from=${range.from}&to=${range.to}`}
+              className="inline-flex items-center gap-2 rounded-xl border bg-surface px-3 py-2 text-sm font-semibold text-foreground-muted hover:bg-accent-soft hover:text-foreground"
+            >
+              <Download className="h-4 w-4" />
+              Export Summary CSV
+            </Link>
+            <Link
+              href={`/app/payroll/export?from=${range.from}&to=${range.to}&type=breakdown`}
+              className="inline-flex items-center gap-2 rounded-xl border bg-surface px-3 py-2 text-sm font-semibold text-foreground-muted hover:bg-accent-soft hover:text-foreground"
+            >
+              <Download className="h-4 w-4" />
+              Export Breakdown CSV
+            </Link>
+          </div>
         }
       />
 
@@ -99,10 +108,15 @@ export default async function PayrollPage({
         </CardContent>
       </Card>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <StatCard label="Team Members" value={`${summary.rows.length}`} />
         <StatCard label="Total Hours" value={`${summary.totalHours.toFixed(2)}h`} />
-        <StatCard label="Estimated Pay" value={formatMoney(summary.totalEstimatedPayCents)} />
+        <StatCard label="Base Pay" value={formatMoney(summary.totalBasePayCents)} />
+        <StatCard
+          label="Incentive Pay"
+          value={formatMoney(summary.totalIncentivePayCents)}
+        />
+        <StatCard label="Total Pay" value={formatMoney(summary.totalPayCents)} />
       </section>
 
       <Card>
@@ -123,7 +137,9 @@ export default async function PayrollPage({
                     <TableHeaderCell>Pay Type</TableHeaderCell>
                     <TableHeaderCell>Pay Rate</TableHeaderCell>
                     <TableHeaderCell>Hours</TableHeaderCell>
-                    <TableHeaderCell>Estimated Pay</TableHeaderCell>
+                    <TableHeaderCell>Base Pay</TableHeaderCell>
+                    <TableHeaderCell>Incentive Pay</TableHeaderCell>
+                    <TableHeaderCell>Total Pay</TableHeaderCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -141,7 +157,9 @@ export default async function PayrollPage({
                       <TableCell>{formatPayType(row.payType)}</TableCell>
                       <TableCell>{formatMoney(row.payRateCents)}</TableCell>
                       <TableCell>{row.hoursWorked.toFixed(2)}</TableCell>
-                      <TableCell>{formatMoney(row.estimatedPayCents)}</TableCell>
+                      <TableCell>{formatMoney(row.basePayCents)}</TableCell>
+                      <TableCell>{formatMoney(row.incentivePayCents)}</TableCell>
+                      <TableCell>{formatMoney(row.totalPayCents)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

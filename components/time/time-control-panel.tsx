@@ -3,12 +3,14 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-  defaultTimeActionState,
+  completeWorkOrderAction,
   endShiftAction,
   endWorkSessionAction,
   startShiftAction,
   startWorkSessionAction,
+  type TimeActionState,
 } from "@/lib/time/actions";
+import type { PayType } from "@/lib/db/schema";
 import type { ShiftRecord, WorkOrderOption, WorkSessionRecord } from "@/lib/time/queries";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
@@ -17,7 +19,10 @@ interface TimeControlPanelProps {
   activeShift: ShiftRecord | null;
   activeWork: WorkSessionRecord | null;
   workOrderOptions: WorkOrderOption[];
+  payType: PayType;
 }
+
+const initialTimeActionState: TimeActionState = {};
 
 function formatTime(date: Date): string {
   return new Intl.DateTimeFormat("en-US", {
@@ -30,23 +35,29 @@ export function TimeControlPanel({
   activeShift,
   activeWork,
   workOrderOptions,
+  payType,
 }: TimeControlPanelProps) {
   const router = useRouter();
+  const isPieceWork = payType === "piece_work";
   const [startShiftState, startShiftFormAction] = useActionState(
     startShiftAction,
-    defaultTimeActionState,
+    initialTimeActionState,
   );
   const [endShiftState, endShiftFormAction] = useActionState(
     endShiftAction,
-    defaultTimeActionState,
+    initialTimeActionState,
   );
   const [startWorkState, startWorkFormAction] = useActionState(
     startWorkSessionAction,
-    defaultTimeActionState,
+    initialTimeActionState,
   );
   const [endWorkState, endWorkFormAction] = useActionState(
     endWorkSessionAction,
-    defaultTimeActionState,
+    initialTimeActionState,
+  );
+  const [completeOrderState, completeOrderFormAction] = useActionState(
+    completeWorkOrderAction,
+    initialTimeActionState,
   );
 
   useEffect(() => {
@@ -54,11 +65,13 @@ export function TimeControlPanel({
       startShiftState.success ||
       endShiftState.success ||
       startWorkState.success ||
-      endWorkState.success
+      endWorkState.success ||
+      completeOrderState.success
     ) {
       router.refresh();
     }
   }, [
+    completeOrderState.success,
     endShiftState.success,
     endWorkState.success,
     router,
@@ -73,11 +86,22 @@ export function TimeControlPanel({
           <div>
             <CardTitle className="text-base">Shift status</CardTitle>
             <CardDescription>
-              {activeShift
-                ? `Shift started at ${formatTime(activeShift.startedAt)}`
-                : "No active shift"}
+              {isPieceWork
+                ? activeShift
+                  ? `Legacy shift active since ${formatTime(activeShift.startedAt)}. Clock out to continue piece-work mode.`
+                  : "Piece-work mode: no shift required."
+                : activeShift
+                  ? activeShift.pausedAt
+                    ? "Shift is in a paused state. Clock out, then clock back in."
+                    : `Clocked in at ${formatTime(activeShift.startedAt)}`
+                  : "No active shift"}
             </CardDescription>
           </div>
+          <p className="text-xs text-foreground-muted">
+            {isPieceWork
+              ? "Piece-work pay uses work-order timers only."
+              : "For lunch or breaks, clock out and clock back in when you return."}
+          </p>
           <div className="space-y-2">
             {startShiftState.error ? (
               <p className="text-sm font-medium text-danger">{startShiftState.error}</p>
@@ -85,11 +109,17 @@ export function TimeControlPanel({
             {endShiftState.error ? (
               <p className="text-sm font-medium text-danger">{endShiftState.error}</p>
             ) : null}
-            <form action={activeShift ? endShiftFormAction : startShiftFormAction}>
-              <Button variant={activeShift ? "danger" : "primary"} type="submit">
-                {activeShift ? "End shift" : "Start shift"}
-              </Button>
-            </form>
+            {activeShift ? (
+              <form action={endShiftFormAction}>
+                <Button variant="danger" type="submit">
+                  Clock out
+                </Button>
+              </form>
+            ) : isPieceWork ? null : (
+              <form action={startShiftFormAction}>
+                <Button type="submit">Clock in</Button>
+              </form>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -101,7 +131,9 @@ export function TimeControlPanel({
             <CardDescription>
               {activeWork
                 ? `Tracking ${activeWork.workOrderTitle} since ${formatTime(activeWork.startedAt)}`
-                : "No active work timer"}
+                : isPieceWork
+                  ? "No active work timer. Piece-work tracking starts here."
+                  : "No active work timer"}
             </CardDescription>
           </div>
           <div className="space-y-2">
@@ -111,32 +143,65 @@ export function TimeControlPanel({
             {endWorkState.error ? (
               <p className="text-sm font-medium text-danger">{endWorkState.error}</p>
             ) : null}
+            {completeOrderState.error ? (
+              <p className="text-sm font-medium text-danger">{completeOrderState.error}</p>
+            ) : null}
             {activeWork ? (
-              <form action={endWorkFormAction}>
-                <Button variant="secondary" type="submit">
-                  Stop work timer
-                </Button>
-              </form>
+              <div className="flex flex-wrap gap-2">
+                <form action={endWorkFormAction}>
+                  <Button variant="secondary" type="submit">
+                    Stop work timer
+                  </Button>
+                </form>
+                <form action={completeOrderFormAction}>
+                  <input type="hidden" name="workOrderId" value={activeWork.workOrderId} />
+                  <Button variant="primary" type="submit">
+                    Complete work order
+                  </Button>
+                </form>
+              </div>
             ) : (
               workOrderOptions.length ? (
-                <form action={startWorkFormAction} className="space-y-2">
-                  <select
-                    name="workOrderId"
-                    className="h-10 w-full rounded-xl border bg-surface px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    defaultValue=""
-                    required
-                  >
-                    <option value="" disabled>
-                      Select work order
-                    </option>
-                    {workOrderOptions.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.title}
+                <div className="space-y-2">
+                  <form action={startWorkFormAction} className="space-y-2">
+                    <select
+                      name="workOrderId"
+                      className="h-10 w-full rounded-xl border bg-surface px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      defaultValue=""
+                      required
+                    >
+                      <option value="" disabled>
+                        Select work order
                       </option>
-                    ))}
-                  </select>
-                  <Button type="submit">Start work timer</Button>
-                </form>
+                      {workOrderOptions.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.title}
+                        </option>
+                      ))}
+                    </select>
+                    <Button type="submit">Start work timer</Button>
+                  </form>
+                  <form action={completeOrderFormAction} className="space-y-2">
+                    <select
+                      name="workOrderId"
+                      className="h-10 w-full rounded-xl border bg-surface px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      defaultValue=""
+                      required
+                    >
+                      <option value="" disabled>
+                        Select work order to complete
+                      </option>
+                      {workOrderOptions.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.title}
+                        </option>
+                      ))}
+                    </select>
+                    <Button variant="secondary" type="submit">
+                      Complete selected work order
+                    </Button>
+                  </form>
+                </div>
               ) : (
                 <p className="text-sm text-foreground-muted">
                   No available work orders to track right now.

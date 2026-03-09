@@ -21,6 +21,8 @@ import {
 export interface ShiftRecord {
   id: string;
   startedAt: Date;
+  pausedAt: Date | null;
+  pausedAccumulatedSeconds: number;
   endedAt: Date | null;
 }
 
@@ -44,6 +46,7 @@ export interface ActiveShiftRosterItem {
   memberName: string;
   role: RanchRole;
   shiftStartedAt: Date;
+  isPaused: boolean;
   activeWorkTitle: string | null;
 }
 
@@ -55,6 +58,8 @@ export async function getActiveShiftForMembership(
     .select({
       id: shifts.id,
       startedAt: shifts.startedAt,
+      pausedAt: shifts.pausedAt,
+      pausedAccumulatedSeconds: shifts.pausedAccumulatedSeconds,
       endedAt: shifts.endedAt,
     })
     .from(shifts)
@@ -80,6 +85,8 @@ export async function getRecentShiftsForMembership(
     .select({
       id: shifts.id,
       startedAt: shifts.startedAt,
+      pausedAt: shifts.pausedAt,
+      pausedAccumulatedSeconds: shifts.pausedAccumulatedSeconds,
       endedAt: shifts.endedAt,
     })
     .from(shifts)
@@ -189,6 +196,7 @@ export async function getActiveShiftRosterForRanch(
       memberName: users.fullName,
       role: ranchMemberships.role,
       shiftStartedAt: shifts.startedAt,
+      pausedAt: shifts.pausedAt,
     })
     .from(shifts)
     .innerJoin(ranchMemberships, eq(shifts.membershipId, ranchMemberships.id))
@@ -225,6 +233,7 @@ export async function getActiveShiftRosterForRanch(
 
   return activeShifts.map((shift) => ({
     ...shift,
+    isPaused: shift.pausedAt !== null,
     activeWorkTitle: activeWorkMap.get(shift.membershipId) ?? null,
   }));
 }

@@ -42,12 +42,32 @@ function formatDuration(startedAt: Date, endedAt: Date | null): string {
   return `${hours}h ${minutes}m`;
 }
 
+function formatShiftDuration(shift: {
+  startedAt: Date;
+  endedAt: Date | null;
+  pausedAt: Date | null;
+  pausedAccumulatedSeconds: number;
+}): string {
+  const end = shift.endedAt ?? new Date();
+  const totalMs = Math.max(end.getTime() - shift.startedAt.getTime(), 0);
+  const activePauseMs = shift.pausedAt
+    ? Math.max(end.getTime() - shift.pausedAt.getTime(), 0)
+    : 0;
+  const pauseMs = shift.pausedAccumulatedSeconds * 1000 + activePauseMs;
+  const netMs = Math.max(totalMs - pauseMs, 0);
+  const totalMinutes = Math.floor(netMs / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${hours}h ${minutes}m`;
+}
+
 function isWorkerRole(role: "owner" | "manager" | "worker" | "seasonal_worker"): boolean {
   return role === "worker" || role === "seasonal_worker";
 }
 
 export default async function TimePage() {
   const context = await requirePaidAccessContext();
+  const isPieceWorkMember = context.membership.payType === "piece_work";
   const [activeShift, activeWork, recentShifts, recentWorkSessions, workOrderOptions] =
     await Promise.all([
       getActiveShiftForMembership(context.ranch.id, context.membership.id),
@@ -77,8 +97,28 @@ export default async function TimePage() {
       <section className="grid gap-4 md:grid-cols-3">
         <StatCard
           label="Current Shift"
-          value={activeShift ? "Active" : "Not started"}
-          trend={activeShift ? `Since ${formatDateTime(activeShift.startedAt)}` : undefined}
+          value={
+            isPieceWorkMember
+              ? activeShift
+                ? activeShift.pausedAt
+                  ? "Legacy paused"
+                  : "Legacy active"
+                : "Not required"
+              : activeShift
+                ? activeShift.pausedAt
+                  ? "Paused"
+                  : "Active"
+                : "Not started"
+          }
+          trend={
+            activeShift
+              ? activeShift.pausedAt
+                ? `Paused since ${formatDateTime(activeShift.pausedAt)}`
+                : `Since ${formatDateTime(activeShift.startedAt)}`
+              : isPieceWorkMember
+                ? "Piece-work mode uses work timers"
+              : undefined
+          }
         />
         <StatCard
           label="Active Work"
@@ -98,6 +138,7 @@ export default async function TimePage() {
         activeShift={activeShift}
         activeWork={activeWork}
         workOrderOptions={workOrderOptions}
+        payType={context.membership.payType}
       />
 
       <section className="grid gap-4 xl:grid-cols-2">
@@ -122,9 +163,13 @@ export default async function TimePage() {
                       <TableRow key={shift.id}>
                         <TableCell>{formatDateTime(shift.startedAt)}</TableCell>
                         <TableCell>
-                          {shift.endedAt ? formatDateTime(shift.endedAt) : "Active"}
+                          {shift.endedAt
+                            ? formatDateTime(shift.endedAt)
+                            : shift.pausedAt
+                              ? "Paused"
+                              : "Active"}
                         </TableCell>
-                        <TableCell>{formatDuration(shift.startedAt, shift.endedAt)}</TableCell>
+                        <TableCell>{formatShiftDuration(shift)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -133,7 +178,11 @@ export default async function TimePage() {
             ) : (
               <EmptyState
                 title="No shift history yet"
-                description="Start your first shift to begin tracking hours."
+                description={
+                  isPieceWorkMember
+                    ? "Piece-work mode does not require shift clock-ins."
+                    : "Start your first shift to begin tracking hours."
+                }
                 icon={<Clock3 className="h-5 w-5 text-accent" />}
               />
             )}
@@ -179,7 +228,11 @@ export default async function TimePage() {
             ) : (
               <EmptyState
                 title="No work timer history yet"
-                description="Start a work timer during an active shift to record task time."
+                description={
+                  isPieceWorkMember
+                    ? "Start a work timer on a work order to record piece-work time."
+                    : "Start a work timer during an active shift to record task time."
+                }
                 icon={<Clock3 className="h-5 w-5 text-accent" />}
               />
             )}
@@ -201,6 +254,9 @@ export default async function TimePage() {
                     <p className="font-semibold">{item.memberName}</p>
                     <p className="text-sm text-foreground-muted">
                       Shift started: {formatDateTime(item.shiftStartedAt)}
+                    </p>
+                    <p className="text-sm text-foreground-muted">
+                      Status: {item.isPaused ? "Paused" : "Active"}
                     </p>
                     <p className="text-sm text-foreground-muted">
                       Active work: {item.activeWorkTitle ?? "No active work timer"}

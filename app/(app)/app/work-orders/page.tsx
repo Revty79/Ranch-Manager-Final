@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ClipboardList } from "lucide-react";
 import { CreateWorkOrderForm } from "@/components/work-orders/create-work-order-form";
+import { IncentiveCountdown } from "@/components/work-orders/incentive-countdown";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { PageHeader } from "@/components/patterns/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -55,6 +56,10 @@ function formatStatus(status: string): string {
   return status.replace("_", " ");
 }
 
+function formatMoney(cents: number): string {
+  return `$${(cents / 100).toFixed(2)}`;
+}
+
 export default async function WorkOrdersPage({
   searchParams,
 }: {
@@ -91,7 +96,17 @@ export default async function WorkOrdersPage({
                   <div className="flex flex-wrap items-center gap-3 text-xs text-foreground-muted">
                     <span>Priority: {order.priority}</span>
                     <span>Due: {formatDate(order.dueAt)}</span>
+                    <span>
+                      Incentive:{" "}
+                      {order.incentivePayCents > 0
+                        ? formatMoney(order.incentivePayCents)
+                        : "Not set"}
+                    </span>
                   </div>
+                  <IncentiveCountdown
+                    incentivePayCents={order.incentivePayCents}
+                    incentiveEndsAt={order.incentiveEndsAt}
+                  />
                 </CardContent>
               </Card>
             ))}
@@ -184,6 +199,7 @@ export default async function WorkOrdersPage({
                   <TableHeaderCell>Priority</TableHeaderCell>
                   <TableHeaderCell>Assignees</TableHeaderCell>
                   <TableHeaderCell>Due</TableHeaderCell>
+                  <TableHeaderCell>Incentive</TableHeaderCell>
                   <TableHeaderCell className="text-right">Actions</TableHeaderCell>
                 </TableRow>
               </TableHead>
@@ -203,6 +219,12 @@ export default async function WorkOrdersPage({
                         : "Unassigned"}
                     </TableCell>
                     <TableCell>{formatDate(order.dueAt)}</TableCell>
+                    <TableCell>
+                      <IncentiveCountdown
+                        incentivePayCents={order.incentivePayCents}
+                        incentiveEndsAt={order.incentiveEndsAt}
+                      />
+                    </TableCell>
                     <TableCell className="text-right">
                       <Link
                         href={`/app/work-orders/${order.id}`}

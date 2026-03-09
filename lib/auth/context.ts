@@ -3,7 +3,14 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { hasBillingAccess } from "@/lib/billing/access";
 import { db } from "@/lib/db/client";
-import { ranchMemberships, ranches, sessions, users, type RanchRole } from "@/lib/db/schema";
+import {
+  ranchMemberships,
+  ranches,
+  sessions,
+  users,
+  type PayType,
+  type RanchRole,
+} from "@/lib/db/schema";
 import { getSessionTokenFromCookie, hashSessionToken } from "./session";
 
 export interface AuthUser {
@@ -30,6 +37,7 @@ export interface RanchContext {
   membership: {
     id: string;
     role: RanchRole;
+    payType: PayType;
     isActive: boolean;
   };
 }
@@ -46,6 +54,7 @@ async function getRanchContextForUser(
     .select({
       membershipId: ranchMemberships.id,
       role: ranchMemberships.role,
+      payType: ranchMemberships.payType,
       isActive: ranchMemberships.isActive,
       ranchId: ranches.id,
       ranchName: ranches.name,
@@ -86,6 +95,7 @@ async function getRanchContextForUser(
     membership: {
       id: activeMembership.membershipId,
       role: activeMembership.role,
+      payType: activeMembership.payType,
       isActive: activeMembership.isActive,
     },
   };

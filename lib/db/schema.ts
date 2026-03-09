@@ -43,6 +43,11 @@ export const workOrderPriorityEnum = pgEnum("work_order_priority", [
   "normal",
   "high",
 ]);
+export const workOrderIncentiveTimerTypeEnum = pgEnum("work_order_incentive_timer_type", [
+  "none",
+  "hours",
+  "deadline",
+]);
 
 export const users = pgTable(
   "users",
@@ -206,6 +211,13 @@ export const workOrders = pgTable(
     status: workOrderStatusEnum("status").default("draft").notNull(),
     priority: workOrderPriorityEnum("priority").default("normal").notNull(),
     dueAt: timestamp("due_at", { withTimezone: true }),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    incentivePayCents: integer("incentive_pay_cents").default(0).notNull(),
+    incentiveTimerType: workOrderIncentiveTimerTypeEnum("incentive_timer_type")
+      .default("none")
+      .notNull(),
+    incentiveDurationHours: integer("incentive_duration_hours"),
+    incentiveEndsAt: timestamp("incentive_ends_at", { withTimezone: true }),
     createdByMembershipId: uuid("created_by_membership_id").references(
       () => ranchMemberships.id,
       { onDelete: "set null" },
@@ -221,6 +233,8 @@ export const workOrders = pgTable(
     index("work_orders_ranch_idx").on(table.ranchId),
     index("work_orders_status_idx").on(table.status),
     index("work_orders_due_idx").on(table.dueAt),
+    index("work_orders_completed_idx").on(table.completedAt),
+    index("work_orders_incentive_ends_idx").on(table.incentiveEndsAt),
   ],
 );
 
@@ -258,6 +272,10 @@ export const shifts = pgTable(
     startedAt: timestamp("started_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
+    pausedAt: timestamp("paused_at", { withTimezone: true }),
+    pausedAccumulatedSeconds: integer("paused_accumulated_seconds")
+      .default(0)
+      .notNull(),
     endedAt: timestamp("ended_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
@@ -267,6 +285,7 @@ export const shifts = pgTable(
     index("shifts_ranch_idx").on(table.ranchId),
     index("shifts_membership_idx").on(table.membershipId),
     index("shifts_started_idx").on(table.startedAt),
+    index("shifts_paused_idx").on(table.pausedAt),
   ],
 );
 
@@ -306,3 +325,5 @@ export type CouponGrantType = (typeof couponGrantTypeEnum.enumValues)[number];
 export type PayType = (typeof payTypeEnum.enumValues)[number];
 export type WorkOrderStatus = (typeof workOrderStatusEnum.enumValues)[number];
 export type WorkOrderPriority = (typeof workOrderPriorityEnum.enumValues)[number];
+export type WorkOrderIncentiveTimerType =
+  (typeof workOrderIncentiveTimerTypeEnum.enumValues)[number];

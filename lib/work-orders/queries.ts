@@ -5,6 +5,7 @@ import {
   users,
   workOrderAssignments,
   workOrders,
+  type WorkOrderIncentiveTimerType,
   type WorkOrderPriority,
   type WorkOrderStatus,
 } from "@/lib/db/schema";
@@ -23,6 +24,10 @@ export interface WorkOrderListItem {
   status: WorkOrderStatus;
   priority: WorkOrderPriority;
   dueAt: Date | null;
+  incentivePayCents: number;
+  incentiveTimerType: WorkOrderIncentiveTimerType;
+  incentiveDurationHours: number | null;
+  incentiveEndsAt: Date | null;
   createdAt: Date;
   assignees: { membershipId: string; fullName: string }[];
 }
@@ -69,6 +74,10 @@ export async function getWorkOrdersForRanch(
       status: workOrders.status,
       priority: workOrders.priority,
       dueAt: workOrders.dueAt,
+      incentivePayCents: workOrders.incentivePayCents,
+      incentiveTimerType: workOrders.incentiveTimerType,
+      incentiveDurationHours: workOrders.incentiveDurationHours,
+      incentiveEndsAt: workOrders.incentiveEndsAt,
       createdAt: workOrders.createdAt,
     })
     .from(workOrders)
@@ -125,6 +134,10 @@ export async function getWorkOrderById(
       status: workOrders.status,
       priority: workOrders.priority,
       dueAt: workOrders.dueAt,
+      incentivePayCents: workOrders.incentivePayCents,
+      incentiveTimerType: workOrders.incentiveTimerType,
+      incentiveDurationHours: workOrders.incentiveDurationHours,
+      incentiveEndsAt: workOrders.incentiveEndsAt,
       createdAt: workOrders.createdAt,
     })
     .from(workOrders)
@@ -170,6 +183,10 @@ export async function getAssignedWorkForMembership(
       status: workOrders.status,
       priority: workOrders.priority,
       dueAt: workOrders.dueAt,
+      incentivePayCents: workOrders.incentivePayCents,
+      incentiveTimerType: workOrders.incentiveTimerType,
+      incentiveDurationHours: workOrders.incentiveDurationHours,
+      incentiveEndsAt: workOrders.incentiveEndsAt,
       createdAt: workOrders.createdAt,
     })
     .from(workOrderAssignments)

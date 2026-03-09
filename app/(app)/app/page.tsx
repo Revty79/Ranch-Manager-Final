@@ -1,16 +1,96 @@
 import Link from "next/link";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { PageHeader } from "@/components/patterns/page-header";
 import { SectionHeader } from "@/components/patterns/section-header";
 import { StatCard } from "@/components/patterns/stat-card";
 import { DataTableShell } from "@/components/patterns/data-table-shell";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { ClipboardList } from "lucide-react";
 import { requirePaidAccessContext } from "@/lib/auth/context";
+import { db } from "@/lib/db/client";
+import { ranchMemberships, shifts, workOrders } from "@/lib/db/schema";
+import { resolvePayrollDateRange } from "@/lib/payroll/date-range";
+import { getPayrollSummaryForRange } from "@/lib/payroll/queries";
+import { getWorkOrdersForRanch } from "@/lib/work-orders/queries";
 import { cn } from "@/lib/utils";
 
 export default async function AppHomePage() {
-  await requirePaidAccessContext();
+  const context = await requirePaidAccessContext();
+  const canViewPayroll =
+    context.membership.role === "owner" || context.membership.role === "manager";
+  const payrollRange = resolvePayrollDateRange();
+
+  const [
+    [activeCrewCountRow],
+    [openWorkOrdersCountRow],
+    [activeShiftsCountRow],
+    recentWorkOrders,
+    payrollSummary,
+  ] = await Promise.all([
+    db
+      .select({
+        count: sql<number>`count(*)::int`,
+      })
+      .from(ranchMemberships)
+      .where(
+        and(
+          eq(ranchMemberships.ranchId, context.ranch.id),
+          eq(ranchMemberships.isActive, true),
+        ),
+      ),
+    db
+      .select({
+        count: sql<number>`count(*)::int`,
+      })
+      .from(workOrders)
+      .where(
+        and(
+          eq(workOrders.ranchId, context.ranch.id),
+          inArray(workOrders.status, ["draft", "open", "in_progress"]),
+        ),
+      ),
+    db
+      .select({
+        count: sql<number>`count(*)::int`,
+      })
+      .from(shifts)
+      .where(and(eq(shifts.ranchId, context.ranch.id), isNull(shifts.endedAt))),
+    getWorkOrdersForRanch(context.ranch.id, { status: "all" }),
+    canViewPayroll
+      ? getPayrollSummaryForRange(
+          context.ranch.id,
+          payrollRange.fromDate,
+          payrollRange.toDateExclusive,
+        )
+      : Promise.resolve(null),
+  ]);
+
+  const activeCrewCount = activeCrewCountRow?.count ?? 0;
+  const openWorkOrdersCount = openWorkOrdersCountRow?.count ?? 0;
+  const activeShiftsCount = activeShiftsCountRow?.count ?? 0;
+  const totalPayrollCents = payrollSummary?.totalPayCents ?? 0;
+  const recentRows = recentWorkOrders.slice(0, 8).map((order) => {
+    const dueLabel = order.dueAt
+      ? new Intl.DateTimeFormat("en-US", {
+          month: "short",
+          day: "numeric",
+        }).format(order.dueAt)
+      : "Not set";
+    const assigneeLabel = order.assignees.length
+      ? order.assignees
+          .slice(0, 2)
+          .map((assignee) => assignee.fullName)
+          .join(", ")
+      : "Unassigned";
+    return [
+      order.title,
+      order.assignees.length > 2 ? `${assigneeLabel} +${order.assignees.length - 2}` : assigneeLabel,
+      dueLabel,
+      `status: ${order.status.replace("_", " ")}`,
+    ];
+  });
+  const hasLiveActivity = recentRows.length > 0 || activeShiftsCount > 0 || openWorkOrdersCount > 0;
 
   return (
     <div className="space-y-6">
@@ -26,32 +106,52 @@ export default async function AppHomePage() {
       />
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Active Crew" value="0" trend="Ready for first team setup" />
-        <StatCard label="Open Work Orders" value="0" trend="No backlog yet" />
-        <StatCard label="Active Shifts" value="0" trend="Clock starts on first shift" />
-        <StatCard label="Payroll This Period" value="$0.00" trend="Will populate from tracked time" />
+        <StatCard
+          label="Active Crew"
+          value={`${activeCrewCount}`}
+          trend={activeCrewCount > 0 ? "Active team memberships" : "Ready for first team setup"}
+        />
+        <StatCard
+          label="Open Work Orders"
+          value={`${openWorkOrdersCount}`}
+          trend={openWorkOrdersCount > 0 ? "Draft, open, or in progress" : "No backlog yet"}
+        />
+        <StatCard
+          label="Active Shifts"
+          value={`${activeShiftsCount}`}
+          trend={activeShiftsCount > 0 ? "Currently clocked in" : "Clock starts on first shift"}
+        />
+        <StatCard
+          label="Payroll This Period"
+          value={canViewPayroll ? `$${(totalPayrollCents / 100).toFixed(2)}` : "Restricted"}
+          trend={canViewPayroll ? `${payrollRange.from} to ${payrollRange.to}` : "Owner/manager only"}
+        />
       </section>
 
       <section>
         <SectionHeader
           title="Recent Work"
-          description="Work-order activity will appear here as soon as your team starts using the system."
+          description="Latest work orders across your ranch."
         />
         <DataTableShell
           columns={["Work Order", "Assigned", "Due", "Status"]}
-          rows={[
-            ["Water Line Inspection", "Unassigned", "Not set", "status: draft"],
-            ["North Fence Repair", "No crew", "Not set", "status: open"],
-          ]}
+          rows={recentRows}
+          emptyLabel="No work orders yet. Create one to start tracking activity."
         />
       </section>
 
-      <EmptyState
-        title="No live activity yet"
-        description="Create your first work order, add team members, and start tracking time to populate this dashboard."
-        icon={<ClipboardList className="h-5 w-5 text-accent" />}
-        action={<Button variant="secondary">View setup checklist</Button>}
-      />
+      {!hasLiveActivity ? (
+        <EmptyState
+          title="No live activity yet"
+          description="Create your first work order, add team members, and start tracking time to populate this dashboard."
+          icon={<ClipboardList className="h-5 w-5 text-accent" />}
+          action={
+            <Link href="/app/work-orders" className={cn(buttonVariants({ variant: "secondary" }))}>
+              Go to work orders
+            </Link>
+          }
+        />
+      ) : null}
     </div>
   );
 }
