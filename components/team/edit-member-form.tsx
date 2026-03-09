@@ -19,6 +19,7 @@ interface EditMemberFormProps {
   role: "owner" | "manager" | "worker" | "seasonal_worker";
   payType: "hourly" | "salary" | "piece_work";
   payRateCents: number;
+  payAdvanceCents: number;
   isActive: boolean;
 }
 
@@ -30,6 +31,7 @@ export function EditMemberForm({
   role,
   payType,
   payRateCents,
+  payAdvanceCents,
   isActive,
 }: EditMemberFormProps) {
   const router = useRouter();
@@ -88,6 +90,19 @@ export function EditMemberForm({
             step="0.01"
             min="0"
             defaultValue={(payRateCents / 100).toFixed(2)}
+            required
+          />
+        </FormFieldShell>
+        <FormFieldShell
+          label="Member pay advance"
+          hint="Member-specific amount deducted from this member's payroll net pay."
+        >
+          <Input
+            name="payAdvance"
+            type="number"
+            step="0.01"
+            min="0"
+            defaultValue={(payAdvanceCents / 100).toFixed(2)}
             required
           />
         </FormFieldShell>

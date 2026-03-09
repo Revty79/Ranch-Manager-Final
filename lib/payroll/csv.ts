@@ -39,7 +39,9 @@ export function buildPayrollCsv(rows: PayrollSummaryRow[]): string {
     "Hours",
     "Base Pay",
     "Incentive Pay",
-    "Total Pay",
+    "Gross Pay",
+    "Pay Advance",
+    "Net Pay",
     "Member Status",
   ];
 
@@ -53,6 +55,8 @@ export function buildPayrollCsv(rows: PayrollSummaryRow[]): string {
       row.hoursWorked.toFixed(2),
       centsToDollars(row.basePayCents),
       centsToDollars(row.incentivePayCents),
+      centsToDollars(row.grossPayCents),
+      centsToDollars(row.payAdvanceCents),
       centsToDollars(row.totalPayCents),
       row.isActive ? "active" : "inactive",
     ]
@@ -79,8 +83,9 @@ export function buildPayrollBreakdownCsv(data: PayrollBreakdown): string {
     "Pay Rate",
     "Base Pay For Row",
     "Incentive For Row",
+    "Advance Deduction",
     "Pay Calculation",
-    "Total Pay For Row",
+    "Net Pay For Row",
   ];
 
   const dayRowsByMembership = new Map<string, (typeof data.dayRows)[number][]>();
@@ -125,6 +130,7 @@ export function buildPayrollBreakdownCsv(data: PayrollBreakdown): string {
         centsToDollars(workerTotal.payRateCents),
         dailyPayCents > 0 ? centsToDollars(dailyPayCents) : "",
         "",
+        "",
         payCalculation,
         dailyPayCents > 0 ? centsToDollars(dailyPayCents) : "",
       );
@@ -153,6 +159,7 @@ export function buildPayrollBreakdownCsv(data: PayrollBreakdown): string {
       centsToDollars(workerTotal.payRateCents),
       centsToDollars(workerTotal.basePayCents),
       centsToDollars(workerTotal.incentivePayCents),
+      centsToDollars(workerTotal.payAdvanceCents),
       totalCalculation,
       centsToDollars(workerTotal.totalPayCents),
     );

@@ -1,0 +1,1 @@
+ALTER TABLE "ranch_memberships" ADD COLUMN "pay_advance_cents" integer DEFAULT 0 NOT NULL;

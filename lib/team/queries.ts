@@ -10,6 +10,7 @@ export interface TeamMemberRow {
   role: "owner" | "manager" | "worker" | "seasonal_worker";
   payType: "hourly" | "salary" | "piece_work";
   payRateCents: number;
+  payAdvanceCents: number;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -36,6 +37,7 @@ export async function getTeamMembersForRanch(
       role: ranchMemberships.role,
       payType: ranchMemberships.payType,
       payRateCents: ranchMemberships.payRateCents,
+      payAdvanceCents: ranchMemberships.payAdvanceCents,
       isActive: ranchMemberships.isActive,
       createdAt: ranchMemberships.createdAt,
       updatedAt: ranchMemberships.updatedAt,
@@ -61,6 +63,7 @@ export async function getTeamMemberByMembership(
       role: ranchMemberships.role,
       payType: ranchMemberships.payType,
       payRateCents: ranchMemberships.payRateCents,
+      payAdvanceCents: ranchMemberships.payAdvanceCents,
       isActive: ranchMemberships.isActive,
       createdAt: ranchMemberships.createdAt,
       updatedAt: ranchMemberships.updatedAt,

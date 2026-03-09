@@ -52,7 +52,7 @@ export default async function PayrollPage({
       <PageHeader
         eyebrow="Payroll"
         title="Payroll Summary"
-        description="Transparent calculations based on tracked time and configured pay type. Use breakdown export for daily clock in/out detail."
+        description="Transparent calculations based on tracked time, configured pay type, and pay-advance deductions. Use breakdown export for daily clock in/out detail."
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <Link
@@ -108,7 +108,7 @@ export default async function PayrollPage({
         </CardContent>
       </Card>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
         <StatCard label="Team Members" value={`${summary.rows.length}`} />
         <StatCard label="Total Hours" value={`${summary.totalHours.toFixed(2)}h`} />
         <StatCard label="Base Pay" value={formatMoney(summary.totalBasePayCents)} />
@@ -116,7 +116,15 @@ export default async function PayrollPage({
           label="Incentive Pay"
           value={formatMoney(summary.totalIncentivePayCents)}
         />
-        <StatCard label="Total Pay" value={formatMoney(summary.totalPayCents)} />
+        <StatCard
+          label="Pay Advances"
+          value={
+            summary.totalPayAdvanceCents > 0
+              ? `-${formatMoney(summary.totalPayAdvanceCents)}`
+              : formatMoney(0)
+          }
+        />
+        <StatCard label="Net Pay" value={formatMoney(summary.totalPayCents)} />
       </section>
 
       <Card>
@@ -124,7 +132,8 @@ export default async function PayrollPage({
           <div>
             <CardTitle className="text-base">Summary by team member</CardTitle>
             <CardDescription>
-              Hourly uses shift hours. Piece work uses work-order timer hours. Salary uses a flat period amount.
+              Hourly uses shift hours. Piece work uses work-order timer hours. Salary uses a
+              flat period amount. Pay advances are deducted from net pay.
             </CardDescription>
           </div>
           {summary.rows.length ? (
@@ -139,7 +148,8 @@ export default async function PayrollPage({
                     <TableHeaderCell>Hours</TableHeaderCell>
                     <TableHeaderCell>Base Pay</TableHeaderCell>
                     <TableHeaderCell>Incentive Pay</TableHeaderCell>
-                    <TableHeaderCell>Total Pay</TableHeaderCell>
+                    <TableHeaderCell>Advance</TableHeaderCell>
+                    <TableHeaderCell>Net Pay</TableHeaderCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -159,6 +169,11 @@ export default async function PayrollPage({
                       <TableCell>{row.hoursWorked.toFixed(2)}</TableCell>
                       <TableCell>{formatMoney(row.basePayCents)}</TableCell>
                       <TableCell>{formatMoney(row.incentivePayCents)}</TableCell>
+                      <TableCell>
+                        {row.payAdvanceCents > 0
+                          ? `-${formatMoney(row.payAdvanceCents)}`
+                          : formatMoney(0)}
+                      </TableCell>
                       <TableCell>{formatMoney(row.totalPayCents)}</TableCell>
                     </TableRow>
                   ))}

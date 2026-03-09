@@ -115,6 +115,7 @@ export const ranchMemberships = pgTable(
     role: ranchRoleEnum("role").default("worker").notNull(),
     payType: payTypeEnum("pay_type").default("hourly").notNull(),
     payRateCents: integer("pay_rate_cents").default(0).notNull(),
+    payAdvanceCents: integer("pay_advance_cents").default(0).notNull(),
     isActive: boolean("is_active").default(true).notNull(),
     deactivatedAt: timestamp("deactivated_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })

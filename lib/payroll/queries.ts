@@ -19,6 +19,8 @@ export interface PayrollSummaryRow {
   hoursWorked: number;
   basePayCents: number;
   incentivePayCents: number;
+  grossPayCents: number;
+  payAdvanceCents: number;
   totalPayCents: number;
   isActive: boolean;
 }
@@ -28,6 +30,8 @@ export interface PayrollSummary {
   totalHours: number;
   totalBasePayCents: number;
   totalIncentivePayCents: number;
+  totalGrossPayCents: number;
+  totalPayAdvanceCents: number;
   totalPayCents: number;
 }
 
@@ -60,6 +64,8 @@ export interface PayrollBreakdownWorkerTotalRow {
   paidHours: number;
   basePayCents: number;
   incentivePayCents: number;
+  grossPayCents: number;
+  payAdvanceCents: number;
   totalPayCents: number;
   isActive: boolean;
 }
@@ -246,6 +252,7 @@ export async function getPayrollSummaryForRange(
         role: ranchMemberships.role,
         payType: ranchMemberships.payType,
         payRateCents: ranchMemberships.payRateCents,
+        payAdvanceCents: ranchMemberships.payAdvanceCents,
         isActive: ranchMemberships.isActive,
       })
       .from(ranchMemberships)
@@ -334,7 +341,8 @@ export async function getPayrollSummaryForRange(
       const hasTrackedTime =
         (shiftSecondsByMembership.get(member.membershipId) ?? 0) > 0 ||
         (workSecondsByMembership.get(member.membershipId) ?? 0) > 0 ||
-        (incentivePayByMembership.get(member.membershipId) ?? 0) > 0;
+        (incentivePayByMembership.get(member.membershipId) ?? 0) > 0 ||
+        member.payAdvanceCents > 0;
       return member.isActive || hasTrackedTime;
     })
     .map((member) => {
@@ -349,7 +357,9 @@ export async function getPayrollSummaryForRange(
             ? member.payRateCents
             : 0;
       const incentivePayCents = incentivePayByMembership.get(member.membershipId) ?? 0;
-      const totalPayCents = basePayCents + incentivePayCents;
+      const grossPayCents = basePayCents + incentivePayCents;
+      const payAdvanceCents = member.payAdvanceCents;
+      const totalPayCents = grossPayCents - payAdvanceCents;
 
       return {
         membershipId: member.membershipId,
@@ -361,6 +371,8 @@ export async function getPayrollSummaryForRange(
         hoursWorked,
         basePayCents,
         incentivePayCents,
+        grossPayCents,
+        payAdvanceCents,
         totalPayCents,
         isActive: member.isActive,
       };
@@ -377,6 +389,14 @@ export async function getPayrollSummaryForRange(
     (sum, row) => sum + row.incentivePayCents,
     0,
   );
+  const totalGrossPayCents = rows.reduce(
+    (sum, row) => sum + row.grossPayCents,
+    0,
+  );
+  const totalPayAdvanceCents = rows.reduce(
+    (sum, row) => sum + row.payAdvanceCents,
+    0,
+  );
   const totalPayCents = rows.reduce(
     (sum, row) => sum + row.totalPayCents,
     0,
@@ -387,6 +407,8 @@ export async function getPayrollSummaryForRange(
     totalHours,
     totalBasePayCents,
     totalIncentivePayCents,
+    totalGrossPayCents,
+    totalPayAdvanceCents,
     totalPayCents,
   };
 }
@@ -405,6 +427,7 @@ export async function getPayrollBreakdownForRange(
         role: ranchMemberships.role,
         payType: ranchMemberships.payType,
         payRateCents: ranchMemberships.payRateCents,
+        payAdvanceCents: ranchMemberships.payAdvanceCents,
         isActive: ranchMemberships.isActive,
       })
       .from(ranchMemberships)
@@ -588,7 +611,10 @@ export async function getPayrollBreakdownForRange(
   const includedMemberships = new Set([
     ...dayRows.map((row) => row.membershipId),
     ...summary.rows
-      .filter((row) => row.hoursWorked > 0 || row.totalPayCents > 0)
+      .filter(
+        (row) =>
+          row.hoursWorked > 0 || row.totalPayCents !== 0 || row.payAdvanceCents > 0,
+      )
       .map((row) => row.membershipId),
   ]);
 
@@ -612,7 +638,9 @@ export async function getPayrollBreakdownForRange(
             ? member.payRateCents
             : 0);
       const incentivePayCents = summaryRow?.incentivePayCents ?? 0;
-      const totalPayCents = basePayCents + incentivePayCents;
+      const grossPayCents = summaryRow?.grossPayCents ?? basePayCents + incentivePayCents;
+      const payAdvanceCents = summaryRow?.payAdvanceCents ?? member.payAdvanceCents;
+      const totalPayCents = grossPayCents - payAdvanceCents;
 
       return {
         membershipId: member.membershipId,
@@ -625,6 +653,8 @@ export async function getPayrollBreakdownForRange(
         paidHours,
         basePayCents,
         incentivePayCents,
+        grossPayCents,
+        payAdvanceCents,
         totalPayCents,
         isActive: member.isActive,
       };

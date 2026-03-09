@@ -16,6 +16,10 @@ export interface TeamActionState {
 
 const roleSchema = z.enum(["owner", "manager", "worker", "seasonal_worker"]);
 const payTypeSchema = z.enum(["hourly", "salary", "piece_work"]);
+const payAdvanceSchema = z.preprocess(
+  (value) => (value === null || value === undefined || value === "" ? 0 : value),
+  z.coerce.number().min(0, "Pay advance must be zero or more."),
+);
 
 const createMemberSchema = z.object({
   fullName: z.string().trim().min(2, "Full name is required."),
@@ -24,6 +28,7 @@ const createMemberSchema = z.object({
   role: roleSchema.default("worker"),
   payType: payTypeSchema.default("hourly"),
   payRate: z.coerce.number().min(0, "Pay rate must be zero or more."),
+  payAdvance: payAdvanceSchema,
 });
 
 const editMemberSchema = z.object({
@@ -32,6 +37,7 @@ const editMemberSchema = z.object({
   role: roleSchema,
   payType: payTypeSchema,
   payRate: z.coerce.number().min(0, "Pay rate must be zero or more."),
+  payAdvance: payAdvanceSchema,
 });
 
 const toggleMemberSchema = z.object({
@@ -63,6 +69,7 @@ export async function createTeamMemberAction(
     role: formData.get("role"),
     payType: formData.get("payType"),
     payRate: formData.get("payRate"),
+    payAdvance: formData.get("payAdvance"),
   });
 
   if (!parsed.success) {
@@ -77,6 +84,7 @@ export async function createTeamMemberAction(
   const email = normalizeEmail(parsed.data.email);
   const tempPassword = parsed.data.tempPassword?.trim() ?? "";
   const payRateCents = toCents(parsed.data.payRate);
+  const payAdvanceCents = toCents(parsed.data.payAdvance);
 
   const [existingUser] = await db
     .select({
@@ -135,6 +143,7 @@ export async function createTeamMemberAction(
       role,
       payType: parsed.data.payType,
       payRateCents,
+      payAdvanceCents,
       isActive: true,
       deactivatedAt: null,
     });
@@ -166,6 +175,7 @@ export async function updateTeamMemberAction(
     role: formData.get("role"),
     payType: formData.get("payType"),
     payRate: formData.get("payRate"),
+    payAdvance: formData.get("payAdvance"),
   });
 
   if (!parsed.success) {
@@ -214,6 +224,7 @@ export async function updateTeamMemberAction(
         role: parsed.data.role,
         payType: parsed.data.payType,
         payRateCents: toCents(parsed.data.payRate),
+        payAdvanceCents: toCents(parsed.data.payAdvance),
         updatedAt: new Date(),
       })
       .where(eq(ranchMemberships.id, parsed.data.membershipId));

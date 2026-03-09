@@ -66,6 +66,7 @@ export default async function TeamMemberDetailPage({
             role={member.role}
             payType={member.payType}
             payRateCents={member.payRateCents}
+            payAdvanceCents={member.payAdvanceCents}
             isActive={member.isActive}
           />
         </CardContent>

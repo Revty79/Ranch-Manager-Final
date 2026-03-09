@@ -36,6 +36,10 @@ function formatPay(
   return `$${amount} / period`;
 }
 
+function formatMoney(cents: number): string {
+  return `$${(cents / 100).toFixed(2)}`;
+}
+
 export default async function TeamPage({
   searchParams,
 }: {
@@ -68,7 +72,8 @@ export default async function TeamPage({
           <div>
             <CardTitle className="text-base">Add team member</CardTitle>
             <CardDescription>
-              Simple launch flow: create a member login and attach them to this ranch.
+              Simple launch flow: create a member login and attach them to this ranch. Set pay
+              advances per member in their record.
             </CardDescription>
           </div>
           <AddMemberForm />
@@ -109,6 +114,7 @@ export default async function TeamPage({
                   <TableHeaderCell>Email</TableHeaderCell>
                   <TableHeaderCell>Role</TableHeaderCell>
                   <TableHeaderCell>Pay</TableHeaderCell>
+                  <TableHeaderCell>Pay Advance</TableHeaderCell>
                   <TableHeaderCell>Status</TableHeaderCell>
                   <TableHeaderCell className="text-right">Actions</TableHeaderCell>
                 </TableRow>
@@ -121,7 +127,14 @@ export default async function TeamPage({
                     <TableCell>
                       <Badge variant="neutral">{formatRole(member.role)}</Badge>
                     </TableCell>
-                    <TableCell>{formatPay(member.payRateCents, member.payType)}</TableCell>
+                    <TableCell>
+                      {formatPay(member.payRateCents, member.payType)}
+                    </TableCell>
+                    <TableCell>
+                      {member.payAdvanceCents > 0
+                        ? formatMoney(member.payAdvanceCents)
+                        : formatMoney(0)}
+                    </TableCell>
                     <TableCell>
                       <Badge variant={member.isActive ? "success" : "warning"}>
                         {member.isActive ? "Active" : "Inactive"}
