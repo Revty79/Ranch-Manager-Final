@@ -38,6 +38,28 @@ npm run dev
 
 4. Open `http://localhost:3000`.
 
+## Environment Variables
+
+Core:
+
+- `DATABASE_URL`
+- `APP_URL`
+- `APP_SECRET`
+- `SESSION_COOKIE_NAME`
+
+Stripe billing:
+
+- `STRIPE_SECRET_KEY`
+- `STRIPE_PRICE_ID`
+- `STRIPE_WEBHOOK_SECRET`
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+
+Optional:
+
+- `BETA_LIFETIME_CODE` (owner-entered beta lifetime access code)
+- `ALLOW_DEMO_SEED=true` (required to run demo seed)
+- `DEMO_SEED_PASSWORD` (override default demo password)
+
 ## Quality Commands
 
 ```bash
@@ -57,3 +79,45 @@ npm run db:studio
 
 Drizzle schema source: `lib/db/schema.ts`.
 Migration output: `drizzle/`.
+
+## Demo Seed
+
+Safe non-production demo seed:
+
+```bash
+ALLOW_DEMO_SEED=true npm run seed:demo
+```
+
+Default seeded credentials:
+
+- `owner@demoranch.local`
+- `manager@demoranch.local`
+- `worker@demoranch.local`
+- password: `DemoRanch123!`
+
+## Deploy Notes
+
+1. Set production environment variables.
+2. Build and start:
+
+```bash
+npm install
+npm run build
+npm run start
+```
+
+3. Run migrations:
+
+```bash
+npm run db:migrate
+```
+
+4. Configure Stripe webhook endpoint:
+
+`https://<your-domain>/api/stripe/webhook`
+
+Additional deployment/demo docs:
+
+- `docs/deploy-render.md`
+- `docs/billing.md`
+- `docs/demo-walkthrough.md`

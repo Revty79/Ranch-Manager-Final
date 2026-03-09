@@ -1,6 +1,7 @@
 import { and, eq, gt } from "drizzle-orm";
 import { cache } from "react";
 import { redirect } from "next/navigation";
+import { hasBillingAccess } from "@/lib/billing/access";
 import { db } from "@/lib/db/client";
 import { ranchMemberships, ranches, sessions, users, type RanchRole } from "@/lib/db/schema";
 import { getSessionTokenFromCookie, hashSessionToken } from "./session";
@@ -21,6 +22,9 @@ export interface RanchContext {
     onboardingCompleted: boolean;
     subscriptionStatus: string;
     subscriptionPlanKey: string | null;
+    stripeCustomerId: string | null;
+    stripeSubscriptionId: string | null;
+    subscriptionCurrentPeriodEnd: Date | null;
     betaLifetimeAccess: boolean;
   };
   membership: {
@@ -49,6 +53,9 @@ async function getRanchContextForUser(
       onboardingCompleted: ranches.onboardingCompleted,
       subscriptionStatus: ranches.subscriptionStatus,
       subscriptionPlanKey: ranches.subscriptionPlanKey,
+      stripeCustomerId: ranches.stripeCustomerId,
+      stripeSubscriptionId: ranches.stripeSubscriptionId,
+      subscriptionCurrentPeriodEnd: ranches.subscriptionCurrentPeriodEnd,
       betaLifetimeAccess: ranches.betaLifetimeAccess,
     })
     .from(ranchMemberships)
@@ -71,6 +78,9 @@ async function getRanchContextForUser(
       onboardingCompleted: activeMembership.onboardingCompleted,
       subscriptionStatus: activeMembership.subscriptionStatus,
       subscriptionPlanKey: activeMembership.subscriptionPlanKey,
+      stripeCustomerId: activeMembership.stripeCustomerId,
+      stripeSubscriptionId: activeMembership.stripeSubscriptionId,
+      subscriptionCurrentPeriodEnd: activeMembership.subscriptionCurrentPeriodEnd,
       betaLifetimeAccess: activeMembership.betaLifetimeAccess,
     },
     membership: {
@@ -167,8 +177,23 @@ export async function requireAppContext(): Promise<AppContext> {
   };
 }
 
-export async function requireRole(allowedRoles: RanchRole[]): Promise<AppContext> {
+export async function requirePaidAccessContext(): Promise<AppContext> {
   const context = await requireAppContext();
+  if (!hasBillingAccess(context.ranch)) {
+    redirect("/app/billing-required");
+  }
+
+  return context;
+}
+
+export async function requireRole(
+  allowedRoles: RanchRole[],
+  options?: { requirePaid?: boolean },
+): Promise<AppContext> {
+  const context =
+    options?.requirePaid === false
+      ? await requireAppContext()
+      : await requirePaidAccessContext();
   if (!allowedRoles.includes(context.membership.role)) {
     redirect("/app/access-denied");
   }

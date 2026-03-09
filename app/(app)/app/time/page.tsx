@@ -1,28 +1,215 @@
 import { Clock3 } from "lucide-react";
+import { TimeControlPanel } from "@/components/time/time-control-panel";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { PageHeader } from "@/components/patterns/page-header";
 import { StatCard } from "@/components/patterns/stat-card";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeaderCell,
+  TableRow,
+} from "@/components/ui/table";
+import { requirePaidAccessContext } from "@/lib/auth/context";
+import {
+  getActiveShiftForMembership,
+  getActiveShiftRosterForRanch,
+  getActiveWorkSessionForMembership,
+  getRecentShiftsForMembership,
+  getRecentWorkSessionsForMembership,
+  getWorkOrderOptionsForTimeTracking,
+} from "@/lib/time/queries";
 
-export default function TimePage() {
+function formatDateTime(date: Date): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function formatDuration(startedAt: Date, endedAt: Date | null): string {
+  const end = endedAt ?? new Date();
+  const diffMs = Math.max(end.getTime() - startedAt.getTime(), 0);
+  const totalMinutes = Math.floor(diffMs / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${hours}h ${minutes}m`;
+}
+
+export default async function TimePage() {
+  const context = await requirePaidAccessContext();
+  const [activeShift, activeWork, recentShifts, recentWorkSessions, workOrderOptions] =
+    await Promise.all([
+      getActiveShiftForMembership(context.ranch.id, context.membership.id),
+      getActiveWorkSessionForMembership(context.ranch.id, context.membership.id),
+      getRecentShiftsForMembership(context.ranch.id, context.membership.id, 12),
+      getRecentWorkSessionsForMembership(context.ranch.id, context.membership.id, 12),
+      getWorkOrderOptionsForTimeTracking(
+        context.ranch.id,
+        context.membership.id,
+        context.membership.role,
+      ),
+    ]);
+
+  const activeShiftRoster =
+    context.membership.role === "worker"
+      ? []
+      : await getActiveShiftRosterForRanch(context.ranch.id);
+
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Time"
         title="Shift & Task Time"
-        description="Track shift state, active work, and recent time history with clear guardrails."
+        description="Start and stop shift/work timers with clear state and clean history."
       />
+
       <section className="grid gap-4 md:grid-cols-3">
-        <StatCard label="Current Shift" value="Not started" />
-        <StatCard label="Active Work Order" value="None" />
-        <StatCard label="Tracked Hours Today" value="0.0h" />
+        <StatCard
+          label="Current Shift"
+          value={activeShift ? "Active" : "Not started"}
+          trend={activeShift ? `Since ${formatDateTime(activeShift.startedAt)}` : undefined}
+        />
+        <StatCard
+          label="Active Work"
+          value={activeWork ? activeWork.workOrderTitle : "None"}
+          trend={
+            activeWork ? `Started ${formatDateTime(activeWork.startedAt)}` : undefined
+          }
+        />
+        <StatCard
+          label="Recent Sessions"
+          value={`${recentWorkSessions.length}`}
+          trend="Last 12 entries"
+        />
       </section>
-      <EmptyState
-        title="No time entries yet"
-        description="Workers can start shifts and clock into assigned work orders from this area."
-        icon={<Clock3 className="h-5 w-5 text-accent" />}
-        action={<Button variant="secondary">Start a shift</Button>}
+
+      <TimeControlPanel
+        activeShift={activeShift}
+        activeWork={activeWork}
+        workOrderOptions={workOrderOptions}
       />
+
+      <section className="grid gap-4 xl:grid-cols-2">
+        <Card>
+          <CardContent className="space-y-3 py-6">
+            <div>
+              <CardTitle className="text-base">Shift history</CardTitle>
+              <CardDescription>Recent shift sessions for your membership.</CardDescription>
+            </div>
+            {recentShifts.length ? (
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableHeaderCell>Started</TableHeaderCell>
+                      <TableHeaderCell>Ended</TableHeaderCell>
+                      <TableHeaderCell>Duration</TableHeaderCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {recentShifts.map((shift) => (
+                      <TableRow key={shift.id}>
+                        <TableCell>{formatDateTime(shift.startedAt)}</TableCell>
+                        <TableCell>
+                          {shift.endedAt ? formatDateTime(shift.endedAt) : "Active"}
+                        </TableCell>
+                        <TableCell>{formatDuration(shift.startedAt, shift.endedAt)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <EmptyState
+                title="No shift history yet"
+                description="Start your first shift to begin tracking hours."
+                icon={<Clock3 className="h-5 w-5 text-accent" />}
+              />
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="space-y-3 py-6">
+            <div>
+              <CardTitle className="text-base">Work timer history</CardTitle>
+              <CardDescription>Recent work-order time sessions.</CardDescription>
+            </div>
+            {recentWorkSessions.length ? (
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableHeaderCell>Work Order</TableHeaderCell>
+                      <TableHeaderCell>Started</TableHeaderCell>
+                      <TableHeaderCell>Duration</TableHeaderCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {recentWorkSessions.map((session) => (
+                      <TableRow key={session.id}>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            <span>{session.workOrderTitle}</span>
+                            <Badge variant="neutral" className="w-fit">
+                              {session.status.replace("_", " ")}
+                            </Badge>
+                          </div>
+                        </TableCell>
+                        <TableCell>{formatDateTime(session.startedAt)}</TableCell>
+                        <TableCell>
+                          {formatDuration(session.startedAt, session.endedAt)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <EmptyState
+                title="No work timer history yet"
+                description="Start a work timer during an active shift to record task time."
+                icon={<Clock3 className="h-5 w-5 text-accent" />}
+              />
+            )}
+          </CardContent>
+        </Card>
+      </section>
+
+      {context.membership.role !== "worker" ? (
+        <Card>
+          <CardContent className="space-y-3 py-6">
+            <div>
+              <CardTitle className="text-base">Team active shift state</CardTitle>
+              <CardDescription>Live visibility into who is currently on shift.</CardDescription>
+            </div>
+            {activeShiftRoster.length ? (
+              <div className="grid gap-3 md:grid-cols-2">
+                {activeShiftRoster.map((item) => (
+                  <div key={item.membershipId} className="rounded-xl border bg-surface p-3">
+                    <p className="font-semibold">{item.memberName}</p>
+                    <p className="text-sm text-foreground-muted">
+                      Shift started: {formatDateTime(item.shiftStartedAt)}
+                    </p>
+                    <p className="text-sm text-foreground-muted">
+                      Active work: {item.activeWorkTitle ?? "No active work timer"}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-foreground-muted">No team members currently on shift.</p>
+            )}
+          </CardContent>
+        </Card>
+      ) : null}
     </div>
   );
 }

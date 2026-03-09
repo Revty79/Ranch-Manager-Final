@@ -28,8 +28,8 @@ export default function PricingPage() {
             <p className="font-display text-4xl font-semibold">{pricing.amount}</p>
             <p className="text-sm text-foreground-muted">{pricing.cadence}</p>
             <CardDescription>{pricing.description}</CardDescription>
-            <Link href="/signup" className={cn(buttonVariants({ size: "lg" }), "mt-2")}>
-              Start paid setup
+            <Link href="/checkout" className={cn(buttonVariants({ size: "lg" }), "mt-2")}>
+              Start paid checkout
             </Link>
             <p className="text-xs text-foreground-muted">
               Checkout step is presented after account creation.

@@ -15,8 +15,8 @@ import { Button } from "@/components/ui/button";
 interface EditMemberFormProps {
   membershipId: string;
   fullName: string;
-  role: "owner" | "manager" | "worker";
-  payType: "hourly" | "salary";
+  role: "owner" | "manager" | "worker" | "Seasonal";
+  payType: "hourly" | "salary" | "piecework";
   payRateCents: number;
   isActive: boolean;
 }

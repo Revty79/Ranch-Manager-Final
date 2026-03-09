@@ -5,8 +5,11 @@ import { StatCard } from "@/components/patterns/stat-card";
 import { DataTableShell } from "@/components/patterns/data-table-shell";
 import { Button } from "@/components/ui/button";
 import { ClipboardList } from "lucide-react";
+import { requirePaidAccessContext } from "@/lib/auth/context";
 
-export default function AppHomePage() {
+export default async function AppHomePage() {
+  await requirePaidAccessContext();
+
   return (
     <div className="space-y-6">
       <PageHeader

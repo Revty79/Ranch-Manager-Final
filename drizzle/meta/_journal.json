@@ -15,6 +15,34 @@
       "when": 1773026361548,
       "tag": "0001_nostalgic_purifiers",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773026972839,
+      "tag": "0002_fine_mongoose",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1773027309271,
+      "tag": "0003_shallow_tarantula",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1773027611821,
+      "tag": "0004_striped_lionheart",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1773028341114,
+      "tag": "0005_magical_bastion",
+      "breakpoints": true
     }
   ]
 }

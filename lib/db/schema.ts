@@ -23,6 +23,18 @@ export const subscriptionStatusEnum = pgEnum("subscription_status", [
   "canceled",
 ]);
 export const payTypeEnum = pgEnum("pay_type", ["hourly", "salary"]);
+export const workOrderStatusEnum = pgEnum("work_order_status", [
+  "draft",
+  "open",
+  "in_progress",
+  "completed",
+  "cancelled",
+]);
+export const workOrderPriorityEnum = pgEnum("work_order_priority", [
+  "low",
+  "normal",
+  "high",
+]);
 
 export const users = pgTable(
   "users",
@@ -52,10 +64,16 @@ export const ranches = pgTable(
     name: text("name").notNull(),
     slug: text("slug").notNull().unique(),
     onboardingCompleted: boolean("onboarding_completed").default(false).notNull(),
+    stripeCustomerId: text("stripe_customer_id"),
+    stripeSubscriptionId: text("stripe_subscription_id"),
     subscriptionStatus: subscriptionStatusEnum("subscription_status")
       .default("inactive")
       .notNull(),
     subscriptionPlanKey: text("subscription_plan_key"),
+    subscriptionCurrentPeriodEnd: timestamp("subscription_current_period_end", {
+      withTimezone: true,
+    }),
+    subscriptionUpdatedAt: timestamp("subscription_updated_at", { withTimezone: true }),
     betaLifetimeAccess: boolean("beta_lifetime_access").default(false).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
@@ -64,7 +82,11 @@ export const ranches = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [index("ranches_slug_idx").on(table.slug)],
+  (table) => [
+    index("ranches_slug_idx").on(table.slug),
+    uniqueIndex("ranches_stripe_customer_uidx").on(table.stripeCustomerId),
+    uniqueIndex("ranches_stripe_subscription_uidx").on(table.stripeSubscriptionId),
+  ],
 );
 
 export const ranchMemberships = pgTable(
@@ -115,7 +137,114 @@ export const sessions = pgTable(
   ],
 );
 
+export const workOrders = pgTable(
+  "work_orders",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ranchId: uuid("ranch_id")
+      .references(() => ranches.id, { onDelete: "cascade" })
+      .notNull(),
+    title: text("title").notNull(),
+    description: text("description"),
+    status: workOrderStatusEnum("status").default("draft").notNull(),
+    priority: workOrderPriorityEnum("priority").default("normal").notNull(),
+    dueAt: timestamp("due_at", { withTimezone: true }),
+    createdByMembershipId: uuid("created_by_membership_id").references(
+      () => ranchMemberships.id,
+      { onDelete: "set null" },
+    ),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("work_orders_ranch_idx").on(table.ranchId),
+    index("work_orders_status_idx").on(table.status),
+    index("work_orders_due_idx").on(table.dueAt),
+  ],
+);
+
+export const workOrderAssignments = pgTable(
+  "work_order_assignments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workOrderId: uuid("work_order_id")
+      .references(() => workOrders.id, { onDelete: "cascade" })
+      .notNull(),
+    membershipId: uuid("membership_id")
+      .references(() => ranchMemberships.id, { onDelete: "cascade" })
+      .notNull(),
+    assignedAt: timestamp("assigned_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("work_order_assignments_work_order_idx").on(table.workOrderId),
+    index("work_order_assignments_membership_idx").on(table.membershipId),
+    uniqueIndex("work_order_assignment_unique").on(table.workOrderId, table.membershipId),
+  ],
+);
+
+export const shifts = pgTable(
+  "shifts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ranchId: uuid("ranch_id")
+      .references(() => ranches.id, { onDelete: "cascade" })
+      .notNull(),
+    membershipId: uuid("membership_id")
+      .references(() => ranchMemberships.id, { onDelete: "cascade" })
+      .notNull(),
+    startedAt: timestamp("started_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    endedAt: timestamp("ended_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("shifts_ranch_idx").on(table.ranchId),
+    index("shifts_membership_idx").on(table.membershipId),
+    index("shifts_started_idx").on(table.startedAt),
+  ],
+);
+
+export const workTimeEntries = pgTable(
+  "work_time_entries",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ranchId: uuid("ranch_id")
+      .references(() => ranches.id, { onDelete: "cascade" })
+      .notNull(),
+    membershipId: uuid("membership_id")
+      .references(() => ranchMemberships.id, { onDelete: "cascade" })
+      .notNull(),
+    workOrderId: uuid("work_order_id")
+      .references(() => workOrders.id, { onDelete: "cascade" })
+      .notNull(),
+    startedAt: timestamp("started_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    endedAt: timestamp("ended_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("work_time_entries_ranch_idx").on(table.ranchId),
+    index("work_time_entries_membership_idx").on(table.membershipId),
+    index("work_time_entries_work_order_idx").on(table.workOrderId),
+    index("work_time_entries_started_idx").on(table.startedAt),
+  ],
+);
+
 export type RanchRole = (typeof ranchRoleEnum.enumValues)[number];
 export type OnboardingState = (typeof onboardingStateEnum.enumValues)[number];
 export type SubscriptionStatus = (typeof subscriptionStatusEnum.enumValues)[number];
 export type PayType = (typeof payTypeEnum.enumValues)[number];
+export type WorkOrderStatus = (typeof workOrderStatusEnum.enumValues)[number];
+export type WorkOrderPriority = (typeof workOrderPriorityEnum.enumValues)[number];
