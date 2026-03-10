@@ -42,14 +42,24 @@ function formatPayType(payType: "hourly" | "salary" | "piece_work"): string {
 }
 
 function formatDate(value: string): string {
+  const [yearString, monthString, dayString] = value.split("-");
+  const year = Number(yearString);
+  const month = Number(monthString);
+  const day = Number(dayString);
+
+  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) {
+    return value;
+  }
+
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
-  }).format(new Date(`${value}T00:00:00.000Z`));
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(year, month - 1, day)));
 }
 
-function formatDateTime(value: Date | null): string {
+function formatDateTime(value: Date | null, timeZone: string): string {
   if (!value) {
     return "Not marked";
   }
@@ -60,6 +70,7 @@ function formatDateTime(value: Date | null): string {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone,
   }).format(value);
 }
 
@@ -179,7 +190,7 @@ export default async function PayrollPage({
                             {period.status === "paid" ? "Paid" : "Open"}
                           </Badge>
                         </TableCell>
-                        <TableCell>{formatDateTime(period.paidAt)}</TableCell>
+                        <TableCell>{formatDateTime(period.paidAt, context.user.timeZone)}</TableCell>
                         <TableCell className="text-right">
                           <Link
                             href={`/app/payroll?from=${range.from}&to=${range.to}&periodId=${period.id}`}
@@ -368,7 +379,7 @@ export default async function PayrollPage({
                           <TableCell>{advance.fullName}</TableCell>
                           <TableCell>{formatMoney(advance.amountCents)}</TableCell>
                           <TableCell>{advance.note || "-"}</TableCell>
-                          <TableCell>{formatDateTime(advance.createdAt)}</TableCell>
+                          <TableCell>{formatDateTime(advance.createdAt, context.user.timeZone)}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>

@@ -11,6 +11,7 @@ import {
   type PayType,
   type RanchRole,
 } from "@/lib/db/schema";
+import { resolveTimeZone } from "@/lib/timezone";
 import { getSessionTokenFromCookie, hashSessionToken } from "./session";
 
 export interface AuthUser {
@@ -19,6 +20,7 @@ export interface AuthUser {
   fullName: string;
   onboardingState: "needs_ranch" | "complete";
   lastActiveRanchId: string | null;
+  timeZone: string;
 }
 
 export interface RanchContext {
@@ -114,6 +116,7 @@ export const getCurrentUser = cache(async (): Promise<AuthUser | null> => {
       fullName: users.fullName,
       onboardingState: users.onboardingState,
       lastActiveRanchId: users.lastActiveRanchId,
+      timeZone: users.timeZone,
     })
     .from(sessions)
     .innerJoin(users, eq(sessions.userId, users.id))
@@ -135,6 +138,7 @@ export const getCurrentUser = cache(async (): Promise<AuthUser | null> => {
     fullName: sessionRow.fullName,
     onboardingState: sessionRow.onboardingState,
     lastActiveRanchId: sessionRow.lastActiveRanchId,
+    timeZone: resolveTimeZone(sessionRow.timeZone),
   };
 });
 

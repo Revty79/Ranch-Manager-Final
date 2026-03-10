@@ -133,6 +133,7 @@ export async function loginAction(
       passwordHash: users.passwordHash,
       onboardingState: users.onboardingState,
       lastActiveRanchId: users.lastActiveRanchId,
+      timeZone: users.timeZone,
     })
     .from(users)
     .where(eq(users.email, email))
@@ -156,6 +157,7 @@ export async function loginAction(
     fullName: user.fullName,
     onboardingState: user.onboardingState,
     lastActiveRanchId: user.lastActiveRanchId,
+    timeZone: user.timeZone,
   });
 
   redirect(redirectPath);

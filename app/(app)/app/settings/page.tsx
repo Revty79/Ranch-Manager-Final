@@ -3,17 +3,19 @@ import { AccessDeniedShell, BillingRequiredShell } from "@/components/patterns/a
 import { PageHeader } from "@/components/patterns/page-header";
 import { CouponCodeForm } from "@/components/billing/beta-code-form";
 import { CheckoutForm } from "@/components/billing/checkout-form";
+import { TimeZoneForm } from "@/components/settings/timezone-form";
 import { requireAppContext } from "@/lib/auth/context";
 import { hasBillingAccess } from "@/lib/billing/access";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 
-function formatDate(value: Date | null): string {
+function formatDate(value: Date | null, timeZone: string): string {
   if (!value) return "Not available";
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
+    timeZone,
   }).format(value);
 }
 
@@ -90,7 +92,7 @@ export default async function SettingsPage({
               </p>
               <p>
                 <span className="text-foreground-muted">Current period end:</span>{" "}
-                {formatDate(context.ranch.subscriptionCurrentPeriodEnd)}
+                {formatDate(context.ranch.subscriptionCurrentPeriodEnd, context.user.timeZone)}
               </p>
               <p>
                 <span className="text-foreground-muted">Beta lifetime access:</span>{" "}
@@ -117,6 +119,16 @@ export default async function SettingsPage({
           </CardContent>
         </Card>
       </section>
+
+      <Card>
+        <CardContent className="space-y-3 py-6">
+          <CardTitle>Timezone</CardTitle>
+          <CardDescription>
+            Set your timezone so payroll, time tracking, and dates render consistently for your account.
+          </CardDescription>
+          <TimeZoneForm currentTimeZone={context.user.timeZone} />
+        </CardContent>
+      </Card>
 
       <section className="grid gap-4 xl:grid-cols-2">
         <AccessDeniedShell />

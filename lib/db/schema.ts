@@ -62,6 +62,7 @@ export const users = pgTable(
       .default("needs_ranch")
       .notNull(),
     lastActiveRanchId: uuid("last_active_ranch_id"),
+    timeZone: text("time_zone").default("UTC").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),

@@ -20,14 +20,16 @@ interface TimeControlPanelProps {
   activeWork: WorkSessionRecord | null;
   workOrderOptions: WorkOrderOption[];
   payType: PayType;
+  timeZone: string;
 }
 
 const initialTimeActionState: TimeActionState = {};
 
-function formatTime(date: Date): string {
+function formatTime(date: Date, timeZone: string): string {
   return new Intl.DateTimeFormat("en-US", {
     hour: "numeric",
     minute: "2-digit",
+    timeZone,
   }).format(date);
 }
 
@@ -36,6 +38,7 @@ export function TimeControlPanel({
   activeWork,
   workOrderOptions,
   payType,
+  timeZone,
 }: TimeControlPanelProps) {
   const router = useRouter();
   const isPieceWork = payType === "piece_work";
@@ -88,12 +91,12 @@ export function TimeControlPanel({
             <CardDescription>
               {isPieceWork
                 ? activeShift
-                  ? `Legacy shift active since ${formatTime(activeShift.startedAt)}. Clock out to continue piece-work mode.`
+                  ? `Legacy shift active since ${formatTime(activeShift.startedAt, timeZone)}. Clock out to continue piece-work mode.`
                   : "Piece-work mode: no shift required."
                 : activeShift
                   ? activeShift.pausedAt
                     ? "Shift is in a paused state. Clock out, then clock back in."
-                    : `Clocked in at ${formatTime(activeShift.startedAt)}`
+                    : `Clocked in at ${formatTime(activeShift.startedAt, timeZone)}`
                   : "No active shift"}
             </CardDescription>
           </div>
@@ -130,7 +133,7 @@ export function TimeControlPanel({
             <CardTitle className="text-base">Work timer</CardTitle>
             <CardDescription>
               {activeWork
-                ? `Tracking ${activeWork.workOrderTitle} since ${formatTime(activeWork.startedAt)}`
+                ? `Tracking ${activeWork.workOrderTitle} since ${formatTime(activeWork.startedAt, timeZone)}`
                 : isPieceWork
                   ? "No active work timer. Piece-work tracking starts here."
                   : "No active work timer"}

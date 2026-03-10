@@ -2,6 +2,7 @@ import type {
   PayrollBreakdown,
   PayrollSummaryRow,
 } from "./queries";
+import { resolveTimeZone } from "@/lib/timezone";
 
 function escapeCsv(value: string): string {
   if (value.includes(",") || value.includes("\"") || value.includes("\n")) {
@@ -14,8 +15,13 @@ function centsToDollars(cents: number): string {
   return (cents / 100).toFixed(2);
 }
 
-function formatDateTimeCsv(value: Date): string {
-  return value.toISOString();
+function formatDateTimeCsv(value: Date, timeZone: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+    timeZone,
+  }).format(value);
 }
 
 function formatRole(role: "owner" | "manager" | "worker" | "seasonal_worker"): string {
@@ -63,11 +69,18 @@ export function buildPayrollCsv(rows: PayrollSummaryRow[]): string {
   return [header.join(","), ...lines].join("\n");
 }
 
-export function buildPayrollBreakdownCsv(data: PayrollBreakdown): string {
+export function buildPayrollBreakdownCsv(
+  data: PayrollBreakdown,
+  requestedTimeZone?: string,
+): string {
+  const timeZone = resolveTimeZone(requestedTimeZone);
   const intervalCount = Math.max(1, data.maxIntervalsPerDay);
   const intervalHeaders: string[] = [];
   for (let index = 0; index < intervalCount; index += 1) {
-    intervalHeaders.push(`In ${index + 1} (UTC)`, `Out ${index + 1} (UTC)`);
+    intervalHeaders.push(
+      `In ${index + 1} (${timeZone})`,
+      `Out ${index + 1} (${timeZone})`,
+    );
   }
 
   const header = [
@@ -103,8 +116,8 @@ export function buildPayrollBreakdownCsv(data: PayrollBreakdown): string {
       for (let index = 0; index < intervalCount; index += 1) {
         const interval = dayRow.intervals[index];
         values.push(
-          interval ? formatDateTimeCsv(interval.inAt).slice(11, 16) : "",
-          interval ? formatDateTimeCsv(interval.outAt).slice(11, 16) : "",
+          interval ? formatDateTimeCsv(interval.inAt, timeZone) : "",
+          interval ? formatDateTimeCsv(interval.outAt, timeZone) : "",
         );
       }
 

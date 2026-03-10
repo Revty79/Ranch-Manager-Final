@@ -75,6 +75,7 @@ export default async function AppHomePage() {
       ? new Intl.DateTimeFormat("en-US", {
           month: "short",
           day: "numeric",
+          timeZone: context.user.timeZone,
         }).format(order.dueAt)
       : "Not set";
     const assigneeLabel = order.assignees.length

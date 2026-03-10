@@ -26,6 +26,7 @@ interface TimeEntryAdjustmentsProps {
   membershipId: string;
   shiftRows: ShiftAdjustmentRow[];
   workRows: WorkAdjustmentRow[];
+  timeZone: string;
 }
 
 interface EditState {
@@ -41,15 +42,6 @@ function pad(value: number): string {
 
 const HOURS_24 = Array.from({ length: 24 }, (_, hour) => pad(hour));
 const MINUTES_60 = Array.from({ length: 60 }, (_, minute) => pad(minute));
-
-function toDateTime24String(value: Date): string {
-  const year = value.getFullYear();
-  const month = pad(value.getMonth() + 1);
-  const day = pad(value.getDate());
-  const hours = pad(value.getHours());
-  const minutes = pad(value.getMinutes());
-  return `${year}-${month}-${day} ${hours}:${minutes}`;
-}
 
 function toDateTimeLocalInputString(value: Date): string {
   const year = value.getFullYear();
@@ -191,13 +183,21 @@ function todayAtHourInputValue(hour24: number): string {
   return toDateTimeLocalInputString(value);
 }
 
-function formatDateTime(isoValue: string): string {
+function formatDateTime(isoValue: string, timeZone: string): string {
   const date = new Date(isoValue);
   if (Number.isNaN(date.getTime())) {
     return "Invalid date";
   }
 
-  return toDateTime24String(date);
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+    timeZone,
+  }).format(date);
 }
 
 function formatDuration(startedAtIso: string, endedAtIso: string | null): string {
@@ -283,7 +283,7 @@ function DateTime24Field({
   );
 }
 
-function ShiftRowForm({ row }: { row: ShiftAdjustmentRow }) {
+function ShiftRowForm({ row, timeZone }: { row: ShiftAdjustmentRow; timeZone: string }) {
   const router = useRouter();
   const [startedAtValue, setStartedAtValue] = useState(() =>
     toDateTimeInputValue(row.startedAtIso),
@@ -307,9 +307,9 @@ function ShiftRowForm({ row }: { row: ShiftAdjustmentRow }) {
     <form action={formAction} className="space-y-2 rounded-xl border bg-surface p-3">
       <input type="hidden" name="entryId" value={row.id} />
       <div className="text-xs text-foreground-muted">
-        <span>{formatDateTime(row.startedAtIso)}</span>
+        <span>{formatDateTime(row.startedAtIso, timeZone)}</span>
         <span> to </span>
-        <span>{row.endedAtIso ? formatDateTime(row.endedAtIso) : "Active"}</span>
+        <span>{row.endedAtIso ? formatDateTime(row.endedAtIso, timeZone) : "Active"}</span>
         <span> ({duration})</span>
       </div>
       <div className="grid gap-2 md:grid-cols-2">
@@ -373,7 +373,7 @@ function ShiftRowForm({ row }: { row: ShiftAdjustmentRow }) {
   );
 }
 
-function WorkRowForm({ row }: { row: WorkAdjustmentRow }) {
+function WorkRowForm({ row, timeZone }: { row: WorkAdjustmentRow; timeZone: string }) {
   const router = useRouter();
   const [startedAtValue, setStartedAtValue] = useState(() =>
     toDateTimeInputValue(row.startedAtIso),
@@ -402,9 +402,9 @@ function WorkRowForm({ row }: { row: WorkAdjustmentRow }) {
         <span>({duration})</span>
       </div>
       <div className="text-xs text-foreground-muted">
-        <span>{formatDateTime(row.startedAtIso)}</span>
+        <span>{formatDateTime(row.startedAtIso, timeZone)}</span>
         <span> to </span>
-        <span>{row.endedAtIso ? formatDateTime(row.endedAtIso) : "Active"}</span>
+        <span>{row.endedAtIso ? formatDateTime(row.endedAtIso, timeZone) : "Active"}</span>
       </div>
       <div className="grid gap-2 md:grid-cols-2">
         <DateTime24Field
@@ -557,6 +557,7 @@ export function TimeEntryAdjustments({
   membershipId,
   shiftRows,
   workRows,
+  timeZone,
 }: TimeEntryAdjustmentsProps) {
   return (
     <div className="grid gap-4 xl:grid-cols-2">
@@ -566,7 +567,7 @@ export function TimeEntryAdjustments({
         {shiftRows.length ? (
           <div className="space-y-2">
             {shiftRows.map((row) => (
-              <ShiftRowForm key={row.id} row={row} />
+              <ShiftRowForm key={row.id} row={row} timeZone={timeZone} />
             ))}
           </div>
         ) : (
@@ -579,7 +580,7 @@ export function TimeEntryAdjustments({
         {workRows.length ? (
           <div className="space-y-2">
             {workRows.map((row) => (
-              <WorkRowForm key={row.id} row={row} />
+              <WorkRowForm key={row.id} row={row} timeZone={timeZone} />
             ))}
           </div>
         ) : (

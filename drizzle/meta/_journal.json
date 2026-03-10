@@ -92,6 +92,13 @@
       "when": 1773095744070,
       "tag": "0012_square_proemial_gods",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1773102952598,
+      "tag": "0013_majestic_stryfe",
+      "breakpoints": true
     }
   ]
 }

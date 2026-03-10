@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       range.fromDate,
       range.toDateExclusive,
     );
-    csv = buildPayrollBreakdownCsv(breakdown);
+    csv = buildPayrollBreakdownCsv(breakdown, user.timeZone);
     filename = `payroll-breakdown-${ranchSlug || "ranch"}-${range.from}-to-${range.to}.csv`;
   } else {
     const summary = await getPayrollSummaryForRange(

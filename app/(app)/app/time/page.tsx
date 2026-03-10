@@ -24,12 +24,13 @@ import {
   getWorkOrderOptionsForTimeTracking,
 } from "@/lib/time/queries";
 
-function formatDateTime(date: Date): string {
+function formatDateTime(date: Date, timeZone: string): string {
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
+    timeZone,
   }).format(date);
 }
 
@@ -113,8 +114,8 @@ export default async function TimePage() {
           trend={
             activeShift
               ? activeShift.pausedAt
-                ? `Paused since ${formatDateTime(activeShift.pausedAt)}`
-                : `Since ${formatDateTime(activeShift.startedAt)}`
+                ? `Paused since ${formatDateTime(activeShift.pausedAt, context.user.timeZone)}`
+                : `Since ${formatDateTime(activeShift.startedAt, context.user.timeZone)}`
               : isPieceWorkMember
                 ? "Piece-work mode uses work timers"
               : undefined
@@ -124,7 +125,9 @@ export default async function TimePage() {
           label="Active Work"
           value={activeWork ? activeWork.workOrderTitle : "None"}
           trend={
-            activeWork ? `Started ${formatDateTime(activeWork.startedAt)}` : undefined
+            activeWork
+              ? `Started ${formatDateTime(activeWork.startedAt, context.user.timeZone)}`
+              : undefined
           }
         />
         <StatCard
@@ -139,6 +142,7 @@ export default async function TimePage() {
         activeWork={activeWork}
         workOrderOptions={workOrderOptions}
         payType={context.membership.payType}
+        timeZone={context.user.timeZone}
       />
 
       <section className="grid gap-4 xl:grid-cols-2">
@@ -161,10 +165,10 @@ export default async function TimePage() {
                   <TableBody>
                     {recentShifts.map((shift) => (
                       <TableRow key={shift.id}>
-                        <TableCell>{formatDateTime(shift.startedAt)}</TableCell>
+                        <TableCell>{formatDateTime(shift.startedAt, context.user.timeZone)}</TableCell>
                         <TableCell>
                           {shift.endedAt
-                            ? formatDateTime(shift.endedAt)
+                            ? formatDateTime(shift.endedAt, context.user.timeZone)
                             : shift.pausedAt
                               ? "Paused"
                               : "Active"}
@@ -216,7 +220,7 @@ export default async function TimePage() {
                             </Badge>
                           </div>
                         </TableCell>
-                        <TableCell>{formatDateTime(session.startedAt)}</TableCell>
+                        <TableCell>{formatDateTime(session.startedAt, context.user.timeZone)}</TableCell>
                         <TableCell>
                           {formatDuration(session.startedAt, session.endedAt)}
                         </TableCell>
@@ -253,7 +257,7 @@ export default async function TimePage() {
                   <div key={item.membershipId} className="rounded-xl border bg-surface p-3">
                     <p className="font-semibold">{item.memberName}</p>
                     <p className="text-sm text-foreground-muted">
-                      Shift started: {formatDateTime(item.shiftStartedAt)}
+                      Shift started: {formatDateTime(item.shiftStartedAt, context.user.timeZone)}
                     </p>
                     <p className="text-sm text-foreground-muted">
                       Status: {item.isPaused ? "Paused" : "Active"}

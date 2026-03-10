@@ -40,7 +40,7 @@ function statusVariant(status: string) {
   return "neutral";
 }
 
-function formatDate(value: Date | null): string {
+function formatDate(value: Date | null, timeZone: string): string {
   if (!value) {
     return "Not set";
   }
@@ -49,6 +49,7 @@ function formatDate(value: Date | null): string {
     month: "short",
     day: "numeric",
     year: "numeric",
+    timeZone,
   }).format(value);
 }
 
@@ -95,7 +96,7 @@ export default async function WorkOrdersPage({
                   <CardDescription>{order.description ?? "No details provided yet."}</CardDescription>
                   <div className="flex flex-wrap items-center gap-3 text-xs text-foreground-muted">
                     <span>Priority: {order.priority}</span>
-                    <span>Due: {formatDate(order.dueAt)}</span>
+                    <span>Due: {formatDate(order.dueAt, context.user.timeZone)}</span>
                     <span>
                       Incentive:{" "}
                       {order.incentivePayCents > 0
@@ -218,7 +219,7 @@ export default async function WorkOrdersPage({
                         ? order.assignees.map((assignee) => assignee.fullName).join(", ")
                         : "Unassigned"}
                     </TableCell>
-                    <TableCell>{formatDate(order.dueAt)}</TableCell>
+                    <TableCell>{formatDate(order.dueAt, context.user.timeZone)}</TableCell>
                     <TableCell>
                       <IncentiveCountdown
                         incentivePayCents={order.incentivePayCents}

@@ -93,6 +93,7 @@ export default async function TeamMemberDetailPage({
               startedAtIso: entry.startedAt.toISOString(),
               endedAtIso: entry.endedAt ? entry.endedAt.toISOString() : null,
             }))}
+            timeZone={context.user.timeZone}
           />
         </CardContent>
       </Card>
