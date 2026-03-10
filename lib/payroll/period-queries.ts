@@ -4,20 +4,12 @@ import {
   payrollPeriodAdvances,
   payrollPeriodMemberReceipts,
   payrollPeriods,
-  payrollSettings,
   ranchMemberships,
   users,
   type PayrollPeriodStatus,
 } from "@/lib/db/schema";
 import { resolvePayrollDateRange } from "@/lib/payroll/date-range";
 import { getPayrollSummaryForRange } from "@/lib/payroll/queries";
-
-export interface PayrollSettingsRecord {
-  ranchId: string;
-  anchorStartDate: string;
-  periodLengthDays: number;
-  paydayOffsetDays: number;
-}
 
 export interface PayrollPeriodRecord {
   id: string;
@@ -66,21 +58,27 @@ export interface PayrollPeriodLedgerTotals {
 }
 
 export interface PayrollPeriodWorkspace {
-  settings: PayrollSettingsRecord;
   periods: PayrollPeriodRecord[];
-  selectedPeriod: PayrollPeriodRecord;
+  selectedPeriod: PayrollPeriodRecord | null;
   ledgerRows: PayrollPeriodLedgerRow[];
   totals: PayrollPeriodLedgerTotals;
   selectedPeriodAdvances: PayrollPeriodAdvanceEntry[];
   memberOptions: { membershipId: string; fullName: string }[];
 }
 
+const emptyTotals: PayrollPeriodLedgerTotals = {
+  totalGrossPayCents: 0,
+  totalCarryInPayableCents: 0,
+  totalCarryInAdvanceCents: 0,
+  totalPeriodAdvanceCents: 0,
+  totalAdvanceAppliedCents: 0,
+  totalAdvanceRemainingCents: 0,
+  totalNetPayableCents: 0,
+  totalWillCarryToNextCents: 0,
+};
+
 function toDateOnlyString(value: Date): string {
   return value.toISOString().slice(0, 10);
-}
-
-function parseDateOnly(value: string): Date {
-  return new Date(`${value}T00:00:00.000Z`);
 }
 
 function startOfTodayUtc(): Date {
@@ -88,20 +86,14 @@ function startOfTodayUtc(): Date {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 }
 
-function addUtcDays(value: Date, days: number): Date {
-  const next = new Date(value);
-  next.setUTCDate(next.getUTCDate() + days);
-  return next;
-}
-
-function defaultAnchorStartDate(): string {
-  return toDateOnlyString(addUtcDays(startOfTodayUtc(), -13));
-}
-
 function chooseSelectedPeriod(
   periodsAsc: PayrollPeriodRecord[],
   selectedPeriodId?: string,
-): PayrollPeriodRecord {
+): PayrollPeriodRecord | null {
+  if (!periodsAsc.length) {
+    return null;
+  }
+
   if (selectedPeriodId) {
     const byId = periodsAsc.find((period) => period.id === selectedPeriodId);
     if (byId) {
@@ -117,109 +109,13 @@ function chooseSelectedPeriod(
     return current;
   }
 
-  const latestPast = [...periodsAsc]
-    .reverse()
-    .find((period) => period.periodStart <= today);
-  if (latestPast) {
-    return latestPast;
-  }
-
   return periodsAsc[periodsAsc.length - 1];
-}
-
-export async function getOrCreatePayrollSettings(
-  ranchId: string,
-): Promise<PayrollSettingsRecord> {
-  const [existing] = await db
-    .select({
-      ranchId: payrollSettings.ranchId,
-      anchorStartDate: payrollSettings.anchorStartDate,
-      periodLengthDays: payrollSettings.periodLengthDays,
-      paydayOffsetDays: payrollSettings.paydayOffsetDays,
-    })
-    .from(payrollSettings)
-    .where(eq(payrollSettings.ranchId, ranchId))
-    .limit(1);
-
-  if (existing) {
-    return existing;
-  }
-
-  const inserted = (
-    await db
-      .insert(payrollSettings)
-      .values({
-        ranchId,
-        anchorStartDate: defaultAnchorStartDate(),
-        periodLengthDays: 14,
-        paydayOffsetDays: 5,
-      })
-      .returning({
-        ranchId: payrollSettings.ranchId,
-        anchorStartDate: payrollSettings.anchorStartDate,
-        periodLengthDays: payrollSettings.periodLengthDays,
-        paydayOffsetDays: payrollSettings.paydayOffsetDays,
-      })
-  )[0];
-
-  return inserted;
-}
-
-export async function ensurePayrollPeriodsForRanch(
-  ranchId: string,
-  providedSettings?: PayrollSettingsRecord,
-): Promise<void> {
-  const settings = providedSettings ?? (await getOrCreatePayrollSettings(ranchId));
-  const existingRows = await db
-    .select({ periodStart: payrollPeriods.periodStart })
-    .from(payrollPeriods)
-    .where(eq(payrollPeriods.ranchId, ranchId));
-  const existingStarts = new Set(existingRows.map((row) => row.periodStart));
-
-  const toInsert: {
-    ranchId: string;
-    periodStart: string;
-    periodEnd: string;
-    payDate: string;
-    status: PayrollPeriodStatus;
-  }[] = [];
-
-  let cursorStart = parseDateOnly(settings.anchorStartDate);
-  const horizon = addUtcDays(startOfTodayUtc(), settings.periodLengthDays * 12);
-  let safety = 0;
-
-  while (cursorStart <= horizon && safety < 520) {
-    const periodStart = toDateOnlyString(cursorStart);
-    const periodEndDate = addUtcDays(cursorStart, settings.periodLengthDays - 1);
-    const periodEnd = toDateOnlyString(periodEndDate);
-    const payDate = toDateOnlyString(addUtcDays(periodEndDate, settings.paydayOffsetDays));
-
-    if (!existingStarts.has(periodStart)) {
-      toInsert.push({
-        ranchId,
-        periodStart,
-        periodEnd,
-        payDate,
-        status: "open",
-      });
-    }
-
-    cursorStart = addUtcDays(cursorStart, settings.periodLengthDays);
-    safety += 1;
-  }
-
-  if (toInsert.length > 0) {
-    await db.insert(payrollPeriods).values(toInsert);
-  }
 }
 
 export async function getPayrollPeriodWorkspace(
   ranchId: string,
   selectedPeriodId?: string,
-): Promise<PayrollPeriodWorkspace | null> {
-  const settings = await getOrCreatePayrollSettings(ranchId);
-  await ensurePayrollPeriodsForRanch(ranchId, settings);
-
+): Promise<PayrollPeriodWorkspace> {
   const periodRowsAsc = await db
     .select({
       id: payrollPeriods.id,
@@ -233,14 +129,8 @@ export async function getPayrollPeriodWorkspace(
     .where(eq(payrollPeriods.ranchId, ranchId))
     .orderBy(asc(payrollPeriods.periodStart));
 
-  if (!periodRowsAsc.length) {
-    return null;
-  }
-
-  const selectedPeriod = chooseSelectedPeriod(periodRowsAsc, selectedPeriodId);
-  const selectedPeriodIndex = periodRowsAsc.findIndex((period) => period.id === selectedPeriod.id);
-  const periodsUpToSelected = periodRowsAsc.slice(0, selectedPeriodIndex + 1);
   const periodsDesc = [...periodRowsAsc].reverse();
+  const selectedPeriod = chooseSelectedPeriod(periodRowsAsc, selectedPeriodId);
 
   const membershipRows = await db
     .select({
@@ -256,7 +146,28 @@ export async function getPayrollPeriodWorkspace(
     .where(eq(ranchMemberships.ranchId, ranchId))
     .orderBy(asc(users.fullName));
 
+  const memberOptions = membershipRows
+    .filter((member) => member.isActive)
+    .map((member) => ({
+      membershipId: member.membershipId,
+      fullName: member.fullName,
+    }));
+
+  if (!selectedPeriod) {
+    return {
+      periods: periodsDesc,
+      selectedPeriod: null,
+      ledgerRows: [],
+      totals: emptyTotals,
+      selectedPeriodAdvances: [],
+      memberOptions,
+    };
+  }
+
+  const selectedPeriodIndex = periodRowsAsc.findIndex((period) => period.id === selectedPeriod.id);
+  const periodsUpToSelected = periodRowsAsc.slice(0, selectedPeriodIndex + 1);
   const periodIds = periodsUpToSelected.map((period) => period.id);
+
   const advanceRows =
     periodIds.length > 0
       ? await db
@@ -294,8 +205,7 @@ export async function getPayrollPeriodWorkspace(
   const advancesByPeriodAndMember = new Map<string, Map<string, number>>();
   for (const row of advanceRows) {
     const byMember = advancesByPeriodAndMember.get(row.periodId) ?? new Map<string, number>();
-    const current = byMember.get(row.membershipId) ?? 0;
-    byMember.set(row.membershipId, current + row.amountCents);
+    byMember.set(row.membershipId, (byMember.get(row.membershipId) ?? 0) + row.amountCents);
     advancesByPeriodAndMember.set(row.periodId, byMember);
   }
 
@@ -323,7 +233,6 @@ export async function getPayrollPeriodWorkspace(
       };
     }),
   );
-
   for (const summary of summaries) {
     summaryByPeriod.set(summary.periodId, summary.grossByMembership);
   }
@@ -336,7 +245,6 @@ export async function getPayrollPeriodWorkspace(
   }
 
   const selectedRows: PayrollPeriodLedgerRow[] = [];
-
   for (const period of periodsUpToSelected) {
     const grossByMembership = summaryByPeriod.get(period.id) ?? new Map<string, number>();
     const advancesByMember = advancesByPeriodAndMember.get(period.id) ?? new Map<string, number>();
@@ -409,16 +317,7 @@ export async function getPayrollPeriodWorkspace(
       totalNetPayableCents: acc.totalNetPayableCents + row.netPayableCents,
       totalWillCarryToNextCents: acc.totalWillCarryToNextCents + row.willCarryToNextCents,
     }),
-    {
-      totalGrossPayCents: 0,
-      totalCarryInPayableCents: 0,
-      totalCarryInAdvanceCents: 0,
-      totalPeriodAdvanceCents: 0,
-      totalAdvanceAppliedCents: 0,
-      totalAdvanceRemainingCents: 0,
-      totalNetPayableCents: 0,
-      totalWillCarryToNextCents: 0,
-    },
+    emptyTotals,
   );
 
   const selectedPeriodAdvances = await db
@@ -444,15 +343,7 @@ export async function getPayrollPeriodWorkspace(
     )
     .orderBy(desc(payrollPeriodAdvances.createdAt));
 
-  const memberOptions = membershipRows
-    .filter((member) => member.isActive)
-    .map((member) => ({
-      membershipId: member.membershipId,
-      fullName: member.fullName,
-    }));
-
   return {
-    settings,
     periods: periodsDesc,
     selectedPeriod,
     ledgerRows: visibleRows,

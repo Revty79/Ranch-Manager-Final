@@ -4,118 +4,111 @@ import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   addPayrollAdvanceAction,
-  updatePayrollSettingsAction,
+  createPayrollPeriodAction,
   type PayrollPeriodActionState,
 } from "@/lib/payroll/period-actions";
-import type {
-  PayrollPeriodRecord,
-  PayrollSettingsRecord,
-} from "@/lib/payroll/period-queries";
+import type { PayrollPeriodRecord } from "@/lib/payroll/period-queries";
 import { Button } from "@/components/ui/button";
 
 const initialState: PayrollPeriodActionState = {};
 
 interface PayPeriodFormsProps {
   canManage: boolean;
-  settings: PayrollSettingsRecord;
-  selectedPeriod: PayrollPeriodRecord;
+  selectedPeriod: PayrollPeriodRecord | null;
   memberOptions: { membershipId: string; fullName: string }[];
 }
 
 export function PayPeriodForms({
   canManage,
-  settings,
   selectedPeriod,
   memberOptions,
 }: PayPeriodFormsProps) {
   const router = useRouter();
-  const [settingsState, settingsAction] = useActionState(
-    updatePayrollSettingsAction,
+  const [createState, createAction] = useActionState(
+    createPayrollPeriodAction,
     initialState,
   );
   const [advanceState, advanceAction] = useActionState(
     addPayrollAdvanceAction,
     initialState,
   );
+  const canSubmitAdvance = canManage && !!selectedPeriod && memberOptions.length > 0;
 
   useEffect(() => {
-    if (settingsState.success || advanceState.success) {
+    if (createState.success || advanceState.success) {
       router.refresh();
     }
-  }, [advanceState.success, router, settingsState.success]);
+  }, [advanceState.success, createState.success, router]);
 
   return (
     <div className="space-y-4">
-      <form action={settingsAction} className="grid gap-3 md:grid-cols-3">
+      <form action={createAction} className="grid gap-3 md:grid-cols-4">
         <label className="space-y-1 text-sm">
-          <span className="text-foreground-muted">Anchor start date</span>
+          <span className="text-foreground-muted">Period start</span>
           <input
-            name="anchorStartDate"
+            name="periodStart"
             type="date"
-            defaultValue={settings.anchorStartDate}
             className="h-10 w-full rounded-xl border bg-surface px-3 text-sm"
             disabled={!canManage}
             required
           />
         </label>
         <label className="space-y-1 text-sm">
-          <span className="text-foreground-muted">Period length (days)</span>
+          <span className="text-foreground-muted">Period end</span>
           <input
-            name="periodLengthDays"
-            type="number"
-            min={7}
-            max={31}
-            defaultValue={settings.periodLengthDays}
+            name="periodEnd"
+            type="date"
             className="h-10 w-full rounded-xl border bg-surface px-3 text-sm"
             disabled={!canManage}
             required
           />
         </label>
         <label className="space-y-1 text-sm">
-          <span className="text-foreground-muted">Payday offset after period end</span>
+          <span className="text-foreground-muted">Pay date</span>
           <input
-            name="paydayOffsetDays"
-            type="number"
-            min={0}
-            max={31}
-            defaultValue={settings.paydayOffsetDays}
+            name="payDate"
+            type="date"
             className="h-10 w-full rounded-xl border bg-surface px-3 text-sm"
             disabled={!canManage}
             required
           />
         </label>
-        {settingsState.error ? (
-          <p className="md:col-span-3 text-sm font-medium text-danger">{settingsState.error}</p>
+        <div className="flex items-end">
+          {canManage ? (
+            <Button type="submit" className="h-10 w-full md:w-fit">
+              Create pay period
+            </Button>
+          ) : (
+            <p className="text-sm text-foreground-muted">Owner controls only.</p>
+          )}
+        </div>
+        {createState.error ? (
+          <p className="md:col-span-4 text-sm font-medium text-danger">{createState.error}</p>
         ) : null}
-        {settingsState.success ? (
-          <p className="md:col-span-3 text-sm font-medium text-accent">{settingsState.success}</p>
+        {createState.success ? (
+          <p className="md:col-span-4 text-sm font-medium text-accent">{createState.success}</p>
         ) : null}
-        {canManage ? (
-          <Button type="submit" className="md:col-span-3 w-full md:w-fit">
-            Save payroll schedule
-          </Button>
-        ) : (
-          <p className="md:col-span-3 text-sm text-foreground-muted">
-            Owners can update payroll schedule settings.
-          </p>
-        )}
       </form>
 
       <form action={advanceAction} className="grid gap-3 md:grid-cols-4">
-        <input type="hidden" name="periodId" value={selectedPeriod.id} />
+        {selectedPeriod ? <input type="hidden" name="periodId" value={selectedPeriod.id} /> : null}
         <label className="space-y-1 text-sm md:col-span-2">
           <span className="text-foreground-muted">Add advance for selected period</span>
           <select
             name="membershipId"
             className="h-10 w-full rounded-xl border bg-surface px-3 text-sm text-foreground"
-            disabled={!canManage || memberOptions.length === 0}
+            disabled={!canSubmitAdvance}
             required
           >
-            {memberOptions.map((member) => (
-              <option key={member.membershipId} value={member.membershipId}>
-                {member.fullName}
-              </option>
-            ))}
+            {memberOptions.length ? (
+              memberOptions.map((member) => (
+                <option key={member.membershipId} value={member.membershipId}>
+                  {member.fullName}
+                </option>
+              ))
+            ) : (
+              <option value="">No active members</option>
+            )}
           </select>
         </label>
         <label className="space-y-1 text-sm">
@@ -127,7 +120,7 @@ export function PayPeriodForms({
             step="0.01"
             placeholder="0.00"
             className="h-10 w-full rounded-xl border bg-surface px-3 text-sm"
-            disabled={!canManage}
+            disabled={!canSubmitAdvance}
             required
           />
         </label>
@@ -139,7 +132,7 @@ export function PayPeriodForms({
             maxLength={200}
             placeholder="Fuel, emergency, supplies..."
             className="h-10 w-full rounded-xl border bg-surface px-3 text-sm"
-            disabled={!canManage}
+            disabled={!canSubmitAdvance}
           />
         </label>
         {advanceState.error ? (
@@ -148,10 +141,14 @@ export function PayPeriodForms({
         {advanceState.success ? (
           <p className="md:col-span-4 text-sm font-medium text-accent">{advanceState.success}</p>
         ) : null}
-        {canManage && memberOptions.length > 0 ? (
+        {canManage && canSubmitAdvance ? (
           <Button type="submit" variant="secondary" className="md:col-span-4 w-full md:w-fit">
             Add period advance
           </Button>
+        ) : canManage && !selectedPeriod ? (
+          <p className="md:col-span-4 text-sm text-foreground-muted">
+            Create and select a pay period to add advances.
+          </p>
         ) : canManage ? (
           <p className="md:col-span-4 text-sm text-foreground-muted">
             Add an active team member to assign period advances.

@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, gte, lte } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth/context";
@@ -9,10 +9,8 @@ import {
   payrollPeriodAdvances,
   payrollPeriodMemberReceipts,
   payrollPeriods,
-  payrollSettings,
   ranchMemberships,
 } from "@/lib/db/schema";
-import { ensurePayrollPeriodsForRanch } from "@/lib/payroll/period-queries";
 
 export interface PayrollPeriodActionState {
   error?: string;
@@ -21,25 +19,39 @@ export interface PayrollPeriodActionState {
 
 const dateOnlySchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD.");
 
-const settingsSchema = z.object({
-  anchorStartDate: dateOnlySchema,
-  periodLengthDays: z.coerce
-    .number()
-    .int("Period length must be a whole number.")
-    .min(7, "Period length must be at least 7 days.")
-    .max(31, "Period length must be 31 days or fewer."),
-  paydayOffsetDays: z.coerce
-    .number()
-    .int("Payday offset must be a whole number.")
-    .min(0, "Payday offset cannot be negative.")
-    .max(31, "Payday offset must be 31 days or fewer."),
-});
+const createPeriodSchema = z
+  .object({
+    periodStart: dateOnlySchema,
+    periodEnd: dateOnlySchema,
+    payDate: dateOnlySchema,
+  })
+  .superRefine((value, ctx) => {
+    if (value.periodEnd < value.periodStart) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["periodEnd"],
+        message: "Period end must be on or after period start.",
+      });
+    }
+
+    if (value.payDate < value.periodEnd) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["payDate"],
+        message: "Pay date must be on or after period end.",
+      });
+    }
+  });
 
 const createAdvanceSchema = z.object({
   periodId: z.string().uuid(),
   membershipId: z.string().uuid(),
   amount: z.coerce.number().gt(0, "Advance amount must be greater than zero."),
   note: z.string().trim().max(200, "Note must be 200 characters or fewer.").optional(),
+});
+
+const deletePeriodSchema = z.object({
+  periodId: z.string().uuid(),
 });
 
 const periodPaidStateSchema = z.object({
@@ -57,55 +69,81 @@ function toCents(value: number): number {
   return Math.round(value * 100);
 }
 
-export async function updatePayrollSettingsAction(
+export async function createPayrollPeriodAction(
   _prevState: PayrollPeriodActionState,
   formData: FormData,
 ): Promise<PayrollPeriodActionState> {
   const context = await requireRole(["owner"]);
-  const parsed = settingsSchema.safeParse({
-    anchorStartDate: formData.get("anchorStartDate"),
-    periodLengthDays: formData.get("periodLengthDays"),
-    paydayOffsetDays: formData.get("paydayOffsetDays"),
+  const parsed = createPeriodSchema.safeParse({
+    periodStart: formData.get("periodStart"),
+    periodEnd: formData.get("periodEnd"),
+    payDate: formData.get("payDate"),
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid payroll settings." };
+    return { error: parsed.error.issues[0]?.message ?? "Invalid pay period." };
   }
 
-  const [existing] = await db
-    .select({ ranchId: payrollSettings.ranchId })
-    .from(payrollSettings)
-    .where(eq(payrollSettings.ranchId, context.ranch.id))
+  const [overlap] = await db
+    .select({
+      id: payrollPeriods.id,
+      periodStart: payrollPeriods.periodStart,
+      periodEnd: payrollPeriods.periodEnd,
+    })
+    .from(payrollPeriods)
+    .where(
+      and(
+        eq(payrollPeriods.ranchId, context.ranch.id),
+        lte(payrollPeriods.periodStart, parsed.data.periodEnd),
+        gte(payrollPeriods.periodEnd, parsed.data.periodStart),
+      ),
+    )
     .limit(1);
 
-  if (existing) {
-    await db
-      .update(payrollSettings)
-      .set({
-        anchorStartDate: parsed.data.anchorStartDate,
-        periodLengthDays: parsed.data.periodLengthDays,
-        paydayOffsetDays: parsed.data.paydayOffsetDays,
-        updatedAt: new Date(),
-      })
-      .where(eq(payrollSettings.ranchId, context.ranch.id));
-  } else {
-    await db.insert(payrollSettings).values({
-      ranchId: context.ranch.id,
-      anchorStartDate: parsed.data.anchorStartDate,
-      periodLengthDays: parsed.data.periodLengthDays,
-      paydayOffsetDays: parsed.data.paydayOffsetDays,
-    });
+  if (overlap) {
+    return {
+      error: `This period overlaps ${overlap.periodStart} to ${overlap.periodEnd}.`,
+    };
   }
 
-  await ensurePayrollPeriodsForRanch(context.ranch.id, {
+  await db.insert(payrollPeriods).values({
     ranchId: context.ranch.id,
-    anchorStartDate: parsed.data.anchorStartDate,
-    periodLengthDays: parsed.data.periodLengthDays,
-    paydayOffsetDays: parsed.data.paydayOffsetDays,
+    periodStart: parsed.data.periodStart,
+    periodEnd: parsed.data.periodEnd,
+    payDate: parsed.data.payDate,
   });
 
   revalidatePath("/app/payroll");
-  return { success: "Payroll schedule updated." };
+  return { success: "Pay period created." };
+}
+
+export async function deletePayrollPeriodAction(formData: FormData): Promise<void> {
+  const context = await requireRole(["owner"]);
+  const parsed = deletePeriodSchema.safeParse({
+    periodId: formData.get("periodId"),
+  });
+
+  if (!parsed.success) {
+    return;
+  }
+
+  const [period] = await db
+    .select({ id: payrollPeriods.id })
+    .from(payrollPeriods)
+    .where(
+      and(
+        eq(payrollPeriods.ranchId, context.ranch.id),
+        eq(payrollPeriods.id, parsed.data.periodId),
+      ),
+    )
+    .limit(1);
+
+  if (!period) {
+    return;
+  }
+
+  await db.delete(payrollPeriods).where(eq(payrollPeriods.id, period.id));
+  revalidatePath("/app/payroll");
 }
 
 export async function addPayrollAdvanceAction(
@@ -206,9 +244,7 @@ export async function setPayrollPeriodPaidStateAction(formData: FormData): Promi
   revalidatePath("/app/payroll");
 }
 
-export async function setPayrollMemberCheckPickupAction(
-  formData: FormData,
-): Promise<void> {
+export async function setPayrollMemberCheckPickupAction(formData: FormData): Promise<void> {
   const context = await requireRole(["owner"]);
   const parsed = checkPickupSchema.safeParse({
     periodId: formData.get("periodId"),

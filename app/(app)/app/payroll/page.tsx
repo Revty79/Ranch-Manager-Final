@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { requireRole } from "@/lib/auth/context";
 import {
+  deletePayrollPeriodAction,
   setPayrollMemberCheckPickupAction,
   setPayrollPeriodPaidStateAction,
 } from "@/lib/payroll/period-actions";
@@ -75,13 +76,14 @@ export default async function PayrollPage({
     getPayrollSummaryForRange(context.ranch.id, range.fromDate, range.toDateExclusive),
     getPayrollPeriodWorkspace(context.ranch.id, params.periodId),
   ]);
+  const selectedPeriod = periodWorkspace.selectedPeriod;
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Payroll"
         title="Payroll Summary"
-        description="Transparent calculations based on tracked time and configured pay type. Use period controls below for payday settings, advances, and rollover tracking."
+        description="Transparent calculations based on tracked time and configured pay type. Use payroll period controls below for paydays, advances, and rollover tracking."
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <Link
@@ -137,104 +139,111 @@ export default async function PayrollPage({
         </CardContent>
       </Card>
 
-      {periodWorkspace ? (
-        <>
-          <Card>
-            <CardContent className="space-y-4 py-6">
-              <div>
-                <CardTitle className="text-base">Payroll schedule & period advances</CardTitle>
-                <CardDescription>
-                  Owners can define payroll cycles, assign advances to a pay period, mark periods
-                  paid, and track uncollected checks that roll into later periods.
-                </CardDescription>
-              </div>
-              <PayPeriodForms
-                canManage={canManagePayroll}
-                settings={periodWorkspace.settings}
-                selectedPeriod={periodWorkspace.selectedPeriod}
-                memberOptions={periodWorkspace.memberOptions}
-              />
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableHeaderCell>Pay Period</TableHeaderCell>
-                      <TableHeaderCell>Pay Date</TableHeaderCell>
-                      <TableHeaderCell>Status</TableHeaderCell>
-                      <TableHeaderCell>Paid At</TableHeaderCell>
-                      <TableHeaderCell className="text-right">View</TableHeaderCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {periodWorkspace.periods.slice(0, 16).map((period) => {
-                      const isSelected = period.id === periodWorkspace.selectedPeriod.id;
-                      return (
-                        <TableRow key={period.id} className={isSelected ? "bg-accent-soft/30" : ""}>
-                          <TableCell>
-                            {formatDate(period.periodStart)} to {formatDate(period.periodEnd)}
-                          </TableCell>
-                          <TableCell>{formatDate(period.payDate)}</TableCell>
-                          <TableCell>
-                            <Badge variant={period.status === "paid" ? "success" : "warning"}>
-                              {period.status === "paid" ? "Paid" : "Open"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{formatDateTime(period.paidAt)}</TableCell>
-                          <TableCell className="text-right">
-                            <Link
-                              href={`/app/payroll?from=${range.from}&to=${range.to}&periodId=${period.id}`}
-                              className="inline-flex items-center rounded-lg border px-2.5 py-1 text-xs font-semibold text-foreground-muted hover:bg-accent-soft hover:text-foreground"
-                            >
-                              {isSelected ? "Selected" : "View"}
-                            </Link>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </CardContent>
-          </Card>
+      <Card>
+        <CardContent className="space-y-4 py-6">
+          <div>
+            <CardTitle className="text-base">Payroll periods & period advances</CardTitle>
+            <CardDescription>
+              Owners can create periods by start date, end date, and pay date. Advances and
+              unpicked checks roll forward automatically between periods.
+            </CardDescription>
+          </div>
+          <PayPeriodForms
+            canManage={canManagePayroll}
+            selectedPeriod={selectedPeriod}
+            memberOptions={periodWorkspace.memberOptions}
+          />
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableHeaderCell>Pay Period</TableHeaderCell>
+                  <TableHeaderCell>Pay Date</TableHeaderCell>
+                  <TableHeaderCell>Status</TableHeaderCell>
+                  <TableHeaderCell>Paid At</TableHeaderCell>
+                  <TableHeaderCell className="text-right">View</TableHeaderCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {periodWorkspace.periods.length ? (
+                  periodWorkspace.periods.slice(0, 24).map((period) => {
+                    const isSelected = period.id === selectedPeriod?.id;
+                    return (
+                      <TableRow key={period.id} className={isSelected ? "bg-accent-soft/30" : ""}>
+                        <TableCell>
+                          {formatDate(period.periodStart)} to {formatDate(period.periodEnd)}
+                        </TableCell>
+                        <TableCell>{formatDate(period.payDate)}</TableCell>
+                        <TableCell>
+                          <Badge variant={period.status === "paid" ? "success" : "warning"}>
+                            {period.status === "paid" ? "Paid" : "Open"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{formatDateTime(period.paidAt)}</TableCell>
+                        <TableCell className="text-right">
+                          <Link
+                            href={`/app/payroll?from=${range.from}&to=${range.to}&periodId=${period.id}`}
+                            className="inline-flex items-center rounded-lg border px-2.5 py-1 text-xs font-semibold text-foreground-muted hover:bg-accent-soft hover:text-foreground"
+                          >
+                            {isSelected ? "Selected" : "View"}
+                          </Link>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="py-6 text-center text-sm text-foreground-muted">
+                      No pay periods yet. Create your first period above.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
+      </Card>
 
+      {selectedPeriod ? (
+        <>
           <Card>
             <CardContent className="space-y-4 py-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <CardTitle className="text-base">
-                    Selected period ledger: {formatDate(periodWorkspace.selectedPeriod.periodStart)}{" "}
-                    to {formatDate(periodWorkspace.selectedPeriod.periodEnd)}
+                    Selected period ledger: {formatDate(selectedPeriod.periodStart)} to{" "}
+                    {formatDate(selectedPeriod.periodEnd)}
                   </CardTitle>
                   <CardDescription>
                     Advance balances and unpaid checks roll automatically into the next period.
                   </CardDescription>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge
-                    variant={
-                      periodWorkspace.selectedPeriod.status === "paid" ? "success" : "warning"
-                    }
-                  >
-                    {periodWorkspace.selectedPeriod.status === "paid" ? "Paid" : "Open"}
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant={selectedPeriod.status === "paid" ? "success" : "warning"}>
+                    {selectedPeriod.status === "paid" ? "Paid" : "Open"}
                   </Badge>
                   {canManagePayroll ? (
-                    <form action={setPayrollPeriodPaidStateAction}>
-                      <input type="hidden" name="periodId" value={periodWorkspace.selectedPeriod.id} />
-                      <input
-                        type="hidden"
-                        name="setPaid"
-                        value={periodWorkspace.selectedPeriod.status === "paid" ? "false" : "true"}
-                      />
-                      <Button size="sm" variant="secondary" type="submit">
-                        {periodWorkspace.selectedPeriod.status === "paid"
-                          ? "Reopen period"
-                          : "Mark period paid"}
-                      </Button>
-                    </form>
+                    <>
+                      <form action={setPayrollPeriodPaidStateAction}>
+                        <input type="hidden" name="periodId" value={selectedPeriod.id} />
+                        <input
+                          type="hidden"
+                          name="setPaid"
+                          value={selectedPeriod.status === "paid" ? "false" : "true"}
+                        />
+                        <Button size="sm" variant="secondary" type="submit">
+                          {selectedPeriod.status === "paid" ? "Reopen period" : "Mark period paid"}
+                        </Button>
+                      </form>
+                      <form action={deletePayrollPeriodAction}>
+                        <input type="hidden" name="periodId" value={selectedPeriod.id} />
+                        <Button size="sm" variant="danger" type="submit">
+                          Delete period
+                        </Button>
+                      </form>
+                    </>
                   ) : (
-                    <span className="text-xs text-foreground-muted">
-                      Owner controls only
-                    </span>
+                    <span className="text-xs text-foreground-muted">Owner controls only</span>
                   )}
                 </div>
               </div>
@@ -296,19 +305,11 @@ export default async function PayrollPage({
                           <TableCell>{formatMoney(row.advanceRemainingCents)}</TableCell>
                           <TableCell>{formatMoney(row.willCarryToNextCents)}</TableCell>
                           <TableCell className="text-right">
-                            {periodWorkspace.selectedPeriod.status === "paid" ? (
+                            {selectedPeriod.status === "paid" ? (
                               canManagePayroll ? (
                                 <form action={setPayrollMemberCheckPickupAction}>
-                                  <input
-                                    type="hidden"
-                                    name="periodId"
-                                    value={periodWorkspace.selectedPeriod.id}
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name="membershipId"
-                                    value={row.membershipId}
-                                  />
+                                  <input type="hidden" name="periodId" value={selectedPeriod.id} />
+                                  <input type="hidden" name="membershipId" value={row.membershipId} />
                                   <input
                                     type="hidden"
                                     name="setPicked"
@@ -379,16 +380,22 @@ export default async function PayrollPage({
             </CardContent>
           </Card>
         </>
-      ) : null}
+      ) : (
+        <Card>
+          <CardContent className="py-6">
+            <EmptyState
+              title="No payroll period selected"
+              description="Create a pay period above, then select it from the table to view payroll ledger totals, rollovers, and check pickup status."
+            />
+          </CardContent>
+        </Card>
+      )}
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <StatCard label="Team Members" value={`${summary.rows.length}`} />
         <StatCard label="Total Hours" value={`${summary.totalHours.toFixed(2)}h`} />
         <StatCard label="Base Pay" value={formatMoney(summary.totalBasePayCents)} />
-        <StatCard
-          label="Incentive Pay"
-          value={formatMoney(summary.totalIncentivePayCents)}
-        />
+        <StatCard label="Incentive Pay" value={formatMoney(summary.totalIncentivePayCents)} />
         <StatCard label="Total Pay" value={formatMoney(summary.totalPayCents)} />
       </section>
 
