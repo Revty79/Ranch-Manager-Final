@@ -1,5 +1,6 @@
 "use server";
 
+import Stripe from "stripe";
 import { and, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -19,6 +20,79 @@ const applyCouponSchema = z.object({
   code: z.string().trim().min(1, "Enter a coupon code."),
 });
 
+function toStripeMessage(error: unknown): string {
+  if (error && typeof error === "object") {
+    const record = error as { message?: string };
+    if (record.message) {
+      return record.message;
+    }
+  }
+  return "Stripe request failed.";
+}
+
+async function resolveSubscriptionPriceId(
+  stripe: Stripe,
+  configuredId: string,
+): Promise<{ priceId?: string; error?: string }> {
+  const trimmed = configuredId.trim();
+  if (!trimmed) {
+    return { error: "Missing STRIPE_PRICE_ID." };
+  }
+
+  try {
+    if (trimmed.startsWith("price_")) {
+      const price = await stripe.prices.retrieve(trimmed);
+      if (!price.recurring) {
+        return {
+          error: "Configured STRIPE_PRICE_ID points to a one-time price. Use a recurring price for subscriptions.",
+        };
+      }
+      return { priceId: price.id };
+    }
+
+    if (trimmed.startsWith("prod_")) {
+      const product = await stripe.products.retrieve(trimmed, {
+        expand: ["default_price"],
+      });
+
+      let candidatePrice: Stripe.Price | null = null;
+      if (typeof product.default_price === "string") {
+        candidatePrice = await stripe.prices.retrieve(product.default_price);
+      } else if (product.default_price) {
+        candidatePrice = product.default_price;
+      }
+
+      if (!candidatePrice || !candidatePrice.recurring) {
+        const recurringPrices = await stripe.prices.list({
+          product: product.id,
+          active: true,
+          limit: 100,
+        });
+        candidatePrice =
+          recurringPrices.data.find((price) => Boolean(price.recurring)) ?? null;
+      }
+
+      if (!candidatePrice || !candidatePrice.recurring) {
+        return {
+          error:
+            "Configured STRIPE_PRICE_ID is a product without an active recurring price. Add a recurring price in Stripe and set it as default (or use a price_ ID).",
+        };
+      }
+
+      return { priceId: candidatePrice.id };
+    }
+  } catch (error) {
+    return {
+      error: `Unable to resolve STRIPE_PRICE_ID in Stripe: ${toStripeMessage(error)}`,
+    };
+  }
+
+  return {
+    error:
+      "STRIPE_PRICE_ID must start with price_ (recommended) or prod_.",
+  };
+}
+
 export async function createCheckoutSessionAction(
   _prevState: BillingActionState,
   _formData: FormData,
@@ -35,12 +109,16 @@ export async function createCheckoutSessionAction(
   }
 
   const appUrl = process.env.APP_URL ?? "http://localhost:3000";
-  const priceId = process.env.STRIPE_PRICE_ID;
-  if (!priceId) {
+  const configuredPriceId = process.env.STRIPE_PRICE_ID;
+  if (!configuredPriceId) {
     return { error: "Missing STRIPE_PRICE_ID." };
   }
 
   const stripe = getStripeClient();
+  const resolvedPrice = await resolveSubscriptionPriceId(stripe, configuredPriceId);
+  if (!resolvedPrice.priceId) {
+    return { error: resolvedPrice.error ?? "Invalid Stripe price configuration." };
+  }
 
   let customerId = context.ranch.stripeCustomerId;
   if (!customerId) {
@@ -65,7 +143,7 @@ export async function createCheckoutSessionAction(
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     customer: customerId,
-    line_items: [{ price: priceId, quantity: 1 }],
+    line_items: [{ price: resolvedPrice.priceId, quantity: 1 }],
     success_url: `${appUrl}/app/settings?billing=success`,
     cancel_url: `${appUrl}/app/settings?billing=cancel`,
     metadata: {

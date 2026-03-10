@@ -94,8 +94,8 @@ export function EditMemberForm({
           />
         </FormFieldShell>
         <FormFieldShell
-          label="Member pay advance"
-          hint="Member-specific amount deducted from this member's payroll net pay."
+          label="Opening advance balance"
+          hint="Starting balance that carries into payroll period rollover calculations."
         >
           <Input
             name="payAdvance"

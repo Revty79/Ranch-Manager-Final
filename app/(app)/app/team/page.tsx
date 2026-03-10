@@ -73,7 +73,7 @@ export default async function TeamPage({
             <CardTitle className="text-base">Add team member</CardTitle>
             <CardDescription>
               Simple launch flow: create a member login and attach them to this ranch. Set pay
-              advances per member in their record.
+              balances per member in their record.
             </CardDescription>
           </div>
           <AddMemberForm />
@@ -114,7 +114,7 @@ export default async function TeamPage({
                   <TableHeaderCell>Email</TableHeaderCell>
                   <TableHeaderCell>Role</TableHeaderCell>
                   <TableHeaderCell>Pay</TableHeaderCell>
-                  <TableHeaderCell>Pay Advance</TableHeaderCell>
+                  <TableHeaderCell>Opening Advance</TableHeaderCell>
                   <TableHeaderCell>Status</TableHeaderCell>
                   <TableHeaderCell className="text-right">Actions</TableHeaderCell>
                 </TableRow>

@@ -50,7 +50,7 @@ Core:
 Stripe billing:
 
 - `STRIPE_SECRET_KEY`
-- `STRIPE_PRICE_ID`
+- `STRIPE_PRICE_ID` (use recurring `price_...`; `prod_...` works if it has a default recurring price)
 - `STRIPE_WEBHOOK_SECRET`
 - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
 

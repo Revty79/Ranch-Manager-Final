@@ -1,5 +1,6 @@
 import {
   boolean,
+  date,
   index,
   integer,
   pgEnum,
@@ -48,6 +49,7 @@ export const workOrderIncentiveTimerTypeEnum = pgEnum("work_order_incentive_time
   "hours",
   "deadline",
 ]);
+export const payrollPeriodStatusEnum = pgEnum("payroll_period_status", ["open", "paid"]);
 
 export const users = pgTable(
   "users",
@@ -319,6 +321,114 @@ export const workTimeEntries = pgTable(
   ],
 );
 
+export const payrollSettings = pgTable(
+  "payroll_settings",
+  {
+    ranchId: uuid("ranch_id")
+      .references(() => ranches.id, { onDelete: "cascade" })
+      .primaryKey(),
+    anchorStartDate: date("anchor_start_date", { mode: "string" }).notNull(),
+    periodLengthDays: integer("period_length_days").default(14).notNull(),
+    paydayOffsetDays: integer("payday_offset_days").default(5).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [index("payroll_settings_anchor_idx").on(table.anchorStartDate)],
+);
+
+export const payrollPeriods = pgTable(
+  "payroll_periods",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ranchId: uuid("ranch_id")
+      .references(() => ranches.id, { onDelete: "cascade" })
+      .notNull(),
+    periodStart: date("period_start", { mode: "string" }).notNull(),
+    periodEnd: date("period_end", { mode: "string" }).notNull(),
+    payDate: date("pay_date", { mode: "string" }).notNull(),
+    status: payrollPeriodStatusEnum("status").default("open").notNull(),
+    paidAt: timestamp("paid_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("payroll_periods_ranch_idx").on(table.ranchId),
+    index("payroll_periods_start_idx").on(table.periodStart),
+    index("payroll_periods_pay_date_idx").on(table.payDate),
+    uniqueIndex("payroll_periods_ranch_start_uidx").on(table.ranchId, table.periodStart),
+  ],
+);
+
+export const payrollPeriodAdvances = pgTable(
+  "payroll_period_advances",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ranchId: uuid("ranch_id")
+      .references(() => ranches.id, { onDelete: "cascade" })
+      .notNull(),
+    periodId: uuid("period_id")
+      .references(() => payrollPeriods.id, { onDelete: "cascade" })
+      .notNull(),
+    membershipId: uuid("membership_id")
+      .references(() => ranchMemberships.id, { onDelete: "cascade" })
+      .notNull(),
+    amountCents: integer("amount_cents").notNull(),
+    note: text("note"),
+    createdByMembershipId: uuid("created_by_membership_id").references(
+      () => ranchMemberships.id,
+      { onDelete: "set null" },
+    ),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("payroll_period_advances_ranch_idx").on(table.ranchId),
+    index("payroll_period_advances_period_idx").on(table.periodId),
+    index("payroll_period_advances_member_idx").on(table.membershipId),
+  ],
+);
+
+export const payrollPeriodMemberReceipts = pgTable(
+  "payroll_period_member_receipts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ranchId: uuid("ranch_id")
+      .references(() => ranches.id, { onDelete: "cascade" })
+      .notNull(),
+    periodId: uuid("period_id")
+      .references(() => payrollPeriods.id, { onDelete: "cascade" })
+      .notNull(),
+    membershipId: uuid("membership_id")
+      .references(() => ranchMemberships.id, { onDelete: "cascade" })
+      .notNull(),
+    isCheckPickedUp: boolean("is_check_picked_up").default(false).notNull(),
+    pickedUpAt: timestamp("picked_up_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("payroll_period_receipts_ranch_idx").on(table.ranchId),
+    index("payroll_period_receipts_period_idx").on(table.periodId),
+    uniqueIndex("payroll_period_receipts_period_member_uidx").on(
+      table.periodId,
+      table.membershipId,
+    ),
+  ],
+);
+
 export type RanchRole = (typeof ranchRoleEnum.enumValues)[number];
 export type OnboardingState = (typeof onboardingStateEnum.enumValues)[number];
 export type SubscriptionStatus = (typeof subscriptionStatusEnum.enumValues)[number];
@@ -328,3 +438,4 @@ export type WorkOrderStatus = (typeof workOrderStatusEnum.enumValues)[number];
 export type WorkOrderPriority = (typeof workOrderPriorityEnum.enumValues)[number];
 export type WorkOrderIncentiveTimerType =
   (typeof workOrderIncentiveTimerTypeEnum.enumValues)[number];
+export type PayrollPeriodStatus = (typeof payrollPeriodStatusEnum.enumValues)[number];
