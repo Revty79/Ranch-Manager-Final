@@ -1,13 +1,15 @@
 import Link from "next/link";
-import { AccessDeniedShell, BillingRequiredShell } from "@/components/patterns/access-states";
 import { PageHeader } from "@/components/patterns/page-header";
 import { CouponCodeForm } from "@/components/billing/beta-code-form";
 import { CheckoutForm } from "@/components/billing/checkout-form";
 import { TimeZoneForm } from "@/components/settings/timezone-form";
 import { requireAppContext } from "@/lib/auth/context";
 import { hasBillingAccess } from "@/lib/billing/access";
+import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
+
+const SUPPORT_EMAIL = "brannan.pearson.ranch@gmail.com";
 
 function formatDate(value: Date | null, timeZone: string): string {
   if (!value) return "Not available";
@@ -28,6 +30,7 @@ export default async function SettingsPage({
   const billingQueryState = (await searchParams).billing;
   const isOwner = context.membership.role === "owner";
   const billingAccess = hasBillingAccess(context.ranch);
+  const canSeeStatePreviews = isPlatformAdminEmail(context.user.email);
 
   return (
     <div className="space-y-6">
@@ -130,26 +133,74 @@ export default async function SettingsPage({
         </CardContent>
       </Card>
 
-      <section className="grid gap-4 xl:grid-cols-2">
-        <AccessDeniedShell />
-        <BillingRequiredShell />
-      </section>
-
       <Card>
-        <CardContent className="space-y-3 py-6">
-          <CardTitle className="text-base">State route previews</CardTitle>
-          <CardDescription className="text-sm">
-            Branded access-state routes for product messaging and safeguards.
+        <CardContent className="space-y-2 py-6">
+          <CardTitle>Support Contact</CardTitle>
+          <CardDescription>
+            Direct contact for access or billing help while supporting client ranches.
           </CardDescription>
-          <div className="flex flex-wrap gap-3 text-sm text-accent">
-            <Link href="/app/access-denied">/app/access-denied</Link>
-            <Link href="/app/billing-required">/app/billing-required</Link>
-            <Link href="/billing-required">/billing-required</Link>
-            <Link href="/no-ranch-access">/no-ranch-access</Link>
-            <Link href="/onboarding-incomplete">/onboarding-incomplete</Link>
-          </div>
+          <p className="text-sm">
+            <span className="text-foreground-muted">Email:</span>{" "}
+            <a
+              href={`mailto:${SUPPORT_EMAIL}`}
+              className="font-semibold text-accent hover:underline"
+            >
+              {SUPPORT_EMAIL}
+            </a>
+          </p>
         </CardContent>
       </Card>
+
+      {canSeeStatePreviews ? (
+        <>
+          <section className="grid gap-4 xl:grid-cols-2">
+            <Card>
+              <CardContent className="space-y-2 py-6">
+                <CardTitle className="text-base">Access denied state</CardTitle>
+                <CardDescription>
+                  Preview the page shown when a user role lacks permission to open a route.
+                </CardDescription>
+                <Link
+                  href="/app/access-denied"
+                  className="text-sm font-semibold text-accent hover:underline"
+                >
+                  Open /app/access-denied
+                </Link>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="space-y-2 py-6">
+                <CardTitle className="text-base">Billing required state</CardTitle>
+                <CardDescription>
+                  Preview the page shown when ranch billing access is inactive.
+                </CardDescription>
+                <Link
+                  href="/app/billing-required"
+                  className="text-sm font-semibold text-accent hover:underline"
+                >
+                  Open /app/billing-required
+                </Link>
+              </CardContent>
+            </Card>
+          </section>
+
+          <Card>
+            <CardContent className="space-y-3 py-6">
+              <CardTitle className="text-base">State route previews</CardTitle>
+              <CardDescription className="text-sm">
+                Branded access-state routes for product messaging and safeguards.
+              </CardDescription>
+              <div className="flex flex-wrap gap-3 text-sm text-accent">
+                <Link href="/app/access-denied">/app/access-denied</Link>
+                <Link href="/app/billing-required">/app/billing-required</Link>
+                <Link href="/billing-required">/billing-required</Link>
+                <Link href="/no-ranch-access">/no-ranch-access</Link>
+                <Link href="/onboarding-incomplete">/onboarding-incomplete</Link>
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      ) : null}
     </div>
   );
 }

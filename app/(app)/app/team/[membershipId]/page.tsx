@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EditMemberForm } from "@/components/team/edit-member-form";
+import { ResetMemberPasswordForm } from "@/components/team/reset-member-password-form";
 import { TimeEntryAdjustments } from "@/components/team/time-entry-adjustments";
 import { PageHeader } from "@/components/patterns/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +36,10 @@ export default async function TeamMemberDetailPage({
     notFound();
   }
 
+  const canResetPassword = !(
+    context.membership.role === "manager" && member.role === "owner"
+  );
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -68,6 +73,22 @@ export default async function TeamMemberDetailPage({
             payRateCents={member.payRateCents}
             payAdvanceCents={member.payAdvanceCents}
             isActive={member.isActive}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="space-y-4 py-6">
+          <div>
+            <CardTitle className="text-base">Reset login password</CardTitle>
+            <CardDescription>
+              Set a new temporary password for this member if they cannot sign in. Share it
+              securely and have them change it after login.
+            </CardDescription>
+          </div>
+          <ResetMemberPasswordForm
+            membershipId={member.membershipId}
+            canReset={canResetPassword}
           />
         </CardContent>
       </Card>

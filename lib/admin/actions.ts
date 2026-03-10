@@ -1,13 +1,15 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requirePlatformAdmin } from "@/lib/auth/platform-admin";
 import { db } from "@/lib/db/client";
 import {
   billingCouponRedemptions,
   billingCoupons,
+  ranchMemberships,
   ranches,
   type SubscriptionStatus,
   users,
@@ -68,6 +70,10 @@ const deleteRanchSchema = z.object({
 
 const deleteUserSchema = z.object({
   userId: z.string().uuid(),
+});
+
+const enterRanchSchema = z.object({
+  ranchId: z.string().uuid(),
 });
 
 function revalidateAdminRoutes() {
@@ -190,6 +196,74 @@ export async function setRanchSubscriptionStatusAction(formData: FormData): Prom
     .where(eq(ranches.id, parsed.data.ranchId));
 
   revalidateAdminRoutes();
+}
+
+export async function enterRanchAsAdminAction(formData: FormData): Promise<void> {
+  const adminUser = await requirePlatformAdmin();
+
+  const parsed = enterRanchSchema.safeParse({
+    ranchId: formData.get("ranchId"),
+  });
+  if (!parsed.success) return;
+
+  const [ranch] = await db
+    .select({ id: ranches.id })
+    .from(ranches)
+    .where(eq(ranches.id, parsed.data.ranchId))
+    .limit(1);
+  if (!ranch) return;
+
+  await db.transaction(async (tx) => {
+    const [existingMembership] = await tx
+      .select({
+        id: ranchMemberships.id,
+        isActive: ranchMemberships.isActive,
+        role: ranchMemberships.role,
+      })
+      .from(ranchMemberships)
+      .where(
+        and(
+          eq(ranchMemberships.ranchId, ranch.id),
+          eq(ranchMemberships.userId, adminUser.id),
+        ),
+      )
+      .limit(1);
+
+    if (existingMembership) {
+      if (!existingMembership.isActive || existingMembership.role !== "owner") {
+        await tx
+          .update(ranchMemberships)
+          .set({
+            isActive: true,
+            role: "owner",
+            deactivatedAt: null,
+            updatedAt: new Date(),
+          })
+          .where(eq(ranchMemberships.id, existingMembership.id));
+      }
+    } else {
+      await tx.insert(ranchMemberships).values({
+        ranchId: ranch.id,
+        userId: adminUser.id,
+        role: "owner",
+        isActive: true,
+        deactivatedAt: null,
+      });
+    }
+
+    await tx
+      .update(users)
+      .set({
+        lastActiveRanchId: ranch.id,
+        onboardingState: "complete",
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, adminUser.id));
+  });
+
+  revalidateAdminRoutes();
+  revalidatePath("/app", "layout");
+  redirect("/app");
 }
 
 export async function deleteCouponAction(formData: FormData): Promise<void> {

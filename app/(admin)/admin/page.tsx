@@ -7,6 +7,7 @@ import {
   deleteCouponAction,
   deleteRanchAction,
   deleteUserAction,
+  enterRanchAsAdminAction,
   resetCouponRedemptionsAction,
   setCouponActiveAction,
   setRanchBetaAccessAction,
@@ -148,7 +149,7 @@ export default async function AdminPage() {
         <CardContent className="space-y-3 py-6">
           <CardTitle>Ranch Billing Controls</CardTitle>
           <CardDescription>
-            Override lifetime access and subscription status for support/testing.
+            Override lifetime access/subscription status and enter a ranch workspace for support.
           </CardDescription>
           <div className="space-y-3">
             {ranches.map((ranch) => (
@@ -178,6 +179,15 @@ export default async function AdminPage() {
                   {ranch.stripeSubscriptionId ?? "none"}
                 </p>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <form action={enterRanchAsAdminAction}>
+                    <input type="hidden" name="ranchId" value={ranch.id} />
+                    <button
+                      type="submit"
+                      className="rounded-xl border bg-accent px-3 py-2 text-xs font-semibold text-white hover:bg-accent-hover"
+                    >
+                      Enter ranch workspace
+                    </button>
+                  </form>
                   <form action={setRanchBetaAccessAction}>
                     <input type="hidden" name="ranchId" value={ranch.id} />
                     <input

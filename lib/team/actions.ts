@@ -49,6 +49,14 @@ const deleteMemberSchema = z.object({
   membershipId: z.string().uuid(),
 });
 
+const resetMemberPasswordSchema = z.object({
+  membershipId: z.string().uuid(),
+  newPassword: z
+    .string()
+    .min(8, "Password must be at least 8 characters.")
+    .max(128, "Password must be 128 characters or fewer."),
+});
+
 function toCents(value: number): number {
   return Math.round(value * 100);
 }
@@ -354,4 +362,54 @@ export async function deleteTeamMemberAction(
 
   revalidatePath("/app/team");
   redirect("/app/team");
+}
+
+export async function resetTeamMemberPasswordAction(
+  _prevState: TeamActionState,
+  formData: FormData,
+): Promise<TeamActionState> {
+  const context = await requireRole(["owner", "manager"]);
+  const parsed = resetMemberPasswordSchema.safeParse({
+    membershipId: formData.get("membershipId"),
+    newPassword: formData.get("newPassword"),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid password reset request." };
+  }
+
+  const [target] = await db
+    .select({
+      membershipId: ranchMemberships.id,
+      targetRole: ranchMemberships.role,
+      userId: ranchMemberships.userId,
+    })
+    .from(ranchMemberships)
+    .where(
+      and(
+        eq(ranchMemberships.ranchId, context.ranch.id),
+        eq(ranchMemberships.id, parsed.data.membershipId),
+      ),
+    )
+    .limit(1);
+
+  if (!target) {
+    return { error: "Team member not found for this ranch." };
+  }
+
+  if (context.membership.role === "manager" && target.targetRole === "owner") {
+    return { error: "Managers cannot reset owner passwords." };
+  }
+
+  await db
+    .update(users)
+    .set({
+      passwordHash: await hashPassword(parsed.data.newPassword),
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, target.userId));
+
+  revalidatePath("/app/team");
+  revalidatePath(`/app/team/${parsed.data.membershipId}`);
+  return { success: "Password reset. Share the new password securely." };
 }
