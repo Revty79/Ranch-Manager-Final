@@ -1,4 +1,5 @@
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { db } from "@/lib/db/client";
 import {
   payrollPeriodAdvances,
@@ -136,6 +137,7 @@ export async function getPayrollPeriodWorkspace(
     .select({
       membershipId: ranchMemberships.id,
       fullName: users.fullName,
+      email: users.email,
       payType: ranchMemberships.payType,
       payRateCents: ranchMemberships.payRateCents,
       isActive: ranchMemberships.isActive,
@@ -146,7 +148,11 @@ export async function getPayrollPeriodWorkspace(
     .where(eq(ranchMemberships.ranchId, ranchId))
     .orderBy(asc(users.fullName));
 
-  const memberOptions = membershipRows
+  const visibleMembershipRows = membershipRows.filter(
+    (member) => !isPlatformAdminEmail(member.email),
+  );
+
+  const memberOptions = visibleMembershipRows
     .filter((member) => member.isActive)
     .map((member) => ({
       membershipId: member.membershipId,
@@ -239,7 +245,7 @@ export async function getPayrollPeriodWorkspace(
 
   const carryAdvanceByMembership = new Map<string, number>();
   const carryPayableByMembership = new Map<string, number>();
-  for (const member of membershipRows) {
+  for (const member of visibleMembershipRows) {
     carryAdvanceByMembership.set(member.membershipId, member.payAdvanceCents);
     carryPayableByMembership.set(member.membershipId, 0);
   }
@@ -250,7 +256,7 @@ export async function getPayrollPeriodWorkspace(
     const advancesByMember = advancesByPeriodAndMember.get(period.id) ?? new Map<string, number>();
     const receiptsByMember = receiptsByPeriodAndMember.get(period.id) ?? new Map<string, boolean>();
 
-    for (const member of membershipRows) {
+    for (const member of visibleMembershipRows) {
       const carryInAdvanceCents = carryAdvanceByMembership.get(member.membershipId) ?? 0;
       const carryInPayableCents = carryPayableByMembership.get(member.membershipId) ?? 0;
       const periodAdvanceCents = advancesByMember.get(member.membershipId) ?? 0;
@@ -325,6 +331,7 @@ export async function getPayrollPeriodWorkspace(
       id: payrollPeriodAdvances.id,
       membershipId: payrollPeriodAdvances.membershipId,
       fullName: users.fullName,
+      email: users.email,
       amountCents: payrollPeriodAdvances.amountCents,
       note: payrollPeriodAdvances.note,
       createdAt: payrollPeriodAdvances.createdAt,
@@ -343,12 +350,23 @@ export async function getPayrollPeriodWorkspace(
     )
     .orderBy(desc(payrollPeriodAdvances.createdAt));
 
+  const visibleSelectedPeriodAdvances = selectedPeriodAdvances
+    .filter((advance) => !isPlatformAdminEmail(advance.email))
+    .map((advance) => ({
+      id: advance.id,
+      membershipId: advance.membershipId,
+      fullName: advance.fullName,
+      amountCents: advance.amountCents,
+      note: advance.note,
+      createdAt: advance.createdAt,
+    }));
+
   return {
     periods: periodsDesc,
     selectedPeriod,
     ledgerRows: visibleRows,
     totals,
-    selectedPeriodAdvances,
+    selectedPeriodAdvances: visibleSelectedPeriodAdvances,
     memberOptions,
   };
 }

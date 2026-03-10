@@ -3,10 +3,12 @@
 import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { requireRole } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
 import {
   ranchMemberships,
+  users,
   type WorkOrderIncentiveTimerType,
   workOrderAssignments,
   workOrders,
@@ -156,8 +158,12 @@ async function validateAssigneesForRanch(
   }
 
   const rows = await db
-    .select({ membershipId: ranchMemberships.id })
+    .select({
+      membershipId: ranchMemberships.id,
+      email: users.email,
+    })
     .from(ranchMemberships)
+    .innerJoin(users, eq(ranchMemberships.userId, users.id))
     .where(
       and(
         eq(ranchMemberships.ranchId, ranchId),
@@ -166,7 +172,9 @@ async function validateAssigneesForRanch(
       ),
     );
 
-  return rows.map((row) => row.membershipId);
+  return rows
+    .filter((row) => !isPlatformAdminEmail(row.email))
+    .map((row) => row.membershipId);
 }
 
 async function replaceAssignments(workOrderId: string, assigneeIds: string[]) {

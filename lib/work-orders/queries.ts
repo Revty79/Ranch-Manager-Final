@@ -1,4 +1,5 @@
 import { and, desc, eq, ilike, inArray } from "drizzle-orm";
+import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { db } from "@/lib/db/client";
 import {
   ranchMemberships,
@@ -39,16 +40,26 @@ export interface WorkOrderDetail extends WorkOrderListItem {
 export async function getAssignableMembersForRanch(
   ranchId: string,
 ): Promise<AssignableMember[]> {
-  return db
+  const rows = await db
     .select({
       membershipId: ranchMemberships.id,
       fullName: users.fullName,
+      email: users.email,
       role: ranchMemberships.role,
       isActive: ranchMemberships.isActive,
     })
     .from(ranchMemberships)
     .innerJoin(users, eq(ranchMemberships.userId, users.id))
     .where(eq(ranchMemberships.ranchId, ranchId));
+
+  return rows
+    .filter((row) => !isPlatformAdminEmail(row.email))
+    .map((row) => ({
+      membershipId: row.membershipId,
+      fullName: row.fullName,
+      role: row.role,
+      isActive: row.isActive,
+    }));
 }
 
 export async function getWorkOrdersForRanch(
@@ -93,6 +104,7 @@ export async function getWorkOrdersForRanch(
       workOrderId: workOrderAssignments.workOrderId,
       membershipId: workOrderAssignments.membershipId,
       fullName: users.fullName,
+      email: users.email,
     })
     .from(workOrderAssignments)
     .innerJoin(
@@ -108,6 +120,10 @@ export async function getWorkOrdersForRanch(
   >();
 
   for (const assignment of assignmentRows) {
+    if (isPlatformAdminEmail(assignment.email)) {
+      continue;
+    }
+
     const current = assigneeMap.get(assignment.workOrderId) ?? [];
     current.push({
       membershipId: assignment.membershipId,
@@ -152,6 +168,7 @@ export async function getWorkOrderById(
     .select({
       membershipId: workOrderAssignments.membershipId,
       fullName: users.fullName,
+      email: users.email,
     })
     .from(workOrderAssignments)
     .innerJoin(
@@ -161,13 +178,17 @@ export async function getWorkOrderById(
     .innerJoin(users, eq(ranchMemberships.userId, users.id))
     .where(eq(workOrderAssignments.workOrderId, order.id));
 
+  const visibleAssignments = assignmentRows.filter(
+    (assignment) => !isPlatformAdminEmail(assignment.email),
+  );
+
   return {
     ...order,
-    assignees: assignmentRows.map((row) => ({
+    assignees: visibleAssignments.map((row) => ({
       membershipId: row.membershipId,
       fullName: row.fullName,
     })),
-    assignedMembershipIds: assignmentRows.map((row) => row.membershipId),
+    assignedMembershipIds: visibleAssignments.map((row) => row.membershipId),
   };
 }
 

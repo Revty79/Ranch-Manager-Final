@@ -1,4 +1,5 @@
 import { and, asc, eq } from "drizzle-orm";
+import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { db } from "@/lib/db/client";
 import { ranchMemberships, users } from "@/lib/db/schema";
 
@@ -47,7 +48,7 @@ export async function getTeamMembersForRanch(
     .where(whereClause)
     .orderBy(asc(users.fullName));
 
-  return rows;
+  return rows.filter((row) => !isPlatformAdminEmail(row.email));
 }
 
 export async function getTeamMemberByMembership(
@@ -78,5 +79,9 @@ export async function getTeamMemberByMembership(
     )
     .limit(1);
 
-  return row ?? null;
+  if (!row || isPlatformAdminEmail(row.email)) {
+    return null;
+  }
+
+  return row;
 }

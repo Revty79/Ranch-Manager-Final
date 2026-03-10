@@ -7,9 +7,10 @@ import { StatCard } from "@/components/patterns/stat-card";
 import { DataTableShell } from "@/components/patterns/data-table-shell";
 import { buttonVariants } from "@/components/ui/button";
 import { ClipboardList } from "lucide-react";
+import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { requirePaidAccessContext } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
-import { ranchMemberships, shifts, workOrders } from "@/lib/db/schema";
+import { ranchMemberships, shifts, users, workOrders } from "@/lib/db/schema";
 import { resolvePayrollDateRange } from "@/lib/payroll/date-range";
 import { getPayrollSummaryForRange } from "@/lib/payroll/queries";
 import { getWorkOrdersForRanch } from "@/lib/work-orders/queries";
@@ -22,17 +23,18 @@ export default async function AppHomePage() {
   const payrollRange = resolvePayrollDateRange();
 
   const [
-    [activeCrewCountRow],
+    activeCrewRows,
     [openWorkOrdersCountRow],
-    [activeShiftsCountRow],
+    activeShiftRows,
     recentWorkOrders,
     payrollSummary,
   ] = await Promise.all([
     db
       .select({
-        count: sql<number>`count(*)::int`,
+        email: users.email,
       })
       .from(ranchMemberships)
+      .innerJoin(users, eq(ranchMemberships.userId, users.id))
       .where(
         and(
           eq(ranchMemberships.ranchId, context.ranch.id),
@@ -52,9 +54,11 @@ export default async function AppHomePage() {
       ),
     db
       .select({
-        count: sql<number>`count(*)::int`,
+        email: users.email,
       })
       .from(shifts)
+      .innerJoin(ranchMemberships, eq(shifts.membershipId, ranchMemberships.id))
+      .innerJoin(users, eq(ranchMemberships.userId, users.id))
       .where(and(eq(shifts.ranchId, context.ranch.id), isNull(shifts.endedAt))),
     getWorkOrdersForRanch(context.ranch.id, { status: "all" }),
     canViewPayroll
@@ -66,9 +70,13 @@ export default async function AppHomePage() {
       : Promise.resolve(null),
   ]);
 
-  const activeCrewCount = activeCrewCountRow?.count ?? 0;
+  const activeCrewCount = activeCrewRows.filter(
+    (member) => !isPlatformAdminEmail(member.email),
+  ).length;
   const openWorkOrdersCount = openWorkOrdersCountRow?.count ?? 0;
-  const activeShiftsCount = activeShiftsCountRow?.count ?? 0;
+  const activeShiftsCount = activeShiftRows.filter(
+    (member) => !isPlatformAdminEmail(member.email),
+  ).length;
   const totalPayrollCents = payrollSummary?.totalPayCents ?? 0;
   const recentRows = recentWorkOrders.slice(0, 8).map((order) => {
     const dueLabel = order.dueAt

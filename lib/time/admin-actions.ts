@@ -3,9 +3,10 @@
 import { and, eq, isNull, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { requireRole } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
-import { ranchMemberships, shifts, workTimeEntries } from "@/lib/db/schema";
+import { ranchMemberships, shifts, users, workTimeEntries } from "@/lib/db/schema";
 
 const editEntrySchema = z.object({
   entryId: z.string().uuid(),
@@ -111,6 +112,22 @@ export async function updateShiftEntryAction(
     return { error: "Shift entry not found for this ranch." };
   }
 
+  const [targetMembership] = await db
+    .select({ email: users.email })
+    .from(ranchMemberships)
+    .innerJoin(users, eq(ranchMemberships.userId, users.id))
+    .where(
+      and(
+        eq(ranchMemberships.ranchId, context.ranch.id),
+        eq(ranchMemberships.id, target.membershipId),
+      ),
+    )
+    .limit(1);
+
+  if (!targetMembership || isPlatformAdminEmail(targetMembership.email)) {
+    return { error: "Shift entry not found for this ranch." };
+  }
+
   if (!endedAt) {
     const [otherActiveShift] = await db
       .select({ id: shifts.id })
@@ -173,8 +190,12 @@ export async function createShiftEntryAction(
   }
 
   const [membership] = await db
-    .select({ id: ranchMemberships.id })
+    .select({
+      id: ranchMemberships.id,
+      email: users.email,
+    })
     .from(ranchMemberships)
+    .innerJoin(users, eq(ranchMemberships.userId, users.id))
     .where(
       and(
         eq(ranchMemberships.ranchId, context.ranch.id),
@@ -183,7 +204,7 @@ export async function createShiftEntryAction(
     )
     .limit(1);
 
-  if (!membership) {
+  if (!membership || isPlatformAdminEmail(membership.email)) {
     return { error: "Team member not found in this ranch." };
   }
 
@@ -261,6 +282,22 @@ export async function updateWorkEntryAction(
     .limit(1);
 
   if (!target) {
+    return { error: "Work timer entry not found for this ranch." };
+  }
+
+  const [targetMembership] = await db
+    .select({ email: users.email })
+    .from(ranchMemberships)
+    .innerJoin(users, eq(ranchMemberships.userId, users.id))
+    .where(
+      and(
+        eq(ranchMemberships.ranchId, context.ranch.id),
+        eq(ranchMemberships.id, target.membershipId),
+      ),
+    )
+    .limit(1);
+
+  if (!targetMembership || isPlatformAdminEmail(targetMembership.email)) {
     return { error: "Work timer entry not found for this ranch." };
   }
 

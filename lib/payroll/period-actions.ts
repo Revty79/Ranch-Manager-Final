@@ -3,6 +3,7 @@
 import { and, eq, gte, lte } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { requireRole } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
 import {
@@ -10,6 +11,7 @@ import {
   payrollPeriodMemberReceipts,
   payrollPeriods,
   ranchMemberships,
+  users,
 } from "@/lib/db/schema";
 
 export interface PayrollPeriodActionState {
@@ -178,8 +180,12 @@ export async function addPayrollAdvanceAction(
   }
 
   const [membership] = await db
-    .select({ id: ranchMemberships.id })
+    .select({
+      id: ranchMemberships.id,
+      email: users.email,
+    })
     .from(ranchMemberships)
+    .innerJoin(users, eq(ranchMemberships.userId, users.id))
     .where(
       and(
         eq(ranchMemberships.ranchId, context.ranch.id),
@@ -188,7 +194,7 @@ export async function addPayrollAdvanceAction(
     )
     .limit(1);
 
-  if (!membership) {
+  if (!membership || isPlatformAdminEmail(membership.email)) {
     return { error: "Selected team member was not found." };
   }
 
@@ -272,8 +278,12 @@ export async function setPayrollMemberCheckPickupAction(formData: FormData): Pro
   }
 
   const [membership] = await db
-    .select({ id: ranchMemberships.id })
+    .select({
+      id: ranchMemberships.id,
+      email: users.email,
+    })
     .from(ranchMemberships)
+    .innerJoin(users, eq(ranchMemberships.userId, users.id))
     .where(
       and(
         eq(ranchMemberships.ranchId, context.ranch.id),
@@ -282,7 +292,7 @@ export async function setPayrollMemberCheckPickupAction(formData: FormData): Pro
     )
     .limit(1);
 
-  if (!membership) {
+  if (!membership || isPlatformAdminEmail(membership.email)) {
     return;
   }
 

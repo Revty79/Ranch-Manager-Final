@@ -1,9 +1,10 @@
 "use server";
 
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { db } from "@/lib/db/client";
 import { ranchMemberships, users } from "@/lib/db/schema";
 import { requireRole } from "@/lib/auth/context";
@@ -195,8 +196,10 @@ export async function updateTeamMemberAction(
       membershipId: ranchMemberships.id,
       targetRole: ranchMemberships.role,
       userId: ranchMemberships.userId,
+      email: users.email,
     })
     .from(ranchMemberships)
+    .innerJoin(users, eq(ranchMemberships.userId, users.id))
     .where(
       and(
         eq(ranchMemberships.ranchId, context.ranch.id),
@@ -205,7 +208,7 @@ export async function updateTeamMemberAction(
     )
     .limit(1);
 
-  if (!target) {
+  if (!target || isPlatformAdminEmail(target.email)) {
     return { error: "Team member not found for this ranch." };
   }
 
@@ -262,8 +265,10 @@ export async function toggleTeamMemberStatusAction(
       membershipId: ranchMemberships.id,
       targetRole: ranchMemberships.role,
       userId: ranchMemberships.userId,
+      email: users.email,
     })
     .from(ranchMemberships)
+    .innerJoin(users, eq(ranchMemberships.userId, users.id))
     .where(
       and(
         eq(ranchMemberships.ranchId, context.ranch.id),
@@ -272,7 +277,7 @@ export async function toggleTeamMemberStatusAction(
     )
     .limit(1);
 
-  if (!target) {
+  if (!target || isPlatformAdminEmail(target.email)) {
     return { error: "Team member not found for this ranch." };
   }
 
@@ -318,8 +323,10 @@ export async function deleteTeamMemberAction(
       membershipId: ranchMemberships.id,
       targetRole: ranchMemberships.role,
       userId: ranchMemberships.userId,
+      email: users.email,
     })
     .from(ranchMemberships)
+    .innerJoin(users, eq(ranchMemberships.userId, users.id))
     .where(
       and(
         eq(ranchMemberships.ranchId, context.ranch.id),
@@ -328,7 +335,7 @@ export async function deleteTeamMemberAction(
     )
     .limit(1);
 
-  if (!target) {
+  if (!target || isPlatformAdminEmail(target.email)) {
     return { error: "Team member not found for this ranch." };
   }
 
@@ -341,15 +348,17 @@ export async function deleteTeamMemberAction(
   }
 
   if (target.targetRole === "owner") {
-    const [{ ownerCount }] = await db
-      .select({ ownerCount: sql<number>`count(*)::int` })
+    const ownerRows = await db
+      .select({ email: users.email })
       .from(ranchMemberships)
+      .innerJoin(users, eq(ranchMemberships.userId, users.id))
       .where(
         and(
           eq(ranchMemberships.ranchId, context.ranch.id),
           eq(ranchMemberships.role, "owner"),
         ),
       );
+    const ownerCount = ownerRows.filter((owner) => !isPlatformAdminEmail(owner.email)).length;
 
     if (ownerCount <= 1) {
       return { error: "Cannot delete the last owner membership." };
@@ -383,8 +392,10 @@ export async function resetTeamMemberPasswordAction(
       membershipId: ranchMemberships.id,
       targetRole: ranchMemberships.role,
       userId: ranchMemberships.userId,
+      email: users.email,
     })
     .from(ranchMemberships)
+    .innerJoin(users, eq(ranchMemberships.userId, users.id))
     .where(
       and(
         eq(ranchMemberships.ranchId, context.ranch.id),
@@ -393,7 +404,7 @@ export async function resetTeamMemberPasswordAction(
     )
     .limit(1);
 
-  if (!target) {
+  if (!target || isPlatformAdminEmail(target.email)) {
     return { error: "Team member not found for this ranch." };
   }
 

@@ -6,6 +6,7 @@ import {
   isNull,
   notInArray,
 } from "drizzle-orm";
+import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { db } from "@/lib/db/client";
 import {
   ranchMemberships,
@@ -194,6 +195,7 @@ export async function getActiveShiftRosterForRanch(
     .select({
       membershipId: shifts.membershipId,
       memberName: users.fullName,
+      memberEmail: users.email,
       role: ranchMemberships.role,
       shiftStartedAt: shifts.startedAt,
       pausedAt: shifts.pausedAt,
@@ -204,7 +206,11 @@ export async function getActiveShiftRosterForRanch(
     .where(and(eq(shifts.ranchId, ranchId), isNull(shifts.endedAt)))
     .orderBy(desc(shifts.startedAt));
 
-  if (!activeShifts.length) {
+  const visibleActiveShifts = activeShifts.filter(
+    (shift) => !isPlatformAdminEmail(shift.memberEmail),
+  );
+
+  if (!visibleActiveShifts.length) {
     return [];
   }
 
@@ -221,7 +227,7 @@ export async function getActiveShiftRosterForRanch(
         isNull(workTimeEntries.endedAt),
         inArray(
           workTimeEntries.membershipId,
-          activeShifts.map((shift) => shift.membershipId),
+          visibleActiveShifts.map((shift) => shift.membershipId),
         ),
       ),
     );
@@ -231,8 +237,11 @@ export async function getActiveShiftRosterForRanch(
     activeWorkMap.set(row.membershipId, row.title);
   }
 
-  return activeShifts.map((shift) => ({
-    ...shift,
+  return visibleActiveShifts.map((shift) => ({
+    membershipId: shift.membershipId,
+    memberName: shift.memberName,
+    role: shift.role,
+    shiftStartedAt: shift.shiftStartedAt,
     isPaused: shift.pausedAt !== null,
     activeWorkTitle: activeWorkMap.get(shift.membershipId) ?? null,
   }));

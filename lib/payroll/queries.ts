@@ -1,4 +1,5 @@
 import { and, eq, gt, gte, inArray, isNotNull, isNull, lt, or } from "drizzle-orm";
+import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { db } from "@/lib/db/client";
 import {
   ranchMemberships,
@@ -336,7 +337,11 @@ export async function getPayrollSummaryForRange(
     toDateExclusive,
   );
 
-  const rows: PayrollSummaryRow[] = memberRows
+  const visibleMemberRows = memberRows.filter(
+    (member) => !isPlatformAdminEmail(member.email),
+  );
+
+  const rows: PayrollSummaryRow[] = visibleMemberRows
     .filter((member) => {
       const hasTrackedTime =
         (shiftSecondsByMembership.get(member.membershipId) ?? 0) > 0 ||
@@ -467,7 +472,11 @@ export async function getPayrollBreakdownForRange(
     getPayrollSummaryForRange(ranchId, fromDate, toDateExclusive),
   ]);
 
-  const memberById = new Map(memberRows.map((row) => [row.membershipId, row]));
+  const visibleMemberRows = memberRows.filter(
+    (member) => !isPlatformAdminEmail(member.email),
+  );
+
+  const memberById = new Map(visibleMemberRows.map((row) => [row.membershipId, row]));
   const summaryByMembership = new Map(summary.rows.map((row) => [row.membershipId, row]));
   const dayRowsMap = new Map<
     string,
