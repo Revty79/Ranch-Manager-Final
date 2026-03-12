@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { db } from "@/lib/db/client";
-import { ranchMemberships, users } from "@/lib/db/schema";
+import { ranchMemberships, sessions, users } from "@/lib/db/schema";
 import { requireRole } from "@/lib/auth/context";
 import { hashPassword } from "@/lib/auth/password";
 
@@ -140,6 +140,7 @@ export async function createTeamMemberAction(
             fullName: parsed.data.fullName,
             email,
             passwordHash: await hashPassword(tempPassword),
+            mustResetPassword: true,
             onboardingState: "complete",
             lastActiveRanchId: context.ranch.id,
           })
@@ -170,7 +171,11 @@ export async function createTeamMemberAction(
   });
 
   revalidatePath("/app/team");
-  return { success: "Team member added." };
+  return {
+    success: existingUser
+      ? "Team member added."
+      : "Team member added. Share temporary password securely; they must set a new password at first login.",
+  };
 }
 
 export async function updateTeamMemberAction(
@@ -416,11 +421,17 @@ export async function resetTeamMemberPasswordAction(
     .update(users)
     .set({
       passwordHash: await hashPassword(parsed.data.newPassword),
+      mustResetPassword: true,
       updatedAt: new Date(),
     })
     .where(eq(users.id, target.userId));
 
+  await db.delete(sessions).where(eq(sessions.userId, target.userId));
+
   revalidatePath("/app/team");
   revalidatePath(`/app/team/${parsed.data.membershipId}`);
-  return { success: "Password reset. Share the new password securely." };
+  return {
+    success:
+      "Password reset. Share the temporary password securely; member must set a new password at next login.",
+  };
 }

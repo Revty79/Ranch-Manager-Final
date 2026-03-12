@@ -15,6 +15,11 @@
 - [x] 06_payroll.md
 - [x] 07_billing_stripe.md
 - [x] 08_launch_polish_deploy.md
+- [x] 09_post_auth_redirects_to_activation.md
+- [x] 10_billing_required_activation_hub.md
+- [x] 11_trial_support_and_checkout_cleanup.md
+- [x] 12_settings_customer_portal_and_cancel.md
+- [x] 13_launch_flow_qa.md
 
 ---
 
@@ -366,3 +371,120 @@ How to verify:
 - 5) Optionally run demo seed (`ALLOW_DEMO_SEED=true npm run seed:demo`) and follow `docs/demo-walkthrough.md`.
 - 6) Confirm deploy docs/readme steps are present (`README.md`, `docs/deploy-render.md`, `docs/billing.md`).
 - 7) Run `npm run lint`, `npm run typecheck`, and `npm run build` and confirm pass.
+
+
+### 09_post_auth_redirects_to_activation.md
+Status: DONE
+Summary:
+- Updated post-auth destination logic to route onboarded users without billing access directly to `/app/billing-required`.
+- Kept onboarding-first behavior intact by continuing to route users with incomplete ranch setup to `/onboarding`.
+- Switched signup and onboarding-complete server actions to use shared post-auth redirect resolution instead of hardcoded `/app` redirects.
+- Updated `/onboarding` page guard to use shared redirect resolution for already-onboarded users, preventing a paid-access bounce through `/app`.
+Files changed:
+- lib/auth/context.ts
+- lib/auth/actions.ts
+- app/(auth)/onboarding/page.tsx
+Commands to run:
+- npm run lint
+- npm run typecheck
+How to verify:
+- 1) Create a new owner account from `/signup`; after onboarding submission confirm redirect goes to `/app/billing-required` when subscription is inactive and no beta code is applied.
+- 2) Log in with an existing onboarded unpaid account; confirm direct redirect to `/app/billing-required` instead of `/app`.
+- 3) Log in with an account that has active/trialing subscription or beta lifetime access; confirm redirect lands on `/app`.
+- 4) Open `/onboarding` while logged in with an onboarded unpaid account; confirm redirect goes to `/app/billing-required`.
+
+### 10_billing_required_activation_hub.md
+Status: DONE
+Summary:
+- Replaced the thin `/app/billing-required` shell with a real activation hub tied to current ranch billing state.
+- Added owner-first activation actions directly on the page by reusing existing `CheckoutForm` and coupon/beta-code redemption form.
+- Added a role-aware non-owner state that clearly explains billing is owner-only and routes users to settings instead of showing unusable controls.
+- Added concise blocked-state context (subscription status + beta lifetime flag) and support contact guidance to remove dead-end confusion.
+Files changed:
+- app/(app)/app/billing-required/page.tsx
+Commands to run:
+- npm run lint
+- npm run typecheck
+How to verify:
+- 1) Log in as an unpaid owner and open `/app/billing-required`; confirm the page shows activation context plus checkout and coupon code controls.
+- 2) Log in as an unpaid non-owner and open `/app/billing-required`; confirm owner-only controls are hidden and a clear owner-action message is shown.
+- 3) Apply a valid beta lifetime code as owner on `/app/billing-required`; confirm success messaging appears and access can proceed to paid routes.
+- 4) If billing access is already active/trialing, open `/app/billing-required`; confirm redirect to `/app`.
+
+### 11_trial_support_and_checkout_cleanup.md
+Status: DONE
+Summary:
+- Audited checkout flow and confirmed true Stripe trial creation was not previously configured.
+- Added real trial support in checkout session creation via optional `STRIPE_TRIAL_DAYS` with strict validation (no frontend-only trial assumptions).
+- Limited trial use to eligible ranches (inactive status, no prior Stripe subscription ID, no beta lifetime access) while preserving normal paid checkout fallback.
+- Added checkout return-path handling so activation flow can return users to `/app/billing-required` with clear `success` / `trial_started` / `cancel` messaging.
+- Updated owner-facing checkout messaging on activation, settings, and public checkout screens to clarify when a Stripe trial is available.
+- Documented trial env/config and behavior in `.env.example`, `README`, and billing docs.
+Files changed:
+- lib/billing/trial.ts
+- lib/billing/actions.ts
+- components/billing/checkout-form.tsx
+- app/(app)/app/billing-required/page.tsx
+- app/(app)/app/settings/page.tsx
+- app/(public)/checkout/page.tsx
+- .env.example
+- README.md
+- docs/billing.md
+Commands to run:
+- npm run lint
+- npm run typecheck
+How to verify:
+- 1) Set `STRIPE_TRIAL_DAYS` to a valid whole number (example: `14`) and ensure Stripe env vars are configured.
+- 2) Log in as an unpaid owner with no prior Stripe subscription and start checkout from `/app/billing-required`; confirm Stripe checkout starts with trial messaging and returns to `/app/billing-required?billing=trial_started` on success.
+- 3) Send/receive Stripe webhook updates and confirm ranch subscription state moves to `trialing`, unlocking paid routes.
+- 4) Repeat checkout for a ranch that is no longer trial-eligible; confirm checkout still works but follows normal paid `success` messaging.
+- 5) Open `/app/settings` and `/checkout`; confirm trial offer messaging is present only when eligible and no confusing trial copy appears otherwise.
+
+### 12_settings_customer_portal_and_cancel.md
+Status: DONE
+Summary:
+- Audited and expanded settings billing visibility with clearer access source and Stripe identifiers (customer/subscription) while preserving beta-lifetime distinction.
+- Added owner-only Stripe Customer Portal launch action (`createCustomerPortalSessionAction`) for real subscription management/cancellation.
+- Added reusable owner billing UI control (`CustomerPortalForm`) and integrated it into `/app/settings` with clear guidance.
+- Added settings return-state messaging for portal navigation (`billing=portal_return`) to reduce confusion after manage/cancel actions.
+- Documented customer portal setup/usage expectations in billing docs.
+Files changed:
+- lib/billing/actions.ts
+- components/billing/customer-portal-form.tsx
+- app/(app)/app/settings/page.tsx
+- docs/billing.md
+Commands to run:
+- npm run lint
+- npm run typecheck
+How to verify:
+- 1) Log in as owner, open `/app/settings`, and confirm billing card shows access source plus Stripe customer/subscription values.
+- 2) If the ranch has a Stripe customer ID, click `Manage or cancel in Stripe` and confirm redirect to Stripe Customer Portal.
+- 3) Return from portal; confirm `/app/settings?billing=portal_return` shows the return-state message.
+- 4) Log in as non-owner and confirm billing controls (checkout, coupon apply, portal manage/cancel) are not shown.
+- 5) If no Stripe customer exists yet, confirm owner sees the explanatory message that portal is available after first checkout.
+
+### 13_launch_flow_qa.md
+Status: DONE
+Summary:
+- Ran a focused launch-flow QA pass across landing, auth, onboarding, activation, checkout return states, and owner billing management.
+- Tightened checkout safety by blocking new checkout launches when Stripe subscription access is already `active` or `trialing`, steering owners to customer portal management.
+- Reduced public-flow copy confusion by making header/pricing CTA language trial-aware without promising trials to ineligible ranches.
+- Kept protected-route behavior consistent with activation routing (`/app/billing-required`) and existing owner-only billing controls in settings.
+- Verified release quality gates (`lint`, `typecheck`, `build`) all pass after redirect/activation/checkout/settings updates.
+Files changed:
+- lib/billing/actions.ts
+- app/(app)/app/settings/page.tsx
+- components/layout/public-header.tsx
+- app/(public)/pricing/page.tsx
+Commands to run:
+- npm run lint
+- npm run typecheck
+- npm run build
+How to verify:
+- 1) Open `/` and `/pricing` while logged out; confirm CTA language is clear (no unconditional trial promise when trial config is absent).
+- 2) Sign up at `/signup`, complete `/onboarding`, and confirm unpaid owners land on `/app/billing-required` directly.
+- 3) From `/app/billing-required`, start checkout (or trial if eligible) and confirm return-state messaging appears on `?billing=success|trial_started|cancel`.
+- 4) Apply a valid coupon/beta code on `/app/billing-required`; confirm access unlocks and protected routes (`/app`, `/app/work-orders`, `/app/time`) open.
+- 5) Open `/app/settings` as owner and confirm manage/cancel path launches Stripe customer portal when a Stripe customer exists.
+- 6) Open `/app/settings` as non-owner and confirm owner billing controls remain hidden with clear guidance.
+- 7) With an already `active`/`trialing` ranch, try starting checkout from settings and confirm you are directed to use customer portal instead of opening duplicate checkout.

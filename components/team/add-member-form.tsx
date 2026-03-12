@@ -24,7 +24,7 @@ export function AddMemberForm() {
       </FormFieldShell>
       <FormFieldShell
         label="Temporary password"
-        hint="Required for a new login. Ignored if user already exists."
+        hint="Required for a new login. Member will be prompted to set a new password at first login."
       >
         <Input name="tempPassword" type="password" placeholder="At least 8 characters" />
       </FormFieldShell>

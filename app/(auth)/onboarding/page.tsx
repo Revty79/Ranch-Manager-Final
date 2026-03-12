@@ -1,14 +1,22 @@
 import { redirect } from "next/navigation";
 import { OnboardingForm } from "@/components/auth/onboarding-form";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
-import { getCurrentRanchContext, requireUser } from "@/lib/auth/context";
+import {
+  getCurrentRanchContext,
+  getPostAuthRedirectPath,
+  requireUser,
+} from "@/lib/auth/context";
 
 export default async function OnboardingPage() {
-  await requireUser();
+  const user = await requireUser();
+  if (user.mustResetPassword) {
+    redirect("/reset-password");
+  }
+
   const ranchContext = await getCurrentRanchContext();
 
   if (ranchContext?.ranch.onboardingCompleted) {
-    redirect("/app");
+    redirect(await getPostAuthRedirectPath(user));
   }
 
   return (

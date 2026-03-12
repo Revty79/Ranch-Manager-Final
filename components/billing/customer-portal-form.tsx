@@ -1,27 +1,30 @@
 "use client";
 
 import { useActionState } from "react";
-import { createCheckoutSessionAction, type BillingActionState } from "@/lib/billing/actions";
+import {
+  createCustomerPortalSessionAction,
+  type BillingActionState,
+} from "@/lib/billing/actions";
 import { SubmitButton } from "@/components/auth/submit-button";
 
 const initialState: BillingActionState = {};
 
-interface CheckoutFormProps {
-  returnPath?: "/app/settings" | "/app/billing-required";
+interface CustomerPortalFormProps {
   label?: string;
   pendingLabel?: string;
 }
 
-export function CheckoutForm({
-  returnPath = "/app/settings",
-  label = "Start Stripe checkout",
-  pendingLabel = "Opening checkout...",
-}: CheckoutFormProps) {
-  const [state, formAction] = useActionState(createCheckoutSessionAction, initialState);
+export function CustomerPortalForm({
+  label = "Manage or cancel in Stripe",
+  pendingLabel = "Opening customer portal...",
+}: CustomerPortalFormProps) {
+  const [state, formAction] = useActionState(
+    createCustomerPortalSessionAction,
+    initialState,
+  );
 
   return (
     <form action={formAction} className="space-y-2">
-      <input type="hidden" name="returnPath" value={returnPath} />
       {state.error ? <p className="text-sm font-medium text-danger">{state.error}</p> : null}
       <SubmitButton
         label={label}

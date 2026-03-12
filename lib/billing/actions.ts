@@ -9,6 +9,7 @@ import { requireRole } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
 import { billingCouponRedemptions, billingCoupons, ranches } from "@/lib/db/schema";
 import { hashCouponCode, normalizeCouponCode } from "./coupons";
+import { isTrialEligible, resolveTrialConfig } from "./trial";
 import { getStripeClient, isStripeConfigured } from "./stripe";
 
 export interface BillingActionState {
@@ -19,6 +20,8 @@ export interface BillingActionState {
 const applyCouponSchema = z.object({
   code: z.string().trim().min(1, "Enter a coupon code."),
 });
+
+const allowedCheckoutReturnPaths = ["/app/settings", "/app/billing-required"] as const;
 
 function toStripeMessage(error: unknown): string {
   if (error && typeof error === "object") {
@@ -93,14 +96,41 @@ async function resolveSubscriptionPriceId(
   };
 }
 
+function normalizeAppUrl(appUrl: string): string {
+  return appUrl.endsWith("/") ? appUrl.slice(0, -1) : appUrl;
+}
+
+function resolveCheckoutReturnPath(formData: FormData): (typeof allowedCheckoutReturnPaths)[number] {
+  const returnPath = formData.get("returnPath");
+  if (
+    typeof returnPath === "string" &&
+    allowedCheckoutReturnPaths.includes(
+      returnPath as (typeof allowedCheckoutReturnPaths)[number],
+    )
+  ) {
+    return returnPath as (typeof allowedCheckoutReturnPaths)[number];
+  }
+
+  return "/app/settings";
+}
+
 export async function createCheckoutSessionAction(
   _prevState: BillingActionState,
-  _formData: FormData,
+  formData: FormData,
 ): Promise<BillingActionState> {
   void _prevState;
-  void _formData;
 
   const context = await requireRole(["owner"], { requirePaid: false });
+  if (
+    context.ranch.subscriptionStatus === "active" ||
+    context.ranch.subscriptionStatus === "trialing"
+  ) {
+    return {
+      error:
+        "Subscription access is already active. Use Stripe customer portal in settings to manage or cancel.",
+    };
+  }
+
   if (!isStripeConfigured()) {
     return {
       error:
@@ -113,6 +143,15 @@ export async function createCheckoutSessionAction(
   if (!configuredPriceId) {
     return { error: "Missing STRIPE_PRICE_ID." };
   }
+  const returnPath = resolveCheckoutReturnPath(formData);
+
+  const trialConfig = resolveTrialConfig();
+  if (trialConfig.error) {
+    return { error: trialConfig.error };
+  }
+
+  const trialEligible =
+    trialConfig.trialDays !== null && isTrialEligible(context.ranch);
 
   const stripe = getStripeClient();
   const resolvedPrice = await resolveSubscriptionPriceId(stripe, configuredPriceId);
@@ -140,16 +179,25 @@ export async function createCheckoutSessionAction(
       .where(eq(ranches.id, context.ranch.id));
   }
 
+  const baseUrl = normalizeAppUrl(appUrl);
+  const successStatus = trialEligible ? "trial_started" : "success";
+  const successUrl = `${baseUrl}${returnPath}?billing=${successStatus}`;
+  const cancelUrl = `${baseUrl}${returnPath}?billing=cancel`;
+
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     customer: customerId,
     line_items: [{ price: resolvedPrice.priceId, quantity: 1 }],
-    success_url: `${appUrl}/app/settings?billing=success`,
-    cancel_url: `${appUrl}/app/settings?billing=cancel`,
+    success_url: successUrl,
+    cancel_url: cancelUrl,
     metadata: {
       ranchId: context.ranch.id,
+      trialDays: trialEligible ? String(trialConfig.trialDays) : "",
     },
     allow_promotion_codes: true,
+    subscription_data: trialEligible
+      ? { trial_period_days: trialConfig.trialDays ?? undefined }
+      : undefined,
   });
 
   if (!session.url) {
@@ -262,6 +310,50 @@ export async function applyCouponCodeAction(
   revalidatePath("/app/billing-required");
   revalidatePath("/billing-required");
   return result;
+}
+
+export async function createCustomerPortalSessionAction(
+  _prevState: BillingActionState,
+  _formData: FormData,
+): Promise<BillingActionState> {
+  void _prevState;
+  void _formData;
+
+  const context = await requireRole(["owner"], { requirePaid: false });
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) {
+    return {
+      error: "Stripe is not configured. Set STRIPE_SECRET_KEY in environment.",
+    };
+  }
+
+  if (!context.ranch.stripeCustomerId) {
+    return {
+      error:
+        "No Stripe customer exists for this ranch yet. Start checkout once before opening subscription management.",
+    };
+  }
+
+  const appUrl = process.env.APP_URL ?? "http://localhost:3000";
+  const stripe = getStripeClient();
+
+  let portalSession: Stripe.BillingPortal.Session;
+  try {
+    portalSession = await stripe.billingPortal.sessions.create({
+      customer: context.ranch.stripeCustomerId,
+      return_url: `${normalizeAppUrl(appUrl)}/app/settings?billing=portal_return`,
+    });
+  } catch (error) {
+    return {
+      error: `Unable to open Stripe customer portal: ${toStripeMessage(error)}`,
+    };
+  }
+
+  if (!portalSession.url) {
+    return { error: "Stripe customer portal is unavailable for this account." };
+  }
+
+  redirect(portalSession.url);
 }
 
 export const claimBetaLifetimeAccessAction = applyCouponCodeAction;

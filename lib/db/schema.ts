@@ -58,6 +58,7 @@ export const users = pgTable(
     email: text("email").notNull().unique(),
     fullName: text("full_name").notNull(),
     passwordHash: text("password_hash").notNull(),
+    mustResetPassword: boolean("must_reset_password").default(false).notNull(),
     onboardingState: onboardingStateEnum("onboarding_state")
       .default("needs_ranch")
       .notNull(),

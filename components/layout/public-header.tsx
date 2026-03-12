@@ -1,9 +1,15 @@
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { resolveTrialConfig } from "@/lib/billing/trial";
 import { publicNav } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
 export function PublicHeader() {
+  const trialConfig = resolveTrialConfig();
+  const hasLaunchTrial = trialConfig.trialDays !== null && !trialConfig.error;
+  const desktopCta = hasLaunchTrial ? "Start trial" : "Get started";
+  const mobileCta = hasLaunchTrial ? "Trial" : "Start";
+
   return (
     <header className="sticky top-0 z-40 border-b bg-surface/90 backdrop-blur">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
@@ -25,7 +31,7 @@ export function PublicHeader() {
             className={cn(buttonVariants({ size: "sm" }), "text-white")}
             style={{ color: "#fff" }}
           >
-            Start trial
+            {desktopCta}
           </Link>
         </nav>
         <Link
@@ -33,7 +39,7 @@ export function PublicHeader() {
           className={cn(buttonVariants({ size: "sm" }), "text-white md:hidden")}
           style={{ color: "#fff" }}
         >
-          Start
+          {mobileCta}
         </Link>
       </div>
     </header>

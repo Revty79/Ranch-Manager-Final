@@ -18,6 +18,7 @@ export interface AuthUser {
   id: string;
   email: string;
   fullName: string;
+  mustResetPassword: boolean;
   onboardingState: "needs_ranch" | "complete";
   lastActiveRanchId: string | null;
   timeZone: string;
@@ -114,6 +115,7 @@ export const getCurrentUser = cache(async (): Promise<AuthUser | null> => {
       userId: users.id,
       email: users.email,
       fullName: users.fullName,
+      mustResetPassword: users.mustResetPassword,
       onboardingState: users.onboardingState,
       lastActiveRanchId: users.lastActiveRanchId,
       timeZone: users.timeZone,
@@ -136,6 +138,7 @@ export const getCurrentUser = cache(async (): Promise<AuthUser | null> => {
     id: sessionRow.userId,
     email: sessionRow.email,
     fullName: sessionRow.fullName,
+    mustResetPassword: sessionRow.mustResetPassword,
     onboardingState: sessionRow.onboardingState,
     lastActiveRanchId: sessionRow.lastActiveRanchId,
     timeZone: resolveTimeZone(sessionRow.timeZone),
@@ -152,9 +155,17 @@ export const getCurrentRanchContext = cache(async (): Promise<RanchContext | nul
 });
 
 export async function getPostAuthRedirectPath(user: AuthUser): Promise<string> {
+  if (user.mustResetPassword) {
+    return "/reset-password";
+  }
+
   const ranchContext = await getRanchContextForUser(user.id, user.lastActiveRanchId);
   if (!ranchContext || !ranchContext.ranch.onboardingCompleted) {
     return "/onboarding";
+  }
+
+  if (!hasBillingAccess(ranchContext.ranch)) {
+    return "/app/billing-required";
   }
 
   return "/app";
@@ -171,6 +182,10 @@ export async function requireUser(): Promise<AuthUser> {
 
 export async function requireAppContext(): Promise<AppContext> {
   const user = await requireUser();
+  if (user.mustResetPassword) {
+    redirect("/reset-password");
+  }
+
   const ranchContext = await getRanchContextForUser(user.id, user.lastActiveRanchId);
 
   if (!ranchContext || !ranchContext.ranch.onboardingCompleted) {

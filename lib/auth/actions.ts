@@ -39,6 +39,19 @@ const onboardingSchema = z.object({
     .max(80, "Ranch name is too long."),
 });
 
+const resetPasswordSchema = z
+  .object({
+    newPassword: z
+      .string()
+      .min(8, "Password must be at least 8 characters.")
+      .max(128, "Password must be 128 characters or fewer."),
+    confirmPassword: z.string().min(1, "Confirm your new password."),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
+
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
@@ -104,11 +117,19 @@ export async function signupAction(
     })
     .returning({
       id: users.id,
+      email: users.email,
+      fullName: users.fullName,
+      mustResetPassword: users.mustResetPassword,
+      onboardingState: users.onboardingState,
+      lastActiveRanchId: users.lastActiveRanchId,
+      timeZone: users.timeZone,
     });
 
   const { token, expiresAt } = await createSession(createdUser.id);
   await setSessionCookie(token, expiresAt);
-  redirect("/onboarding");
+
+  const redirectPath = await getPostAuthRedirectPath(createdUser);
+  redirect(redirectPath);
 }
 
 export async function loginAction(
@@ -131,6 +152,7 @@ export async function loginAction(
       email: users.email,
       fullName: users.fullName,
       passwordHash: users.passwordHash,
+      mustResetPassword: users.mustResetPassword,
       onboardingState: users.onboardingState,
       lastActiveRanchId: users.lastActiveRanchId,
       timeZone: users.timeZone,
@@ -155,6 +177,7 @@ export async function loginAction(
     id: user.id,
     email: user.email,
     fullName: user.fullName,
+    mustResetPassword: user.mustResetPassword,
     onboardingState: user.onboardingState,
     lastActiveRanchId: user.lastActiveRanchId,
     timeZone: user.timeZone,
@@ -184,10 +207,12 @@ export async function completeOnboardingAction(
     .limit(1);
 
   if (existingMembership) {
-    redirect("/app");
+    const redirectPath = await getPostAuthRedirectPath(user);
+    redirect(redirectPath);
   }
 
   const ranchSlug = await createUniqueRanchSlug(parsed.data.ranchName);
+  let newRanchId: string | null = null;
 
   await db.transaction(async (tx) => {
     const [newRanch] = await tx
@@ -201,6 +226,7 @@ export async function completeOnboardingAction(
       .returning({
         id: ranches.id,
       });
+    newRanchId = newRanch.id;
 
     await tx.insert(ranchMemberships).values({
       ranchId: newRanch.id,
@@ -219,7 +245,48 @@ export async function completeOnboardingAction(
       .where(eq(users.id, user.id));
   });
 
-  redirect("/app");
+  const redirectPath = await getPostAuthRedirectPath({
+    ...user,
+    onboardingState: "complete",
+    lastActiveRanchId: newRanchId,
+  });
+
+  redirect(redirectPath);
+}
+
+export async function resetPasswordAction(
+  _prevState: AuthActionState,
+  formData: FormData,
+): Promise<AuthActionState> {
+  const parsed = resetPasswordSchema.safeParse({
+    newPassword: formData.get("newPassword"),
+    confirmPassword: formData.get("confirmPassword"),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid password update." };
+  }
+
+  const user = await requireUser();
+  if (!user.mustResetPassword) {
+    redirect(await getPostAuthRedirectPath(user));
+  }
+
+  await db
+    .update(users)
+    .set({
+      passwordHash: await hashPassword(parsed.data.newPassword),
+      mustResetPassword: false,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, user.id));
+
+  redirect(
+    await getPostAuthRedirectPath({
+      ...user,
+      mustResetPassword: false,
+    }),
+  );
 }
 
 export async function logoutAction() {

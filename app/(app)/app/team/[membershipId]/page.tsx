@@ -83,7 +83,7 @@ export default async function TeamMemberDetailPage({
             <CardTitle className="text-base">Reset login password</CardTitle>
             <CardDescription>
               Set a new temporary password for this member if they cannot sign in. Share it
-              securely and have them change it after login.
+              securely and they will be forced to set a new password on next login.
             </CardDescription>
           </div>
           <ResetMemberPasswordForm

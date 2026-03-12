@@ -2,9 +2,11 @@ import Link from "next/link";
 import { PageHeader } from "@/components/patterns/page-header";
 import { CouponCodeForm } from "@/components/billing/beta-code-form";
 import { CheckoutForm } from "@/components/billing/checkout-form";
+import { CustomerPortalForm } from "@/components/billing/customer-portal-form";
 import { TimeZoneForm } from "@/components/settings/timezone-form";
 import { requireAppContext } from "@/lib/auth/context";
 import { hasBillingAccess } from "@/lib/billing/access";
+import { isTrialEligible, resolveTrialConfig } from "@/lib/billing/trial";
 import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
@@ -30,6 +32,19 @@ export default async function SettingsPage({
   const billingQueryState = (await searchParams).billing;
   const isOwner = context.membership.role === "owner";
   const billingAccess = hasBillingAccess(context.ranch);
+  const trialConfig = resolveTrialConfig();
+  const trialEligible =
+    trialConfig.trialDays !== null && isTrialEligible(context.ranch);
+  const hasStripeCustomer = Boolean(context.ranch.stripeCustomerId);
+  const hasStripeSubscriptionAccess =
+    context.ranch.subscriptionStatus === "active" ||
+    context.ranch.subscriptionStatus === "trialing";
+  const accessSource = context.ranch.betaLifetimeAccess
+    ? "Beta lifetime code"
+    : context.ranch.subscriptionStatus === "active" ||
+        context.ranch.subscriptionStatus === "trialing"
+      ? "Stripe subscription"
+      : "No active access source";
   const canSeeStatePreviews = isPlatformAdminEmail(context.user.email);
 
   return (
@@ -45,9 +60,19 @@ export default async function SettingsPage({
           Stripe checkout completed. Subscription state will refresh after webhook sync.
         </p>
       ) : null}
+      {billingQueryState === "trial_started" ? (
+        <p className="rounded-xl border border-accent/40 bg-accent-soft px-4 py-3 text-sm text-accent">
+          Trial checkout completed. Subscription state will refresh after webhook sync.
+        </p>
+      ) : null}
       {billingQueryState === "cancel" ? (
         <p className="rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
           Checkout was canceled. You can retry when ready.
+        </p>
+      ) : null}
+      {billingQueryState === "portal_return" ? (
+        <p className="rounded-xl border border-border bg-surface px-4 py-3 text-sm text-foreground-muted">
+          Returned from Stripe customer portal. Billing state will reflect the latest webhook sync.
         </p>
       ) : null}
 
@@ -90,8 +115,19 @@ export default async function SettingsPage({
                 {context.ranch.subscriptionStatus}
               </p>
               <p>
+                <span className="text-foreground-muted">Access source:</span> {accessSource}
+              </p>
+              <p>
                 <span className="text-foreground-muted">Plan:</span>{" "}
                 {context.ranch.subscriptionPlanKey ?? "Launch Plan"}
+              </p>
+              <p>
+                <span className="text-foreground-muted">Stripe customer:</span>{" "}
+                {context.ranch.stripeCustomerId ?? "Not created yet"}
+              </p>
+              <p>
+                <span className="text-foreground-muted">Stripe subscription:</span>{" "}
+                {context.ranch.stripeSubscriptionId ?? "Not active yet"}
               </p>
               <p>
                 <span className="text-foreground-muted">Current period end:</span>{" "}
@@ -101,10 +137,56 @@ export default async function SettingsPage({
                 <span className="text-foreground-muted">Beta lifetime access:</span>{" "}
                 {context.ranch.betaLifetimeAccess ? "Enabled" : "Not enabled"}
               </p>
+              {trialEligible ? (
+                <p>
+                  <span className="text-foreground-muted">Trial offer:</span>{" "}
+                  {trialConfig.trialDays}-day trial available for first checkout
+                </p>
+              ) : null}
             </div>
             {isOwner ? (
               <div className="space-y-3 pt-2">
-                <CheckoutForm />
+                {hasStripeSubscriptionAccess ? (
+                  <p className="text-sm text-foreground-muted">
+                    Stripe subscription is already active. Use customer portal below to manage or
+                    cancel.
+                  </p>
+                ) : (
+                  <CheckoutForm
+                    label={
+                      trialEligible
+                        ? `Start ${trialConfig.trialDays}-day trial in Stripe`
+                        : "Start Stripe checkout"
+                    }
+                    pendingLabel={
+                      trialEligible ? "Opening trial checkout..." : "Opening checkout..."
+                    }
+                  />
+                )}
+                {trialConfig.error ? (
+                  <p className="text-sm text-warning">
+                    Trial offer misconfigured: {trialConfig.error}
+                  </p>
+                ) : null}
+                {hasStripeCustomer ? (
+                  <div className="rounded-xl border bg-surface p-3">
+                    <p className="text-sm font-semibold text-foreground">
+                      Manage or cancel subscription
+                    </p>
+                    <p className="mt-1 text-sm text-foreground-muted">
+                      Open Stripe Customer Portal to update payment method, view billing history,
+                      or cancel membership.
+                    </p>
+                    <div className="pt-3">
+                      <CustomerPortalForm />
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-foreground-muted">
+                    Customer portal becomes available after first Stripe checkout creates a customer
+                    record.
+                  </p>
+                )}
                 <details className="rounded-xl border bg-surface p-3">
                   <summary className="cursor-pointer text-sm font-semibold text-foreground">
                     Have a coupon code?

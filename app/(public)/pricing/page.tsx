@@ -2,11 +2,14 @@ import Link from "next/link";
 import { Check } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
+import { resolveTrialConfig } from "@/lib/billing/trial";
 import { marketingContent } from "@/lib/marketing-content";
 import { cn } from "@/lib/utils";
 
 export default function PricingPage() {
   const pricing = marketingContent.pricing;
+  const trialConfig = resolveTrialConfig();
+  const hasLaunchTrial = trialConfig.trialDays !== null && !trialConfig.error;
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
@@ -33,10 +36,12 @@ export default function PricingPage() {
               className={cn(buttonVariants({ size: "lg" }), "mt-2 text-white")}
               style={{ color: "#fff" }}
             >
-              Start paid checkout
+              Go to checkout
             </Link>
             <p className="text-xs text-foreground-muted">
-              Checkout step is presented after account creation.
+              {hasLaunchTrial
+                ? `Checkout is presented after account creation. Eligible ranches start with a ${trialConfig.trialDays}-day Stripe trial.`
+                : "Checkout step is presented after account creation."}
             </p>
           </div>
           <div className="space-y-6">
