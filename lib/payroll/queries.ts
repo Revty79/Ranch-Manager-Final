@@ -2,6 +2,8 @@ import { and, eq, gt, gte, inArray, isNotNull, isNull, lt, or } from "drizzle-or
 import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { db } from "@/lib/db/client";
 import {
+  payrollPeriodAdvances,
+  payrollPeriods,
   ranchMemberships,
   shifts,
   users,
@@ -244,7 +246,10 @@ export async function getPayrollSummaryForRange(
   fromDate: Date,
   toDateExclusive: Date,
 ): Promise<PayrollSummary> {
-  const [memberRows, shiftRows, workRows] = await Promise.all([
+  const fromDateKey = toUtcDateKey(fromDate);
+  const toDateExclusiveKey = toUtcDateKey(toDateExclusive);
+
+  const [memberRows, shiftRows, workRows, periodAdvanceRows] = await Promise.all([
     db
       .select({
         membershipId: ranchMemberships.id,
@@ -287,6 +292,20 @@ export async function getPayrollSummaryForRange(
           eq(workTimeEntries.ranchId, ranchId),
           lt(workTimeEntries.startedAt, toDateExclusive),
           or(isNull(workTimeEntries.endedAt), gt(workTimeEntries.endedAt, fromDate)),
+        ),
+      ),
+    db
+      .select({
+        membershipId: payrollPeriodAdvances.membershipId,
+        amountCents: payrollPeriodAdvances.amountCents,
+      })
+      .from(payrollPeriodAdvances)
+      .innerJoin(payrollPeriods, eq(payrollPeriodAdvances.periodId, payrollPeriods.id))
+      .where(
+        and(
+          eq(payrollPeriodAdvances.ranchId, ranchId),
+          lt(payrollPeriods.periodStart, toDateExclusiveKey),
+          gte(payrollPeriods.periodEnd, fromDateKey),
         ),
       ),
   ]);
@@ -340,6 +359,11 @@ export async function getPayrollSummaryForRange(
   const visibleMemberRows = memberRows.filter(
     (member) => !isPlatformAdminEmail(member.email),
   );
+  const periodAdvanceByMembership = new Map<string, number>();
+  for (const advance of periodAdvanceRows) {
+    const current = periodAdvanceByMembership.get(advance.membershipId) ?? 0;
+    periodAdvanceByMembership.set(advance.membershipId, current + advance.amountCents);
+  }
 
   const rows: PayrollSummaryRow[] = visibleMemberRows
     .filter((member) => {
@@ -347,7 +371,10 @@ export async function getPayrollSummaryForRange(
         (shiftSecondsByMembership.get(member.membershipId) ?? 0) > 0 ||
         (workSecondsByMembership.get(member.membershipId) ?? 0) > 0 ||
         (incentivePayByMembership.get(member.membershipId) ?? 0) > 0;
-      return member.isActive || hasTrackedTime;
+      const hasAdvanceBalance =
+        member.payAdvanceCents > 0 ||
+        (periodAdvanceByMembership.get(member.membershipId) ?? 0) > 0;
+      return member.isActive || hasTrackedTime || hasAdvanceBalance;
     })
     .map((member) => {
       const shiftSeconds = shiftSecondsByMembership.get(member.membershipId) ?? 0;
@@ -362,8 +389,9 @@ export async function getPayrollSummaryForRange(
             : 0;
       const incentivePayCents = incentivePayByMembership.get(member.membershipId) ?? 0;
       const grossPayCents = basePayCents + incentivePayCents;
-      const payAdvanceCents = 0;
-      const totalPayCents = grossPayCents - payAdvanceCents;
+      const periodAdvanceCents = periodAdvanceByMembership.get(member.membershipId) ?? 0;
+      const payAdvanceCents = member.payAdvanceCents + periodAdvanceCents;
+      const totalPayCents = grossPayCents;
 
       return {
         membershipId: member.membershipId,

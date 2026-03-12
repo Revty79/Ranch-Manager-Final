@@ -45,6 +45,8 @@ export function buildPayrollCsv(rows: PayrollSummaryRow[]): string {
     "Hours",
     "Base Pay",
     "Incentive Pay",
+    "Advances",
+    "Final Check",
     "Total Pay",
     "Member Status",
   ];
@@ -59,6 +61,8 @@ export function buildPayrollCsv(rows: PayrollSummaryRow[]): string {
       row.hoursWorked.toFixed(2),
       centsToDollars(row.basePayCents),
       centsToDollars(row.incentivePayCents),
+      centsToDollars(row.payAdvanceCents),
+      centsToDollars(row.totalPayCents - row.payAdvanceCents),
       centsToDollars(row.totalPayCents),
       row.isActive ? "active" : "inactive",
     ]

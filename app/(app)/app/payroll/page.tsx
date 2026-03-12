@@ -431,6 +431,8 @@ export default async function PayrollPage({
                     <TableHeaderCell>Hours</TableHeaderCell>
                     <TableHeaderCell>Base Pay</TableHeaderCell>
                     <TableHeaderCell>Incentive Pay</TableHeaderCell>
+                    <TableHeaderCell>Advances</TableHeaderCell>
+                    <TableHeaderCell>Final Check</TableHeaderCell>
                     <TableHeaderCell>Total Pay</TableHeaderCell>
                   </TableRow>
                 </TableHead>
@@ -451,6 +453,8 @@ export default async function PayrollPage({
                       <TableCell>{row.hoursWorked.toFixed(2)}</TableCell>
                       <TableCell>{formatMoney(row.basePayCents)}</TableCell>
                       <TableCell>{formatMoney(row.incentivePayCents)}</TableCell>
+                      <TableCell>{formatMoney(row.payAdvanceCents)}</TableCell>
+                      <TableCell>{formatMoney(row.totalPayCents - row.payAdvanceCents)}</TableCell>
                       <TableCell>{formatMoney(row.totalPayCents)}</TableCell>
                     </TableRow>
                   ))}
