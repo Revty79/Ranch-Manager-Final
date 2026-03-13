@@ -9,6 +9,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { requireAppContext } from "@/lib/auth/context";
 import { hasBillingAccess } from "@/lib/billing/access";
+import { syncRanchFromCheckoutSession } from "@/lib/billing/stripe-sync";
 import { isTrialEligible, resolveTrialConfig } from "@/lib/billing/trial";
 import { cn } from "@/lib/utils";
 
@@ -17,12 +18,35 @@ const SUPPORT_EMAIL = "brannan.pearson.ranch@gmail.com";
 export default async function AppBillingRequiredPage({
   searchParams,
 }: {
-  searchParams: Promise<{ billing?: string }>;
+  searchParams: Promise<{ billing?: string; session_id?: string }>;
 }) {
-  const billingQueryState = (await searchParams).billing;
-  const context = await requireAppContext();
+  const query = await searchParams;
+  const billingQueryState = query.billing;
+  const checkoutSessionId = query.session_id;
+  let context = await requireAppContext();
   const isOwner = context.membership.role === "owner";
-  const billingAccess = hasBillingAccess(context.ranch);
+  let billingAccess = hasBillingAccess(context.ranch);
+  let checkoutSyncError: string | null = null;
+
+  if (
+    isOwner &&
+    !billingAccess &&
+    typeof checkoutSessionId === "string" &&
+    (billingQueryState === "success" || billingQueryState === "trial_started")
+  ) {
+    const syncResult = await syncRanchFromCheckoutSession({
+      ranchId: context.ranch.id,
+      checkoutSessionId,
+    });
+
+    if (!syncResult.ok) {
+      checkoutSyncError = syncResult.error ?? "Unable to sync checkout status.";
+    } else {
+      context = await requireAppContext();
+      billingAccess = hasBillingAccess(context.ranch);
+    }
+  }
+
   const trialConfig = resolveTrialConfig();
   const trialEligible =
     trialConfig.trialDays !== null && isTrialEligible(context.ranch);
@@ -41,18 +65,22 @@ export default async function AppBillingRequiredPage({
 
       {billingQueryState === "trial_started" ? (
         <p className="rounded-xl border border-accent/40 bg-accent-soft px-4 py-3 text-sm text-accent">
-          Trial checkout completed. Access state will update to `trialing` after Stripe webhook
-          sync.
+          Trial checkout completed. Subscription access is syncing now.
         </p>
       ) : null}
       {billingQueryState === "success" ? (
         <p className="rounded-xl border border-accent/40 bg-accent-soft px-4 py-3 text-sm text-accent">
-          Checkout completed. Access state will refresh after Stripe webhook sync.
+          Checkout completed. Subscription access is syncing now.
         </p>
       ) : null}
       {billingQueryState === "cancel" ? (
         <p className="rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
           Checkout was canceled. You can retry activation when ready.
+        </p>
+      ) : null}
+      {checkoutSyncError ? (
+        <p className="rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
+          Checkout sync warning: {checkoutSyncError}
         </p>
       ) : null}
 

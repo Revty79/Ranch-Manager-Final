@@ -260,7 +260,7 @@ export async function createCheckoutSessionAction(
 
   const baseUrl = await resolveAppBaseUrl();
   const successStatus = trialEligible ? "trial_started" : "success";
-  const successUrl = `${baseUrl}${returnPath}?billing=${successStatus}`;
+  const successUrl = `${baseUrl}${returnPath}?billing=${successStatus}&session_id={CHECKOUT_SESSION_ID}`;
   const cancelUrl = `${baseUrl}${returnPath}?billing=cancel`;
 
   const session = await stripe.checkout.sessions.create({
@@ -274,9 +274,12 @@ export async function createCheckoutSessionAction(
       trialDays: trialEligible ? String(trialConfig.trialDays) : "",
     },
     allow_promotion_codes: true,
-    subscription_data: trialEligible
-      ? { trial_period_days: trialConfig.trialDays ?? undefined }
-      : undefined,
+    subscription_data: {
+      metadata: {
+        ranchId: context.ranch.id,
+      },
+      trial_period_days: trialEligible ? (trialConfig.trialDays ?? undefined) : undefined,
+    },
   });
 
   if (!session.url) {

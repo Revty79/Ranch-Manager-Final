@@ -6,6 +6,7 @@ import { CustomerPortalForm } from "@/components/billing/customer-portal-form";
 import { TimeZoneForm } from "@/components/settings/timezone-form";
 import { requireAppContext } from "@/lib/auth/context";
 import { hasBillingAccess } from "@/lib/billing/access";
+import { syncRanchFromCheckoutSession } from "@/lib/billing/stripe-sync";
 import { isTrialEligible, resolveTrialConfig } from "@/lib/billing/trial";
 import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { Badge } from "@/components/ui/badge";
@@ -26,10 +27,31 @@ function formatDate(value: Date | null, timeZone: string): string {
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ billing?: string }>;
+  searchParams: Promise<{ billing?: string; session_id?: string }>;
 }) {
-  const context = await requireAppContext();
-  const billingQueryState = (await searchParams).billing;
+  const query = await searchParams;
+  const billingQueryState = query.billing;
+  const checkoutSessionId = query.session_id;
+  let context = await requireAppContext();
+  let checkoutSyncError: string | null = null;
+
+  if (
+    context.membership.role === "owner" &&
+    typeof checkoutSessionId === "string" &&
+    (billingQueryState === "success" || billingQueryState === "trial_started")
+  ) {
+    const syncResult = await syncRanchFromCheckoutSession({
+      ranchId: context.ranch.id,
+      checkoutSessionId,
+    });
+
+    if (!syncResult.ok) {
+      checkoutSyncError = syncResult.error ?? "Unable to sync checkout status.";
+    } else {
+      context = await requireAppContext();
+    }
+  }
+
   const isOwner = context.membership.role === "owner";
   const billingAccess = hasBillingAccess(context.ranch);
   const trialConfig = resolveTrialConfig();
@@ -57,12 +79,12 @@ export default async function SettingsPage({
 
       {billingQueryState === "success" ? (
         <p className="rounded-xl border border-accent/40 bg-accent-soft px-4 py-3 text-sm text-accent">
-          Stripe checkout completed. Subscription state will refresh after webhook sync.
+          Stripe checkout completed. Subscription access is syncing now.
         </p>
       ) : null}
       {billingQueryState === "trial_started" ? (
         <p className="rounded-xl border border-accent/40 bg-accent-soft px-4 py-3 text-sm text-accent">
-          Trial checkout completed. Subscription state will refresh after webhook sync.
+          Trial checkout completed. Subscription access is syncing now.
         </p>
       ) : null}
       {billingQueryState === "cancel" ? (
@@ -73,6 +95,11 @@ export default async function SettingsPage({
       {billingQueryState === "portal_return" ? (
         <p className="rounded-xl border border-border bg-surface px-4 py-3 text-sm text-foreground-muted">
           Returned from Stripe customer portal. Billing state will reflect the latest webhook sync.
+        </p>
+      ) : null}
+      {checkoutSyncError ? (
+        <p className="rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
+          Checkout sync warning: {checkoutSyncError}
         </p>
       ) : null}
 
