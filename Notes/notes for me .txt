@@ -1,0 +1,3 @@
+finally creating our first locked in commit... this is the first stable version the ecommit will be 
+named Lock 1 nothing more. we are going to then begin writing our modules... I am going to keep the 
+initial version at 9.99 a month. each new toolkit will cost an additional 9.99 a month and we will go from there.
