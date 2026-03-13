@@ -43,7 +43,7 @@ npm run dev
 Core:
 
 - `DATABASE_URL`
-- `APP_URL`
+- `APP_URL` (local dev: `http://localhost:3000`; production: your real HTTPS domain used for Stripe return URLs)
 - `APP_SECRET`
 - `SESSION_COOKIE_NAME`
 

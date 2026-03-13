@@ -8,7 +8,7 @@
 ## Environment Variables
 
 - `DATABASE_URL`
-- `APP_URL`
+- `APP_URL` (must be your deployed app origin, e.g. `https://app.example.com`, or Stripe will redirect to the wrong host)
 - `APP_SECRET`
 - `SESSION_COOKIE_NAME`
 - `STRIPE_SECRET_KEY`

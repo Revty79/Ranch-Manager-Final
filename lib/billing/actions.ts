@@ -3,6 +3,7 @@
 import Stripe from "stripe";
 import { and, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth/context";
@@ -31,6 +32,89 @@ function toStripeMessage(error: unknown): string {
     }
   }
   return "Stripe request failed.";
+}
+
+function firstHeaderValue(value: string | null): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const first = value.split(",")[0]?.trim();
+  return first || null;
+}
+
+function isLocalHost(hostname: string): boolean {
+  const normalized = hostname.toLowerCase();
+  return normalized === "localhost" || normalized === "127.0.0.1" || normalized === "::1";
+}
+
+function parseOriginFromConfiguredUrl(value: string | undefined): URL | null {
+  if (!value) {
+    return null;
+  }
+
+  const candidate = value.trim();
+  if (!candidate) {
+    return null;
+  }
+
+  try {
+    const url = new URL(candidate);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      return null;
+    }
+    return new URL(url.origin);
+  } catch {
+    return null;
+  }
+}
+
+function parseOriginFromRequestHeaders(hostValue: string | null, protoValue: string | null): URL | null {
+  const host = firstHeaderValue(hostValue);
+  if (!host) {
+    return null;
+  }
+
+  const proto = firstHeaderValue(protoValue);
+  const protocol =
+    proto === "http" || proto === "https"
+      ? proto
+      : host.startsWith("localhost") || host.startsWith("127.0.0.1") || host.startsWith("[::1]")
+        ? "http"
+        : "https";
+
+  try {
+    return new URL(`${protocol}://${host}`);
+  } catch {
+    return null;
+  }
+}
+
+async function resolveAppBaseUrl(): Promise<string> {
+  const requestHeaders = await headers();
+  const requestOrigin = parseOriginFromRequestHeaders(
+    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host"),
+    requestHeaders.get("x-forwarded-proto"),
+  );
+  const configuredOrigin = parseOriginFromConfiguredUrl(process.env.APP_URL);
+
+  if (configuredOrigin && requestOrigin) {
+    // Prefer request origin if APP_URL is still localhost on a deployed environment.
+    if (isLocalHost(configuredOrigin.hostname) && !isLocalHost(requestOrigin.hostname)) {
+      return requestOrigin.origin;
+    }
+    return configuredOrigin.origin;
+  }
+
+  if (requestOrigin) {
+    return requestOrigin.origin;
+  }
+
+  if (configuredOrigin) {
+    return configuredOrigin.origin;
+  }
+
+  return "http://localhost:3000";
 }
 
 async function resolveSubscriptionPriceId(
@@ -96,10 +180,6 @@ async function resolveSubscriptionPriceId(
   };
 }
 
-function normalizeAppUrl(appUrl: string): string {
-  return appUrl.endsWith("/") ? appUrl.slice(0, -1) : appUrl;
-}
-
 function resolveCheckoutReturnPath(formData: FormData): (typeof allowedCheckoutReturnPaths)[number] {
   const returnPath = formData.get("returnPath");
   if (
@@ -138,7 +218,6 @@ export async function createCheckoutSessionAction(
     };
   }
 
-  const appUrl = process.env.APP_URL ?? "http://localhost:3000";
   const configuredPriceId = process.env.STRIPE_PRICE_ID;
   if (!configuredPriceId) {
     return { error: "Missing STRIPE_PRICE_ID." };
@@ -179,7 +258,7 @@ export async function createCheckoutSessionAction(
       .where(eq(ranches.id, context.ranch.id));
   }
 
-  const baseUrl = normalizeAppUrl(appUrl);
+  const baseUrl = await resolveAppBaseUrl();
   const successStatus = trialEligible ? "trial_started" : "success";
   const successUrl = `${baseUrl}${returnPath}?billing=${successStatus}`;
   const cancelUrl = `${baseUrl}${returnPath}?billing=cancel`;
@@ -334,14 +413,14 @@ export async function createCustomerPortalSessionAction(
     };
   }
 
-  const appUrl = process.env.APP_URL ?? "http://localhost:3000";
+  const baseUrl = await resolveAppBaseUrl();
   const stripe = getStripeClient();
 
   let portalSession: Stripe.BillingPortal.Session;
   try {
     portalSession = await stripe.billingPortal.sessions.create({
       customer: context.ranch.stripeCustomerId,
-      return_url: `${normalizeAppUrl(appUrl)}/app/settings?billing=portal_return`,
+      return_url: `${baseUrl}/app/settings?billing=portal_return`,
     });
   } catch (error) {
     return {

@@ -8,7 +8,7 @@
    - `STRIPE_PRICE_ID` (prefer `price_...`; `prod_...` is supported if a default recurring price exists)
    - `STRIPE_WEBHOOK_SECRET`
    - `STRIPE_TRIAL_DAYS` (optional whole-number day count for first checkout trial)
-   - `APP_URL` (must match your real app domain in production)
+   - `APP_URL` (must match your real app domain in production; localhost here will send Stripe return URLs to localhost)
 3. Configure Stripe webhook endpoint:
    - `https://<your-domain>/api/stripe/webhook`
 4. Enable these webhook events:
@@ -30,7 +30,7 @@
 - `STRIPE_PRICE_ID` (use a recurring price ID for subscriptions)
 - `STRIPE_WEBHOOK_SECRET`
 - `STRIPE_TRIAL_DAYS` (optional; when set, eligible first checkout sessions start with a Stripe trial)
-- `APP_URL` (used for checkout return URLs)
+- `APP_URL` (used for checkout/portal return URLs; set this to your live app domain in production)
 - `BILLING_COUPON_PEPPER` (optional; falls back to `APP_SECRET`)
 - `PLATFORM_ADMIN_EMAILS` (required for `/admin` access)
 
