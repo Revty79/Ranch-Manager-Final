@@ -11,6 +11,7 @@ import { autoClockOutActiveTimeForUser } from "@/lib/time/maintenance";
 import {
   clearSessionCookie,
   createSession,
+  getValidSessionByToken,
   getSessionTokenFromCookie,
   revokeSessionByToken,
   setSessionCookie,
@@ -290,14 +291,29 @@ export async function resetPasswordAction(
 }
 
 export async function logoutAction() {
-  const user = await requireUser();
-  await autoClockOutActiveTimeForUser(user.id);
-
   const token = await getSessionTokenFromCookie();
   if (token) {
-    await revokeSessionByToken(token);
+    try {
+      const session = await getValidSessionByToken(token);
+      if (session) {
+        await autoClockOutActiveTimeForUser(session.userId);
+      }
+    } catch {
+      // Best-effort closeout should not block sign-out.
+    }
+
+    try {
+      await revokeSessionByToken(token);
+    } catch {
+      // Session revocation failure should not trap users in signed-in state.
+    }
   }
 
-  await clearSessionCookie();
+  try {
+    await clearSessionCookie();
+  } catch {
+    // Continue redirect even if cookie clearing fails in this request context.
+  }
+
   redirect("/login");
 }

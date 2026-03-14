@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { logoutAction } from "@/lib/auth/actions";
 import type { AppContext } from "@/lib/auth/context";
 import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { buttonVariants } from "@/components/ui/button";
@@ -30,14 +29,13 @@ export function AppTopbar({ context }: AppTopbarProps) {
             Admin
           </Link>
         ) : null}
-        <form action={logoutAction}>
-          <button
-            type="submit"
-            className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
-          >
-            Log out
-          </button>
-        </form>
+        <Link
+          href="/logout"
+          prefetch={false}
+          className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+        >
+          Log out
+        </Link>
       </div>
     </header>
   );
