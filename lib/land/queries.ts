@@ -5,6 +5,7 @@ import {
   eq,
   ilike,
   inArray,
+  ne,
   or,
   sql,
 } from "drizzle-orm";
@@ -21,6 +22,7 @@ import {
   type LandUnitType,
   type MovementReason,
 } from "@/lib/db/schema";
+import { compareAnimalSpecies } from "@/lib/herd/constants";
 import { handlingUnitTypes, landUnitTypeOptions } from "./constants";
 
 const landUnitTypeSet = new Set<LandUnitType>(landUnitTypeOptions.map((option) => option.value));
@@ -233,8 +235,11 @@ export interface LandUnitProfile {
     updatedAt: Date;
   };
   currentOccupants: LandUnitCurrentOccupant[];
+  occupancyBySpecies: Array<{ species: AnimalSpecies; count: number }>;
+  sourceAnimalClassOptions: string[];
   movementHistory: LandMovementHistoryRow[];
   movementAnimalOptions: LandMovementAnimalOption[];
+  destinationUnitOptions: Array<{ id: string; name: string; unitType: LandUnitType }>;
 }
 
 export async function getLandUnitProfile(
@@ -302,7 +307,8 @@ export async function getLandUnitProfile(
     return null;
   }
 
-  const [currentOccupants, movementHistory, movementAnimalRows] = await Promise.all([
+  const [currentOccupants, movementHistory, movementAnimalRows, destinationUnitOptions] =
+    await Promise.all([
     db
       .select({
         animalId: animals.id,
@@ -378,7 +384,22 @@ export async function getLandUnitProfile(
         asc(animals.displayName),
         asc(animals.tagId),
       ),
-  ]);
+    db
+      .select({
+        id: landUnits.id,
+        name: landUnits.name,
+        unitType: landUnits.unitType,
+      })
+      .from(landUnits)
+      .where(
+        and(
+          eq(landUnits.ranchId, ranchId),
+          eq(landUnits.isActive, true),
+          ne(landUnits.id, landUnitId),
+        ),
+      )
+      .orderBy(asc(landUnits.sortOrder), asc(landUnits.name)),
+    ]);
 
   const activeLocationRows = movementAnimalRows.length
     ? await db
@@ -422,10 +443,30 @@ export async function getLandUnitProfile(
     };
   });
 
+  const speciesCountMap = new Map<AnimalSpecies, number>();
+  for (const occupant of currentOccupants) {
+    speciesCountMap.set(
+      occupant.species,
+      (speciesCountMap.get(occupant.species) ?? 0) + 1,
+    );
+  }
+  const occupancyBySpecies = [...speciesCountMap.entries()]
+    .map(([species, count]) => ({ species, count }))
+    .sort((a, b) => compareAnimalSpecies(a.species, b.species));
+
+  const sourceAnimalClassOptions = [...new Set(
+    currentOccupants
+      .map((occupant) => occupant.animalClass?.trim() ?? "")
+      .filter((value) => value.length > 0),
+  )].sort((a, b) => a.localeCompare(b));
+
   return {
     landUnit,
     currentOccupants,
+    occupancyBySpecies,
+    sourceAnimalClassOptions,
     movementHistory,
     movementAnimalOptions,
+    destinationUnitOptions,
   };
 }

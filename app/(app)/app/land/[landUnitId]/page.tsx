@@ -5,6 +5,7 @@ import { BulkMoveAnimalsForm } from "@/components/land/bulk-move-animals-form";
 import { EditLandUnitForm } from "@/components/land/edit-land-unit-form";
 import { MoveAnimalForm } from "@/components/land/move-animal-form";
 import { RemoveAnimalFromUnitForm } from "@/components/land/remove-animal-from-unit-form";
+import { SplitHerdMoveForm } from "@/components/land/split-herd-move-form";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { PageHeader } from "@/components/patterns/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -76,7 +77,15 @@ export default async function LandUnitDetailPage({
   if (!profile) notFound();
   const grazingHistory = await getLandUnitGrazingHistory(context.ranch.id, landUnitId);
 
-  const { landUnit, currentOccupants, movementHistory, movementAnimalOptions } = profile;
+  const {
+    landUnit,
+    currentOccupants,
+    occupancyBySpecies,
+    sourceAnimalClassOptions,
+    movementHistory,
+    movementAnimalOptions,
+    destinationUnitOptions,
+  } = profile;
 
   return (
     <div className="space-y-6">
@@ -150,6 +159,19 @@ export default async function LandUnitDetailPage({
                 <span className="text-foreground-muted">Horses:</span>{" "}
                 <span className="font-semibold">{landUnit.horseOccupancyCount}</span>
               </p>
+              <p className="text-foreground-muted">Species split:</p>
+              {occupancyBySpecies.length ? (
+                <ul className="space-y-0.5 text-xs text-foreground-muted">
+                  {occupancyBySpecies.map((entry) => (
+                    <li key={entry.species}>
+                      {formatAnimalSpecies(entry.species)}:{" "}
+                      <span className="font-semibold text-foreground">{entry.count}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-xs text-foreground-muted">No active occupants yet.</p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -202,6 +224,15 @@ export default async function LandUnitDetailPage({
                   <div className="space-y-2">
                     <p className="text-sm font-semibold">Bulk move by species</p>
                     <BulkMoveAnimalsForm landUnitId={landUnit.id} />
+                  </div>
+                  <div className="h-px bg-border" />
+                  <div className="space-y-2">
+                    <p className="text-sm font-semibold">Split herd move from this unit</p>
+                    <SplitHerdMoveForm
+                      fromLandUnitId={landUnit.id}
+                      destinationUnits={destinationUnitOptions}
+                      animalClassOptions={sourceAnimalClassOptions}
+                    />
                   </div>
                 </div>
               ) : (

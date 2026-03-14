@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth/context";
@@ -123,6 +123,30 @@ const bulkAssignAnimalsSchema = z.object({
   movementReason: movementReasonSchema.default("grazing_rotation"),
   notes: optionalTextSchema,
 });
+
+const splitMoveAnimalsSchema = z
+  .object({
+    fromLandUnitId: z.string().uuid(),
+    toLandUnitId: z.string().uuid(),
+    species: speciesSchema,
+    animalClass: optionalTextSchema,
+    headCount: z.coerce
+      .number()
+      .int("Headcount must be a whole number.")
+      .min(1, "Move at least one head.")
+      .max(5000, "Headcount is too large for one move."),
+    movementReason: movementReasonSchema.default("grazing_rotation"),
+    notes: optionalTextSchema,
+  })
+  .superRefine((value, ctx) => {
+    if (value.fromLandUnitId === value.toLandUnitId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["toLandUnitId"],
+        message: "Select a different destination unit.",
+      });
+    }
+  });
 
 const removeAnimalSchema = z.object({
   landUnitId: z.string().uuid(),
@@ -618,4 +642,172 @@ export async function removeAnimalFromLandUnitAction(
   revalidatePath(`/app/herd/${assignment.animalId}`);
   revalidatePath("/app/herd");
   return { success: "Animal removed from this unit." };
+}
+
+export async function bulkMoveHeadcountFromUnitAction(
+  _prevState: LandActionState,
+  formData: FormData,
+): Promise<LandActionState> {
+  const context = await requireRole(["owner", "manager"]);
+  const parsed = splitMoveAnimalsSchema.safeParse({
+    fromLandUnitId: formData.get("fromLandUnitId"),
+    toLandUnitId: formData.get("toLandUnitId"),
+    species: formData.get("species"),
+    animalClass: formData.get("animalClass"),
+    headCount: formData.get("headCount"),
+    movementReason: formData.get("movementReason"),
+    notes: formData.get("notes"),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid split-move request." };
+  }
+
+  const species = parsed.data.species as AnimalSpecies;
+  const animalClassFilter = normalizeText(parsed.data.animalClass);
+  const speciesLabel = formatAnimalSpecies(species).toLowerCase();
+  const classSuffix = animalClassFilter ? ` (${animalClassFilter})` : "";
+
+  const [fromLandRows, toLandRows] = await Promise.all([
+    db
+      .select({
+        id: landUnits.id,
+        name: landUnits.name,
+      })
+      .from(landUnits)
+      .where(
+        and(
+          eq(landUnits.id, parsed.data.fromLandUnitId),
+          eq(landUnits.ranchId, context.ranch.id),
+        ),
+      )
+      .limit(1),
+    db
+      .select({
+        id: landUnits.id,
+        name: landUnits.name,
+        isActive: landUnits.isActive,
+      })
+      .from(landUnits)
+      .where(
+        and(
+          eq(landUnits.id, parsed.data.toLandUnitId),
+          eq(landUnits.ranchId, context.ranch.id),
+        ),
+      )
+      .limit(1),
+  ]);
+
+  const fromLandUnit = fromLandRows[0];
+  const toLandUnit = toLandRows[0];
+
+  if (!fromLandUnit) {
+    return { error: "Source unit not found for this ranch." };
+  }
+  if (!toLandUnit) {
+    return { error: "Destination unit not found for this ranch." };
+  }
+  if (!toLandUnit.isActive) {
+    return { error: "Cannot move animals into an inactive destination unit." };
+  }
+
+  const animalSelectionConditions = [
+    eq(animalLocationAssignments.ranchId, context.ranch.id),
+    eq(animalLocationAssignments.landUnitId, fromLandUnit.id),
+    eq(animalLocationAssignments.isActive, true),
+    eq(animals.status, "active"),
+    eq(animals.isArchived, false),
+    eq(animals.species, species),
+  ];
+  if (animalClassFilter) {
+    animalSelectionConditions.push(eq(animals.animalClass, animalClassFilter));
+  }
+
+  const [availableRows, selectedRows] = await Promise.all([
+    db
+      .select({
+        count: sql<number>`count(*)::int`,
+      })
+      .from(animalLocationAssignments)
+      .innerJoin(animals, eq(animalLocationAssignments.animalId, animals.id))
+      .where(and(...animalSelectionConditions)),
+    db
+      .select({
+        assignmentId: animalLocationAssignments.id,
+        animalId: animalLocationAssignments.animalId,
+      })
+      .from(animalLocationAssignments)
+      .innerJoin(animals, eq(animalLocationAssignments.animalId, animals.id))
+      .where(and(...animalSelectionConditions))
+      .orderBy(animalLocationAssignments.assignedAt)
+      .limit(parsed.data.headCount),
+  ]);
+
+  const availableCount = availableRows[0]?.count ?? 0;
+  if (availableCount < parsed.data.headCount) {
+    return {
+      error: `Only ${availableCount} active ${speciesLabel}${classSuffix} are currently in ${fromLandUnit.name}.`,
+    };
+  }
+  if (!selectedRows.length) {
+    return { error: `No active ${speciesLabel}${classSuffix} are available to move from this unit.` };
+  }
+
+  const movementTime = new Date();
+  const movementNotes = normalizeText(parsed.data.notes);
+  const movementBatchKey = `split-${movementTime.getTime()}`;
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(animalLocationAssignments)
+      .set({
+        isActive: false,
+        endedAt: movementTime,
+      })
+      .where(
+        inArray(
+          animalLocationAssignments.id,
+          selectedRows.map((row) => row.assignmentId),
+        ),
+      );
+
+    await tx.insert(animalLocationAssignments).values(
+      selectedRows.map((row) => ({
+        ranchId: context.ranch.id,
+        animalId: row.animalId,
+        landUnitId: toLandUnit.id,
+        movementReason: parsed.data.movementReason,
+        movementBatchKey,
+        notes: movementNotes,
+        assignedAt: movementTime,
+        isActive: true,
+        assignedByMembershipId: context.membership.id,
+      })),
+    );
+
+    await tx.insert(animalEvents).values(
+      selectedRows.map((row) => ({
+        ranchId: context.ranch.id,
+        animalId: row.animalId,
+        eventType: "movement" as const,
+        occurredAt: movementTime,
+        summary: movementSummary({
+          toUnit: toLandUnit.name,
+          fromUnit: fromLandUnit.name,
+        }),
+        details: movementNotes,
+        recordedByMembershipId: context.membership.id,
+      })),
+    );
+  });
+
+  revalidatePath("/app");
+  revalidatePath("/app/land");
+  revalidatePath(`/app/land/${fromLandUnit.id}`);
+  revalidatePath(`/app/land/${toLandUnit.id}`);
+  revalidatePath("/app/herd");
+
+  return {
+    success: `Moved ${selectedRows.length} ${speciesLabel}${classSuffix} from ${fromLandUnit.name} to ${toLandUnit.name}.`,
+  };
 }
