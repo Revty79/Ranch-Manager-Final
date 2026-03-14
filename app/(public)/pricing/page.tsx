@@ -19,8 +19,8 @@ export default function PricingPage() {
         </p>
         <h1 className="font-display text-4xl font-semibold">One plan. One operating system.</h1>
         <p className="mx-auto max-w-2xl text-foreground-muted">
-          Ranch Manager Final launches with a single practical subscription for ranch
-          operations teams.
+          Ranch Manager uses one bundled base subscription covering crew, work, time,
+          payroll, herd, and land operations.
         </p>
       </header>
 

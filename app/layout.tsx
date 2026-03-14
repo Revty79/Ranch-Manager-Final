@@ -18,9 +18,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ranch Manager Final",
+  title: "Ranch Manager",
   description:
-    "Ranch operations SaaS for crew, work, time, payroll, and billing access.",
+    "Ranch operations SaaS for crew, work, time, payroll, herd, land, and billing access.",
 };
 
 export default function RootLayout({

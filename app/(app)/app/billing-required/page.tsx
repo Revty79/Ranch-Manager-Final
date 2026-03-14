@@ -60,7 +60,7 @@ export default async function AppBillingRequiredPage({
       <PageHeader
         eyebrow="Activation"
         title="Activate ranch access"
-        description="This ranch is currently blocked from paid product routes. Complete activation below to unlock `/app`."
+        description="This ranch is currently blocked from bundled base product routes. Complete activation below to unlock `/app`."
       />
 
       {billingQueryState === "trial_started" ? (
@@ -92,7 +92,7 @@ export default async function AppBillingRequiredPage({
           </div>
           <CardDescription>
             Ranch Manager requires an active subscription or approved beta lifetime access for
-            production routes.
+            bundled base production routes, including herd and land management.
           </CardDescription>
           <div className="grid gap-2 text-sm sm:grid-cols-2">
             <p>

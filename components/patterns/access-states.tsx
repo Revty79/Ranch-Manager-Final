@@ -45,7 +45,7 @@ export function BillingRequiredShell() {
       <Wallet className="h-6 w-6 text-warning" />
       <StateShell
         title="Billing required"
-        description="Your ranch needs an active subscription to continue using Ranch Manager Final."
+        description="Your ranch needs an active subscription to continue using Ranch Manager."
         actionLabel="Open settings"
         actionHref="/app/settings"
       />

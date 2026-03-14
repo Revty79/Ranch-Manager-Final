@@ -34,6 +34,17 @@
 - `BILLING_COUPON_PEPPER` (optional; falls back to `APP_SECRET`)
 - `PLATFORM_ADMIN_EMAILS` (required for `/admin` access)
 
+## Bundled Base Plan Scope
+
+Current billing architecture is intentionally one subscription path for the full base app:
+
+- crew
+- work orders
+- time tracking
+- payroll
+- herd management foundation
+- land management foundation (including corrals/pens/stalls)
+
 ## Webhook Endpoint
 
 - URL path: `/api/stripe/webhook`

@@ -36,7 +36,7 @@ export default async function CheckoutPage() {
           <CardDescription>
             {trialEligible
               ? `First checkout for this ranch includes a ${trialConfig.trialDays}-day trial in Stripe.`
-              : "Launch billing is a single Stripe subscription path for full product access."}
+              : "Billing uses a single Stripe subscription path for the bundled base ranch operations product."}
           </CardDescription>
           {trialConfig.error ? (
             <p className="rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">

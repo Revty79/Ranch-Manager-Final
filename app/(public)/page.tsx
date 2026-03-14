@@ -52,7 +52,7 @@ export default function LandingPage() {
       <section>
         <SectionHeader
           title="Built for launch operations"
-          description="The first release is intentionally focused: keep the ranch team coordinated and accountable."
+          description="The first release stays practical while covering crew execution plus herd and land foundations."
         />
         <div className="grid gap-4 md:grid-cols-2">
           {marketingContent.featureCards.map((item) => (
@@ -93,9 +93,9 @@ export default function LandingPage() {
           <Card className="bg-surface">
             <CardContent className="space-y-3 py-6">
               <MapPinned className="h-5 w-5 text-accent" />
-              <CardTitle className="text-base">Daily Operations View</CardTitle>
+              <CardTitle className="text-base">Land & Occupancy View</CardTitle>
               <CardDescription>
-                A focused dashboard built for real ranch operating cadence.
+                Pasture and handling-unit records with movement-ready structure.
               </CardDescription>
             </CardContent>
           </Card>

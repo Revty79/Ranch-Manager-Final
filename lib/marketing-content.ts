@@ -1,16 +1,17 @@
 export const marketingContent = {
   hero: {
     eyebrow: "Ranch Operations Platform",
-    title: "Crew, work, time, and payroll in one calm operating system.",
+    title: "Crew, work, time, payroll, herd, and land in one calm operating system.",
     description:
-      "Ranch Manager Final helps owners and managers run daily operations cleanly across teams, tasks, and payroll-ready records.",
+      "Ranch Manager gives each ranch one bundled base system for crew operations, animal records, and land-unit visibility without juggling separate tools.",
   },
   launchFocus: [
     "Organize crew with clear roles and pay setup",
     "Organize work orders with assignment and status visibility",
     "Track shift and task time with dependable workflows",
     "Review payroll summaries with export-ready outputs",
-    "Keep billing access straightforward and understandable",
+    "Track herd lifecycle records for cattle and horses in one model",
+    "Map pasture, lot, corral, pen, and stall units in one land model",
   ],
   trustNotes: [
     "Multi-tenant ranch boundary protection",
@@ -34,24 +35,35 @@ export const marketingContent = {
       title: "Payroll Summary",
       description: "Review and export payroll-ready summaries for your selected period.",
     },
+    {
+      title: "Herd Registry",
+      description: "Track cattle and horses in one practical lifecycle-ready registry.",
+    },
+    {
+      title: "Land Units",
+      description: "Organize pasture, lot, corral, pen, and stall spaces in one shared model.",
+    },
   ],
   pricing: {
-    planName: "Launch Plan",
-    amount: "$9.99",
+    planName: "Bundled Base Plan",
+    amount: "$12.99",
     cadence: "per ranch / month",
-    description: "A single paid path focused on launch operations value.",
+    description: "One subscription unlocks the full base ranch operations package.",
     included: [
       "Team management with role and pay setup",
       "Work-order creation, assignment, and status tracking",
       "Shift and work-order time tracking",
       "Payroll summary and CSV export workflow",
+      "Herd management foundation (cattle and horses in one model)",
+      "Land management foundation (pastures, lots, corrals, pens, stalls)",
+      "Animal event and location history foundation",
       "Owner-managed billing access controls",
     ],
     notIncludedYet: [
-      "Herd management",
-      "Land and grazing planning",
       "Accounting and tax processing",
+      "Internal chat and broad communications",
       "Automation engines or AI assistants",
+      "GIS and hardware integrations",
     ],
   },
 };

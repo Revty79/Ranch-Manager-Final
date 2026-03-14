@@ -21,6 +21,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
                 <li>- Work-order assignment and status visibility</li>
                 <li>- Shift and task time tracking readiness</li>
                 <li>- Payroll summary and billing access foundations</li>
+                <li>- Herd and land unit foundations in the bundled base plan</li>
               </ul>
             </CardContent>
           </Card>

@@ -20,6 +20,12 @@
 - [x] 11_trial_support_and_checkout_cleanup.md
 - [x] 12_settings_customer_portal_and_cancel.md
 - [x] 13_launch_flow_qa.md
+- [x] 14_herd_land_package_foundation.md
+- [x] 15_animal_registry_and_lifecycle.md
+- [x] 16_land_units_movements_corrals_and_horses.md
+- [x] 17_breeding_health_and_protocols.md
+- [x] 18_grazing_rotation_and_stocking.md
+- [x] 19_herd_land_dashboard_reports_and_polish.md
 
 ---
 
@@ -488,3 +494,262 @@ How to verify:
 - 5) Open `/app/settings` as owner and confirm manage/cancel path launches Stripe customer portal when a Stripe customer exists.
 - 6) Open `/app/settings` as non-owner and confirm owner billing controls remain hidden with clear guidance.
 - 7) With an already `active`/`trialing` ranch, try starting checkout from settings and confirm you are directed to use customer portal instead of opening duplicate checkout.
+
+### 14_herd_land_package_foundation.md
+Status: DONE
+Summary:
+- Expanded the bundled base-plan product story across marketing and billing surfaces to explicitly include herd and land operations.
+- Added paid-access app route shells for `/app/herd`, `/app/land`, `/app/herd/breeding`, and `/app/land/grazing`, plus new nav entries.
+- Added ranch-scoped herd/land schema foundation with unified animal, event, group, land-unit, location-assignment, and settings tables.
+- Added practical enums/indexes/constraints for species sharing (cattle + horses), timeline events, unit types, and active location tracking.
+- Added initial herd/land summary query helpers to power polished placeholder dashboards with real ranch-scoped counts.
+- Generated Drizzle migration + snapshot updates and verified lint/typecheck/build pass.
+
+Files changed:
+- lib/db/schema.ts
+- drizzle/0015_overconfident_manta.sql
+- drizzle/meta/_journal.json
+- drizzle/meta/0015_snapshot.json
+- lib/herd-land/queries.ts
+- app/(app)/app/herd/page.tsx
+- app/(app)/app/herd/loading.tsx
+- app/(app)/app/herd/breeding/page.tsx
+- app/(app)/app/land/page.tsx
+- app/(app)/app/land/loading.tsx
+- app/(app)/app/land/grazing/page.tsx
+- lib/site-config.ts
+- lib/marketing-content.ts
+- app/(public)/pricing/page.tsx
+- app/(public)/page.tsx
+- app/(public)/checkout/page.tsx
+- app/(auth)/layout.tsx
+- app/(app)/app/settings/page.tsx
+- app/(app)/app/billing-required/page.tsx
+- app/layout.tsx
+- README.md
+- docs/billing.md
+- docs/demo-walkthrough.md
+
+Commands to run:
+- npm run db:generate
+- npm run lint
+- npm run typecheck
+- npm run build
+
+How to verify:
+- 1) Run `npm run db:migrate`, then start app with `npm run dev`.
+- 2) Open `/pricing` and confirm bundled base messaging includes herd + land in the included feature list.
+- 3) Sign in to a paid/beta-enabled ranch account, open `/app`, and confirm sidebar now includes `Herd` and `Land`.
+- 4) Open `/app/herd` and `/app/land`; confirm polished shell pages load with real summary cards and no access errors.
+- 5) Open `/app/herd/breeding` and `/app/land/grazing`; confirm polished foundation placeholders render inside the app shell.
+- 6) For an unpaid ranch, open `/app/herd` or `/app/land`; confirm redirect to `/app/billing-required` still applies.
+- 7) Run `npm run lint`, `npm run typecheck`, and `npm run build` and confirm all pass.
+
+### 15_animal_registry_and_lifecycle.md
+Status: DONE
+Summary:
+- Replaced the herd placeholder with a working operational registry list at `/app/herd`, including search and filters for species, status, sex, and class/category.
+- Added owner/manager create and edit animal flows with practical fields for cattle and horses (IDs, identity, class, breed, markings, birth/acquisition, lineage, notes).
+- Added full animal detail route at `/app/herd/[animalId]` with identity, status, current location, lifecycle summary, sire/dam links, and event timeline.
+- Implemented structured lifecycle event actions (birth, acquisition, death, sale/disposition, cull, note) that update current animal status while preserving history.
+- Added tenant-safe query/action modules with status-transition guardrails, parent reference validation, and active-location cleanup on terminal lifecycle states.
+- Added schema extensions + migration for lifecycle support fields (`color_markings`, `is_birth_date_estimated`) and new enum values (`cull`, `culled`).
+
+Files changed:
+- app/(app)/app/herd/page.tsx
+- app/(app)/app/herd/loading.tsx
+- app/(app)/app/herd/[animalId]/page.tsx
+- components/herd/create-animal-form.tsx
+- components/herd/edit-animal-form.tsx
+- components/herd/record-animal-event-form.tsx
+- lib/herd/constants.ts
+- lib/herd/queries.ts
+- lib/herd/actions.ts
+- lib/db/schema.ts
+- drizzle/0016_fine_masque.sql
+- drizzle/meta/_journal.json
+- drizzle/meta/0016_snapshot.json
+
+Commands to run:
+- npm run db:generate
+- npm run lint
+- npm run typecheck
+- npm run build
+
+How to verify:
+- 1) Run `npm run db:migrate`, then start app with `npm run dev` and log in as owner or manager.
+- 2) Open `/app/herd`, add an animal with tag/internal ID plus optional lifecycle fields, and confirm it appears in the registry table.
+- 3) Use search + filters (`species`, `status`, `sex`, `class`) and confirm table rows update to match selections.
+- 4) Open `/app/herd/[animalId]` from the registry `Open` action and confirm identity, current location, lineage links, and lifecycle summary render.
+- 5) On detail page, record lifecycle events (`birth`, `acquisition`, `death`, `sale/disposition`, `cull`, `note`) and confirm timeline entries appear with status updates.
+- 6) Edit the animal record (including sire/dam links and status) and confirm updates persist and guardrails prevent invalid lineage/status changes.
+- 7) Log in as a worker role and confirm herd registry/detail are viewable while create/edit/event controls are hidden.
+- 8) Run `npm run lint`, `npm run typecheck`, and `npm run build` and confirm pass.
+
+### 16_land_units_movements_corrals_and_horses.md
+Status: DONE
+Summary:
+- Replaced the land placeholder with a production-style `/app/land` inventory surface including search, unit-type/activity filters, occupancy counts, and horse-occupancy visibility.
+- Added owner/manager create and edit flows for land units (name/code/type, acreage/grazeable acreage, active status, water/fencing summaries, notes).
+- Added detailed land-unit route `/app/land/[landUnitId]` with identity, acreage, “who is here now” occupancy table, and assignment history timeline.
+- Implemented server-side movement workflows to assign animals, move between units, and remove occupants while preserving structured assignment history.
+- Movement actions now create structured animal movement events and revalidate herd + land views so current location/occupancy refresh coherently.
+- Kept one shared system for pasture/lot/corral/pen/stall and horse-friendly labels without introducing a separate horse subsystem.
+
+Files changed:
+- app/(app)/app/land/page.tsx
+- app/(app)/app/land/loading.tsx
+- app/(app)/app/land/[landUnitId]/page.tsx
+- app/(app)/app/land/[landUnitId]/loading.tsx
+- components/land/create-land-unit-form.tsx
+- components/land/edit-land-unit-form.tsx
+- components/land/move-animal-form.tsx
+- components/land/remove-animal-from-unit-form.tsx
+- lib/land/constants.ts
+- lib/land/queries.ts
+- lib/land/actions.ts
+
+Commands to run:
+- npm run lint
+- npm run typecheck
+- npm run build
+
+How to verify:
+- 1) Start app with `npm run dev`, sign in as owner/manager, and open `/app/land`.
+- 2) Create units for mixed scales (example: pasture, corral, stall) and confirm rows render with type, acreage, and occupancy data.
+- 3) Use search + unit-type/activity filters on `/app/land` and confirm list updates correctly.
+- 4) Open `/app/land/[landUnitId]`, use “Move animal” to assign or move an active animal into the unit, and confirm occupancy updates immediately.
+- 5) From current occupancy table, use `Remove` on an occupant and confirm animal leaves current-occupancy view while history retains the movement row.
+- 6) Open the moved animal’s `/app/herd/[animalId]` detail and confirm current location reflects the latest assignment state.
+- 7) Log in as worker and confirm land inventory/detail remain viewable but create/edit/movement controls are hidden.
+- 8) Run `npm run lint`, `npm run typecheck`, and `npm run build` and confirm pass.
+
+### 17_breeding_health_and_protocols.md
+Status: DONE
+Summary:
+- Added structured breeding, pregnancy-check, and health record actions/forms on animal detail using tenant-safe server actions and event-data payloads.
+- Expanded `/app/herd/[animalId]` with reproductive timeline summaries (last breeding, latest pregnancy outcome, expected birth planning, offspring linkage) and recent health activity.
+- Rebuilt `/app/herd/breeding` into a working protocols workspace with due-soon/overdue visibility, recent breeding/health activity, and trust framing around configurable reminders.
+- Added ranch-scoped protocol template model and management flows (create + activate/pause) without hardcoding a fixed national schedule.
+- Added due-list calculation logic that evaluates active protocol templates against ranch animals and latest matching event history.
+- Kept guidance operational (not veterinary advice), preserved tenant boundaries, and validated quality gates after migration.
+
+Files changed:
+- lib/db/schema.ts
+- drizzle/0017_magenta_kat_farrell.sql
+- drizzle/meta/_journal.json
+- drizzle/meta/0017_snapshot.json
+- lib/herd/constants.ts
+- lib/herd/queries.ts
+- lib/herd/protocol-queries.ts
+- lib/herd/records-actions.ts
+- components/herd/breeding-record-form.tsx
+- components/herd/pregnancy-check-form.tsx
+- components/herd/health-record-form.tsx
+- components/herd/protocol-template-form.tsx
+- components/herd/toggle-protocol-template-form.tsx
+- app/(app)/app/herd/page.tsx
+- app/(app)/app/herd/[animalId]/page.tsx
+- app/(app)/app/herd/breeding/page.tsx
+
+Commands to run:
+- npm run db:generate
+- npm run lint
+- npm run typecheck
+- npm run build
+
+How to verify:
+- 1) Run `npm run db:migrate`, start app with `npm run dev`, and sign in as owner/manager.
+- 2) Open `/app/herd/[animalId]` for an existing animal and record: (a) breeding event, (b) pregnancy check, and (c) health record; confirm each appears in timeline.
+- 3) On the same detail page, confirm reproductive summary updates (last breeding timestamp, latest pregnancy outcome, expected birth estimate, offspring link when set).
+- 4) Open `/app/herd/breeding`, create protocol templates with different interval/due-soon settings, and confirm they appear in the templates table.
+- 5) Confirm due-list rows populate with `overdue`/`due soon` badges and link back to animal detail.
+- 6) Use `Pause` / `Activate` on a template and confirm due-list visibility adjusts after refresh/revalidation.
+- 7) Log in as worker and confirm breeding/health/protocol edit controls are hidden while read surfaces remain viewable.
+- 8) Run `npm run lint`, `npm run typecheck`, and `npm run build` and confirm pass.
+
+### 18_grazing_rotation_and_stocking.md
+Status: DONE
+Summary:
+- Added grazing-planning data model with `grazing_periods` and `grazing_period_animals` plus new land-unit planning inputs (forage lbs/acre, utilization target, rest target, seasonal notes).
+- Built ranch-configurable grazing assumptions management backed by `herd_land_settings.grazingDefaults` (demand basis, species multipliers, utilization/rest defaults, class overrides).
+- Replaced `/app/land/grazing` placeholder with a full operational workspace: assumptions form, grazing-period logging, active-use board, rotation-soon/overdue visibility, and rest tracking.
+- Implemented transparent estimate logic (available forage, demand/day, estimated grazing days, projected move date) with explicit missing-input messaging when precision is unavailable.
+- Added grazing-period completion workflow and land-unit grazing history surface on `/app/land/[landUnitId]` to preserve timeline and rest-window context.
+- Updated land create/edit flows and detail to include practical grazing inputs while keeping formulas visible and non-authoritative.
+
+Files changed:
+- lib/db/schema.ts
+- drizzle/0018_furry_bloodscream.sql
+- drizzle/meta/_journal.json
+- drizzle/meta/0018_snapshot.json
+- lib/land/actions.ts
+- lib/land/queries.ts
+- components/land/create-land-unit-form.tsx
+- components/land/edit-land-unit-form.tsx
+- app/(app)/app/land/page.tsx
+- app/(app)/app/land/[landUnitId]/page.tsx
+- app/(app)/app/land/grazing/page.tsx
+- app/(app)/app/land/grazing/loading.tsx
+- lib/grazing/settings.ts
+- lib/grazing/actions.ts
+- lib/grazing/queries.ts
+- components/grazing/grazing-assumptions-form.tsx
+- components/grazing/create-grazing-period-form.tsx
+- components/grazing/complete-grazing-period-form.tsx
+
+Commands to run:
+- npm run db:generate
+- npm run lint
+- npm run typecheck
+- npm run build
+
+How to verify:
+- 1) Run `npm run db:migrate`, then `npm run dev`, sign in as owner/manager, and open `/app/land/grazing`.
+- 2) Save ranch assumptions in the assumptions card (demand basis, utilization/rest defaults, multipliers) and confirm success state.
+- 3) Record a grazing period linking a land unit plus optional animals/group; confirm it appears in active/recent grazing views.
+- 4) For an active period with sufficient inputs (grazeable acreage + forage lbs/acre + participants), confirm estimate snapshot and projected move date render.
+- 5) For periods missing key inputs, confirm UI shows explicit `Missing: ...` messaging instead of fake precision.
+- 6) Use `Mark completed` on an active period and confirm it moves into history/rest tracking updates.
+- 7) Open `/app/land/[landUnitId]` and confirm grazing period history table appears with linked-animal counts and period windows.
+- 8) Run `npm run lint`, `npm run typecheck`, and `npm run build` and confirm pass.
+
+### 19_herd_land_dashboard_reports_and_polish.md
+Status: DONE
+Summary:
+- Added herd/land operational visibility to `/app` with new summary cards, due-attention table, and recent movement table so the bundled package is visible from dashboard home.
+- Added practical CSV exports for launch reporting: herd inventory, herd due list, current occupancy by unit, movement history, and grazing/rest summary by unit.
+- Polished herd/land surfaces with loading coverage (`/app/herd/[animalId]`, `/app/herd/breeding`) and role-aware action visibility while preserving paid-access and tenant boundaries.
+- Improved demo seed coherence with realistic herd/land records (cattle + horse, occupancy, grazing period, protocol activity) and idempotent movement seeding behavior.
+- Updated product/demo docs so bundled herd/land functionality, exports, and walkthrough steps match the shipped app behavior.
+
+Files changed:
+- app/(app)/app/page.tsx
+- app/(app)/app/herd/page.tsx
+- app/(app)/app/herd/[animalId]/loading.tsx
+- app/(app)/app/herd/breeding/loading.tsx
+- app/(app)/app/herd/export/route.ts
+- app/(app)/app/land/page.tsx
+- app/(app)/app/land/grazing/page.tsx
+- app/(app)/app/land/export/route.ts
+- lib/herd/reporting.ts
+- lib/land/reporting.ts
+- scripts/seed-demo.ts
+- README.md
+- docs/demo-walkthrough.md
+
+Commands to run:
+- npm run lint
+- npm run build
+- npm run typecheck
+- ALLOW_DEMO_SEED=true npm run seed:demo
+
+How to verify:
+- 1) Start app with `npm run dev` and sign in as owner/manager on a paid/beta-enabled ranch.
+- 2) Open `/app` and confirm herd/land stats render (active animals, due attention, occupied units, active grazing) plus due-attention and recent-movement tables.
+- 3) Open `/app/herd` and click `Export inventory CSV` and `Export due-list CSV`; confirm both downloads succeed.
+- 4) Open `/app/land` and click `Export occupancy CSV` and `Export movement CSV`; confirm both downloads succeed.
+- 5) Open `/app/land/grazing` and click `Export grazing/rest CSV`; confirm download succeeds and rows reflect rest-state data.
+- 6) As worker role, revisit herd/land pages and confirm management actions/exports are hidden while read surfaces remain available.
+- 7) Run `ALLOW_DEMO_SEED=true npm run seed:demo`, then verify seeded herd/land activity appears across `/app`, `/app/herd`, `/app/land`, and `/app/land/grazing`.
+- 8) Run `npm run lint`, `npm run build`, and `npm run typecheck`; confirm all pass.

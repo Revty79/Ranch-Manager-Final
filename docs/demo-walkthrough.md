@@ -22,4 +22,15 @@ Demo credentials (default):
 5. Create and assign work orders (`/app/work-orders`).
 6. Track shift and task time (`/app/time`).
 7. Review payroll and export CSV (`/app/payroll`).
-8. Confirm billing/access state messaging in settings and billing-required views.
+8. Open app dashboard (`/app`) and confirm herd/land visibility cards plus due-attention and recent-movement sections.
+9. Manage animals in registry/detail views (`/app/herd`, `/app/herd/[animalId]`) and confirm lifecycle, breeding, and health timeline updates.
+10. Open breeding workspace (`/app/herd/breeding`) and review due/overdue protocol items.
+11. Manage land-unit occupancy/movement (`/app/land`, `/app/land/[landUnitId]`) and confirm movement history coherence.
+12. Open grazing workspace (`/app/land/grazing`) and review active periods, rest tracking, and estimate transparency.
+13. Export operational CSVs:
+    - herd inventory: `/app/herd/export?type=inventory`
+    - herd due list: `/app/herd/export?type=due`
+    - land occupancy: `/app/land/export?type=occupancy`
+    - land movement: `/app/land/export?type=movement`
+    - land grazing/rest: `/app/land/export?type=grazing_rest`
+14. Confirm billing/access state messaging in settings and billing-required views.

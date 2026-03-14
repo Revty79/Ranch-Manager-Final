@@ -10,5 +10,7 @@ export const appNav = [
   { label: "Work Orders", href: "/app/work-orders" },
   { label: "Time", href: "/app/time" },
   { label: "Payroll", href: "/app/payroll" },
+  { label: "Herd", href: "/app/herd" },
+  { label: "Land", href: "/app/land" },
   { label: "Settings", href: "/app/settings" },
 ];

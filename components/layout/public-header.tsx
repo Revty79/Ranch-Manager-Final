@@ -14,7 +14,7 @@ export function PublicHeader() {
     <header className="sticky top-0 z-40 border-b bg-surface/90 backdrop-blur">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="font-display text-lg font-semibold tracking-tight">
-          Ranch Manager Final
+          Ranch Manager
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
           {publicNav.map((item) => (

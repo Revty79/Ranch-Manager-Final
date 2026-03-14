@@ -74,7 +74,7 @@ export default async function SettingsPage({
       <PageHeader
         eyebrow="Settings"
         title="Account & Billing"
-        description="Ranch identity, role context, and subscription access state."
+        description="Ranch identity, role context, and bundled base subscription access state."
       />
 
       {billingQueryState === "success" ? (
@@ -128,7 +128,8 @@ export default async function SettingsPage({
           <CardContent className="space-y-3 py-6">
             <CardTitle>Subscription Access</CardTitle>
             <CardDescription>
-              Paid access is required for core app routes unless beta lifetime access is enabled.
+              Paid access unlocks the bundled base app (crew, work, time, payroll, herd, and land)
+              unless beta lifetime access is enabled.
             </CardDescription>
             <div className="space-y-2 text-sm">
               <p>
@@ -146,7 +147,7 @@ export default async function SettingsPage({
               </p>
               <p>
                 <span className="text-foreground-muted">Plan:</span>{" "}
-                {context.ranch.subscriptionPlanKey ?? "Launch Plan"}
+                {context.ranch.subscriptionPlanKey ?? "Bundled Base Plan"}
               </p>
               <p>
                 <span className="text-foreground-muted">Stripe customer:</span>{" "}

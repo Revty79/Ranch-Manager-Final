@@ -1,7 +1,7 @@
 # Ranch Manager Final
 
 Ranch Manager Final is a production-minded Next.js SaaS build for ranch operations:
-crew, work orders, time, payroll visibility, and billing access controls.
+crew, work orders, time, payroll visibility, herd records, land units, grazing planning, and billing access controls.
 
 ## Stack
 
@@ -9,6 +9,16 @@ crew, work orders, time, payroll visibility, and billing access controls.
 - Tailwind CSS
 - Drizzle ORM (PostgreSQL-ready)
 - Reusable UI primitives + app/public shells
+
+## Bundled Base Scope
+
+- Team management
+- Work orders
+- Time tracking
+- Payroll visibility + CSV export
+- Herd registry, lifecycle, breeding, health protocols, due-list visibility, and CSV exports
+- Land units, occupancy/movement history, grazing/rest planning, and CSV exports
+- Billing activation and access controls
 
 ## Local Setup
 
@@ -105,6 +115,10 @@ Default seeded credentials:
 - `manager@demoranch.local`
 - `worker@demoranch.local`
 - password: `DemoRanch123!`
+
+The seed also creates practical herd/land demo data (cattle + horse records, land-unit occupancy,
+movement history, grazing period, and breeding/health protocol activity) so `/app`, `/app/herd`,
+`/app/land`, and `/app/land/grazing` are walkthrough-ready.
 
 ## Deploy Notes
 
