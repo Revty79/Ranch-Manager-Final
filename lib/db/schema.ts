@@ -48,6 +48,10 @@ export const workOrderPriorityEnum = pgEnum("work_order_priority", [
   "normal",
   "high",
 ]);
+export const ranchMessagePriorityEnum = pgEnum("ranch_message_priority", [
+  "normal",
+  "urgent",
+]);
 export const workOrderIncentiveTimerTypeEnum = pgEnum("work_order_incentive_timer_type", [
   "none",
   "hours",
@@ -328,6 +332,80 @@ export const workOrders = pgTable(
     index("work_orders_due_idx").on(table.dueAt),
     index("work_orders_completed_idx").on(table.completedAt),
     index("work_orders_incentive_ends_idx").on(table.incentiveEndsAt),
+  ],
+);
+
+export const ranchMessages = pgTable(
+  "ranch_messages",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ranchId: uuid("ranch_id")
+      .references(() => ranches.id, { onDelete: "cascade" })
+      .notNull(),
+    authorMembershipId: uuid("author_membership_id").references(
+      () => ranchMemberships.id,
+      { onDelete: "set null" },
+    ),
+    parentMessageId: uuid("parent_message_id").references(
+      (): AnyPgColumn => ranchMessages.id,
+      { onDelete: "set null" },
+    ),
+    title: text("title"),
+    body: text("body").notNull(),
+    priority: ranchMessagePriorityEnum("priority").default("normal").notNull(),
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("ranch_messages_ranch_idx").on(table.ranchId),
+    index("ranch_messages_parent_idx").on(table.parentMessageId),
+    index("ranch_messages_priority_idx").on(table.priority),
+    index("ranch_messages_created_idx").on(table.createdAt),
+    index("ranch_messages_archived_idx").on(table.ranchId, table.archivedAt),
+  ],
+);
+
+export const ranchDirectMessages = pgTable(
+  "ranch_direct_messages",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ranchId: uuid("ranch_id")
+      .references(() => ranches.id, { onDelete: "cascade" })
+      .notNull(),
+    senderMembershipId: uuid("sender_membership_id").references(
+      () => ranchMemberships.id,
+      { onDelete: "set null" },
+    ),
+    recipientMembershipId: uuid("recipient_membership_id").references(
+      () => ranchMemberships.id,
+      { onDelete: "set null" },
+    ),
+    body: text("body").notNull(),
+    isRead: boolean("is_read").default(false).notNull(),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("ranch_direct_messages_ranch_idx").on(table.ranchId),
+    index("ranch_direct_messages_sender_idx").on(table.senderMembershipId),
+    index("ranch_direct_messages_recipient_idx").on(table.recipientMembershipId),
+    index("ranch_direct_messages_created_idx").on(table.createdAt),
+    index("ranch_direct_messages_unread_idx").on(
+      table.recipientMembershipId,
+      table.isRead,
+    ),
+    index("ranch_direct_messages_archived_idx").on(table.ranchId, table.archivedAt),
   ],
 );
 
@@ -894,6 +972,7 @@ export type CouponGrantType = (typeof couponGrantTypeEnum.enumValues)[number];
 export type PayType = (typeof payTypeEnum.enumValues)[number];
 export type WorkOrderStatus = (typeof workOrderStatusEnum.enumValues)[number];
 export type WorkOrderPriority = (typeof workOrderPriorityEnum.enumValues)[number];
+export type RanchMessagePriority = (typeof ranchMessagePriorityEnum.enumValues)[number];
 export type WorkOrderIncentiveTimerType =
   (typeof workOrderIncentiveTimerTypeEnum.enumValues)[number];
 export type PayrollPeriodStatus = (typeof payrollPeriodStatusEnum.enumValues)[number];

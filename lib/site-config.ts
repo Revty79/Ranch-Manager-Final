@@ -7,6 +7,7 @@ export const publicNav = [
 export const appNav = [
   { label: "Dashboard", href: "/app" },
   { label: "Team", href: "/app/team" },
+  { label: "Communication", href: "/app/communication" },
   { label: "Work Orders", href: "/app/work-orders" },
   { label: "Time", href: "/app/time" },
   { label: "Payroll", href: "/app/payroll" },

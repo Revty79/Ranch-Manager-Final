@@ -43,6 +43,10 @@ export const marketingContent = {
       title: "Land Units",
       description: "Organize pasture, lot, corral, pen, and stall spaces in one shared model.",
     },
+    {
+      title: "Ranch Communication",
+      description: "Keep owners, managers, and workers aligned with ranch-scoped message threads.",
+    },
   ],
   pricing: {
     planName: "Bundled Base Plan",
@@ -57,11 +61,11 @@ export const marketingContent = {
       "Herd management foundation (cattle and horses in one model)",
       "Land management foundation (pastures, lots, corrals, pens, stalls)",
       "Animal event and location history foundation",
+      "Internal ranch communication threads and private messages",
       "Owner-managed billing access controls",
     ],
     notIncludedYet: [
       "Accounting and tax processing",
-      "Internal chat and broad communications",
       "Automation engines or AI assistants",
       "GIS and hardware integrations",
     ],
