@@ -6,7 +6,10 @@ import { SubmitButton } from "@/components/auth/submit-button";
 import { FormFieldShell } from "@/components/patterns/form-field-shell";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import type { WorkOrderIncentiveTimerType } from "@/lib/db/schema";
+import type {
+  WorkOrderCompensationType,
+  WorkOrderIncentiveTimerType,
+} from "@/lib/db/schema";
 import { updateWorkOrderAction, type WorkOrderActionState } from "@/lib/work-orders/actions";
 import type { AssignableMember, WorkOrderDetail } from "@/lib/work-orders/queries";
 
@@ -30,6 +33,9 @@ export function EditWorkOrderForm({
 }) {
   const router = useRouter();
   const [state, formAction] = useActionState(updateWorkOrderAction, initialState);
+  const [compensationType, setCompensationType] = useState<WorkOrderCompensationType>(
+    workOrder.compensationType,
+  );
   const [incentiveTimerType, setIncentiveTimerType] = useState<WorkOrderIncentiveTimerType>(
     workOrder.incentiveTimerType,
   );
@@ -77,6 +83,39 @@ export function EditWorkOrderForm({
       <FormFieldShell label="Description" className="md:col-span-2">
         <Textarea name="description" defaultValue={workOrder.description ?? ""} />
       </FormFieldShell>
+      <FormFieldShell
+        label="Work-order pay"
+        hint="Choose regular tracked work or a one-time flat amount paid when the order is completed."
+      >
+        <select
+          name="compensationType"
+          value={compensationType}
+          onChange={(event) =>
+            setCompensationType(event.target.value as WorkOrderCompensationType)
+          }
+          className="h-10 w-full rounded-xl border bg-surface px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <option value="standard">Regular work order</option>
+          <option value="flat_amount">Flat amount only</option>
+        </select>
+      </FormFieldShell>
+      {compensationType === "flat_amount" ? (
+        <FormFieldShell
+          label="Flat amount"
+          hint="Pays once when completed. If multiple people are assigned, payroll splits the amount across eligible assignees."
+        >
+          <Input
+            name="flatPay"
+            type="number"
+            step="0.01"
+            min="0.01"
+            defaultValue={(workOrder.flatPayCents / 100).toFixed(2)}
+            required
+          />
+        </FormFieldShell>
+      ) : (
+        <input type="hidden" name="flatPay" value="0" />
+      )}
       <FormFieldShell
         label="Incentive pay (optional)"
         hint="If set above $0, choose an incentive timer to make it earnable."

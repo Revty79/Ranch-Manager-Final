@@ -48,6 +48,14 @@ export const workOrderPriorityEnum = pgEnum("work_order_priority", [
   "normal",
   "high",
 ]);
+export const workOrderCompensationTypeEnum = pgEnum(
+  "work_order_compensation_type",
+  ["standard", "flat_amount"],
+);
+export const workOrderCompletionReviewStatusEnum = pgEnum(
+  "work_order_completion_review_status",
+  ["pending", "approved", "changes_requested"],
+);
 export const ranchMessagePriorityEnum = pgEnum("ranch_message_priority", [
   "normal",
   "urgent",
@@ -309,6 +317,10 @@ export const workOrders = pgTable(
     priority: workOrderPriorityEnum("priority").default("normal").notNull(),
     dueAt: timestamp("due_at", { withTimezone: true }),
     completedAt: timestamp("completed_at", { withTimezone: true }),
+    compensationType: workOrderCompensationTypeEnum("compensation_type")
+      .default("standard")
+      .notNull(),
+    flatPayCents: integer("flat_pay_cents").default(0).notNull(),
     incentivePayCents: integer("incentive_pay_cents").default(0).notNull(),
     incentiveTimerType: workOrderIncentiveTimerTypeEnum("incentive_timer_type")
       .default("none")
@@ -332,6 +344,54 @@ export const workOrders = pgTable(
     index("work_orders_due_idx").on(table.dueAt),
     index("work_orders_completed_idx").on(table.completedAt),
     index("work_orders_incentive_ends_idx").on(table.incentiveEndsAt),
+  ],
+);
+
+export const workOrderCompletionReviews = pgTable(
+  "work_order_completion_reviews",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ranchId: uuid("ranch_id")
+      .references(() => ranches.id, { onDelete: "cascade" })
+      .notNull(),
+    workOrderId: uuid("work_order_id")
+      .references(() => workOrders.id, { onDelete: "cascade" })
+      .notNull(),
+    requestedByMembershipId: uuid("requested_by_membership_id").references(
+      () => ranchMemberships.id,
+      { onDelete: "set null" },
+    ),
+    requestedAt: timestamp("requested_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    status: workOrderCompletionReviewStatusEnum("status").default("pending").notNull(),
+    reviewedByMembershipId: uuid("reviewed_by_membership_id").references(
+      () => ranchMemberships.id,
+      { onDelete: "set null" },
+    ),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    managerNotes: text("manager_notes"),
+    checklistCompletionVerified: boolean("checklist_completion_verified")
+      .default(false)
+      .notNull(),
+    checklistQualityVerified: boolean("checklist_quality_verified")
+      .default(false)
+      .notNull(),
+    checklistCleanupVerified: boolean("checklist_cleanup_verified")
+      .default(false)
+      .notNull(),
+    checklistFollowUpVerified: boolean("checklist_follow_up_verified")
+      .default(false)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("work_order_completion_reviews_ranch_idx").on(table.ranchId),
+    index("work_order_completion_reviews_status_idx").on(table.status),
+    index("work_order_completion_reviews_requested_idx").on(table.requestedAt),
+    uniqueIndex("work_order_completion_reviews_work_order_uidx").on(table.workOrderId),
   ],
 );
 
@@ -972,6 +1032,10 @@ export type CouponGrantType = (typeof couponGrantTypeEnum.enumValues)[number];
 export type PayType = (typeof payTypeEnum.enumValues)[number];
 export type WorkOrderStatus = (typeof workOrderStatusEnum.enumValues)[number];
 export type WorkOrderPriority = (typeof workOrderPriorityEnum.enumValues)[number];
+export type WorkOrderCompensationType =
+  (typeof workOrderCompensationTypeEnum.enumValues)[number];
+export type WorkOrderCompletionReviewStatus =
+  (typeof workOrderCompletionReviewStatusEnum.enumValues)[number];
 export type RanchMessagePriority = (typeof ranchMessagePriorityEnum.enumValues)[number];
 export type WorkOrderIncentiveTimerType =
   (typeof workOrderIncentiveTimerTypeEnum.enumValues)[number];

@@ -61,6 +61,43 @@ function formatMoney(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
 }
 
+function formatCompensation(order: {
+  compensationType: "standard" | "flat_amount";
+  flatPayCents: number;
+}): string {
+  if (order.compensationType === "flat_amount") {
+    return `Flat ${formatMoney(order.flatPayCents)}`;
+  }
+
+  return "Regular";
+}
+
+function reviewVariant(status: "pending" | "approved" | "changes_requested" | null) {
+  if (status === "pending") {
+    return "warning";
+  }
+  if (status === "approved") {
+    return "success";
+  }
+  if (status === "changes_requested") {
+    return "danger";
+  }
+
+  return "neutral";
+}
+
+function formatReviewStatus(status: "pending" | "approved" | "changes_requested" | null): string {
+  if (!status) {
+    return "Not required";
+  }
+
+  if (status === "changes_requested") {
+    return "Changes requested";
+  }
+
+  return `Review ${status}`;
+}
+
 export default async function WorkOrdersPage({
   searchParams,
 }: {
@@ -89,14 +126,20 @@ export default async function WorkOrdersPage({
                 <CardContent className="space-y-2 py-5">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <CardTitle className="text-base">{order.title}</CardTitle>
-                    <Badge variant={statusVariant(order.status)}>
-                      {formatStatus(order.status)}
-                    </Badge>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant={statusVariant(order.status)}>
+                        {formatStatus(order.status)}
+                      </Badge>
+                      <Badge variant={reviewVariant(order.completionReviewStatus)}>
+                        {formatReviewStatus(order.completionReviewStatus)}
+                      </Badge>
+                    </div>
                   </div>
                   <CardDescription>{order.description ?? "No details provided yet."}</CardDescription>
                   <div className="flex flex-wrap items-center gap-3 text-xs text-foreground-muted">
                     <span>Priority: {order.priority}</span>
                     <span>Due: {formatDate(order.dueAt, context.user.timeZone)}</span>
+                    <span>Pay: {formatCompensation(order)}</span>
                     <span>
                       Incentive:{" "}
                       {order.incentivePayCents > 0
@@ -134,6 +177,9 @@ export default async function WorkOrdersPage({
     }),
     getAssignableMembersForRanch(context.ranch.id),
   ]);
+  const pendingReviewOrders = workOrders.filter(
+    (order) => order.completionReviewStatus === "pending",
+  );
 
   return (
     <div className="space-y-6">
@@ -154,6 +200,38 @@ export default async function WorkOrdersPage({
           <CreateWorkOrderForm members={members} />
         </CardContent>
       </Card>
+
+      {pendingReviewOrders.length ? (
+        <Card>
+          <CardContent className="space-y-4 py-6">
+            <div>
+              <CardTitle className="text-base">Needs Manager Review</CardTitle>
+              <CardDescription>
+                Crew-completed work orders waiting on inspection and sign-off.
+              </CardDescription>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              {pendingReviewOrders.slice(0, 6).map((order) => (
+                <Link
+                  key={order.id}
+                  href={`/app/work-orders/${order.id}`}
+                  className="rounded-xl border bg-surface p-3 hover:bg-accent-soft/40"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold">{order.title}</span>
+                    <Badge variant="warning">Review pending</Badge>
+                  </div>
+                  <p className="mt-1 text-sm text-foreground-muted">
+                    {order.assignees.length
+                      ? order.assignees.map((assignee) => assignee.fullName).join(", ")
+                      : "No assignees listed"}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -200,6 +278,8 @@ export default async function WorkOrdersPage({
                   <TableHeaderCell>Priority</TableHeaderCell>
                   <TableHeaderCell>Assignees</TableHeaderCell>
                   <TableHeaderCell>Due</TableHeaderCell>
+                  <TableHeaderCell>Pay</TableHeaderCell>
+                  <TableHeaderCell>Review</TableHeaderCell>
                   <TableHeaderCell>Incentive</TableHeaderCell>
                   <TableHeaderCell className="text-right">Actions</TableHeaderCell>
                 </TableRow>
@@ -220,6 +300,12 @@ export default async function WorkOrdersPage({
                         : "Unassigned"}
                     </TableCell>
                     <TableCell>{formatDate(order.dueAt, context.user.timeZone)}</TableCell>
+                    <TableCell>{formatCompensation(order)}</TableCell>
+                    <TableCell>
+                      <Badge variant={reviewVariant(order.completionReviewStatus)}>
+                        {formatReviewStatus(order.completionReviewStatus)}
+                      </Badge>
+                    </TableCell>
                     <TableCell>
                       <IncentiveCountdown
                         incentivePayCents={order.incentivePayCents}

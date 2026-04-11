@@ -7,6 +7,7 @@ import { requireAppContext } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
 import {
   ranchMemberships,
+  workOrderCompletionReviews,
   workOrderAssignments,
   workOrders,
   workTimeEntries,
@@ -279,6 +280,7 @@ export async function startWorkSessionAction(
     .select({
       id: workOrders.id,
       status: workOrders.status,
+      compensationType: workOrders.compensationType,
     })
     .from(workOrders)
     .where(
@@ -292,6 +294,13 @@ export async function startWorkSessionAction(
 
   if (!workOrder) {
     return { error: "Work order is unavailable for time tracking." };
+  }
+
+  if (workOrder.compensationType === "flat_amount") {
+    return {
+      error:
+        "This work order uses a flat amount payout. Complete it without starting a work timer.",
+    };
   }
 
   if (
@@ -432,6 +441,8 @@ export async function completeWorkOrderAction(
   }
 
   const completionTime = new Date();
+  const requiresManagerReview =
+    context.membership.role === "worker" || context.membership.role === "seasonal_worker";
   await db.transaction(async (tx) => {
     if (activeWork && activeWork.workOrderId === parsed.data.workOrderId) {
       await tx
@@ -450,6 +461,46 @@ export async function completeWorkOrderAction(
         updatedAt: completionTime,
       })
       .where(eq(workOrders.id, parsed.data.workOrderId));
+
+    const [existingReview] = await tx
+      .select({ id: workOrderCompletionReviews.id })
+      .from(workOrderCompletionReviews)
+      .where(eq(workOrderCompletionReviews.workOrderId, parsed.data.workOrderId))
+      .limit(1);
+
+    if (requiresManagerReview) {
+      if (existingReview) {
+        await tx
+          .update(workOrderCompletionReviews)
+          .set({
+            requestedByMembershipId: context.membership.id,
+            requestedAt: completionTime,
+            status: "pending",
+            reviewedByMembershipId: null,
+            reviewedAt: null,
+            managerNotes: null,
+            checklistCompletionVerified: false,
+            checklistQualityVerified: false,
+            checklistCleanupVerified: false,
+            checklistFollowUpVerified: false,
+            updatedAt: completionTime,
+          })
+          .where(eq(workOrderCompletionReviews.id, existingReview.id));
+      } else {
+        await tx.insert(workOrderCompletionReviews).values({
+          ranchId: context.ranch.id,
+          workOrderId: parsed.data.workOrderId,
+          requestedByMembershipId: context.membership.id,
+          requestedAt: completionTime,
+          status: "pending",
+          updatedAt: completionTime,
+        });
+      }
+    } else if (existingReview) {
+      await tx
+        .delete(workOrderCompletionReviews)
+        .where(eq(workOrderCompletionReviews.id, existingReview.id));
+    }
   });
 
   revalidatePath("/app/time");

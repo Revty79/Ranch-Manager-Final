@@ -44,6 +44,7 @@ export function buildPayrollCsv(rows: PayrollSummaryRow[]): string {
     "Pay Rate",
     "Hours",
     "Base Pay",
+    "Flat Work Pay",
     "Incentive Pay",
     "Advances",
     "Final Check",
@@ -60,6 +61,7 @@ export function buildPayrollCsv(rows: PayrollSummaryRow[]): string {
       centsToDollars(row.payRateCents),
       row.hoursWorked.toFixed(2),
       centsToDollars(row.basePayCents),
+      centsToDollars(row.flatWorkPayCents),
       centsToDollars(row.incentivePayCents),
       centsToDollars(row.payAdvanceCents),
       centsToDollars(row.totalPayCents - row.payAdvanceCents),
@@ -95,6 +97,7 @@ export function buildPayrollBreakdownCsv(
     "Pay Type",
     "Pay Rate",
     "Base Pay For Row",
+    "Flat Work Pay For Row",
     "Incentive For Row",
     "Pay Calculation",
     "Total Pay For Row",
@@ -142,6 +145,7 @@ export function buildPayrollBreakdownCsv(
         centsToDollars(workerTotal.payRateCents),
         dailyPayCents > 0 ? centsToDollars(dailyPayCents) : "",
         "",
+        "",
         payCalculation,
         dailyPayCents > 0 ? centsToDollars(dailyPayCents) : "",
       );
@@ -163,14 +167,22 @@ export function buildPayrollBreakdownCsv(
         : workerTotal.payType === "piece_work"
           ? `${workerTotal.paidHours.toFixed(2)} x ${centsToDollars(workerTotal.payRateCents)}`
           : "salary period amount";
+    const calculationParts = [totalCalculation];
+    if (workerTotal.flatWorkPayCents > 0) {
+      calculationParts.push("flat work-order payouts");
+    }
+    if (workerTotal.incentivePayCents > 0) {
+      calculationParts.push("incentives");
+    }
 
     totalValues.push(
       workerTotal.totalWorkedHours.toFixed(2),
       formatPayType(workerTotal.payType),
       centsToDollars(workerTotal.payRateCents),
       centsToDollars(workerTotal.basePayCents),
+      centsToDollars(workerTotal.flatWorkPayCents),
       centsToDollars(workerTotal.incentivePayCents),
-      totalCalculation,
+      calculationParts.join(" + "),
       centsToDollars(workerTotal.totalPayCents),
     );
 

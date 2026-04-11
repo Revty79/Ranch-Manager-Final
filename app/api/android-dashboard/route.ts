@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
-  animalEvents,
   animalLocationAssignments,
   animals,
   grazingPeriods,

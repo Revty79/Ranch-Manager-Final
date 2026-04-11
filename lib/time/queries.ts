@@ -16,6 +16,7 @@ import {
   workOrders,
   workTimeEntries,
   type RanchRole,
+  type WorkOrderCompensationType,
   type WorkOrderStatus,
 } from "@/lib/db/schema";
 
@@ -40,6 +41,7 @@ export interface WorkOrderOption {
   id: string;
   title: string;
   status: WorkOrderStatus;
+  compensationType: WorkOrderCompensationType;
 }
 
 export interface ActiveShiftRosterItem {
@@ -161,6 +163,7 @@ export async function getWorkOrderOptionsForTimeTracking(
         id: workOrders.id,
         title: workOrders.title,
         status: workOrders.status,
+        compensationType: workOrders.compensationType,
       })
       .from(workOrderAssignments)
       .innerJoin(workOrders, eq(workOrderAssignments.workOrderId, workOrders.id))
@@ -178,6 +181,7 @@ export async function getWorkOrderOptionsForTimeTracking(
       id: workOrders.id,
       title: workOrders.title,
       status: workOrders.status,
+      compensationType: workOrders.compensationType,
     })
     .from(workOrders)
     .where(

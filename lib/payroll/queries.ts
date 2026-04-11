@@ -7,6 +7,7 @@ import {
   ranchMemberships,
   shifts,
   users,
+  workOrderCompletionReviews,
   workOrderAssignments,
   workOrders,
   workTimeEntries,
@@ -21,6 +22,7 @@ export interface PayrollSummaryRow {
   payRateCents: number;
   hoursWorked: number;
   basePayCents: number;
+  flatWorkPayCents: number;
   incentivePayCents: number;
   grossPayCents: number;
   payAdvanceCents: number;
@@ -32,6 +34,7 @@ export interface PayrollSummary {
   rows: PayrollSummaryRow[];
   totalHours: number;
   totalBasePayCents: number;
+  totalFlatWorkPayCents: number;
   totalIncentivePayCents: number;
   totalGrossPayCents: number;
   totalPayAdvanceCents: number;
@@ -66,6 +69,7 @@ export interface PayrollBreakdownWorkerTotalRow {
   totalWorkedHours: number;
   paidHours: number;
   basePayCents: number;
+  flatWorkPayCents: number;
   incentivePayCents: number;
   grossPayCents: number;
   payAdvanceCents: number;
@@ -83,7 +87,7 @@ function secondsBetween(start: Date, end: Date): number {
   return Math.max((end.getTime() - start.getTime()) / 1000, 0);
 }
 
-function isMissingIncentiveSchemaError(error: unknown): boolean {
+function isMissingWorkOrderPaySchemaError(error: unknown): boolean {
   if (!error || typeof error !== "object") {
     return false;
   }
@@ -103,8 +107,29 @@ function isMissingIncentiveSchemaError(error: unknown): boolean {
     text.includes("column") &&
     (text.includes("completed_at") ||
       text.includes("incentive_ends_at") ||
-      text.includes("incentive_pay_cents"))
+      text.includes("incentive_pay_cents") ||
+      text.includes("flat_pay_cents") ||
+      text.includes("compensation_type"))
   );
+}
+
+function distributeEvenly(
+  totalCents: number,
+  participants: string[],
+  target: Map<string, number>,
+) {
+  if (totalCents <= 0 || participants.length === 0) {
+    return;
+  }
+
+  const splitCents = Math.floor(totalCents / participants.length);
+  const remainderCents = totalCents - splitCents * participants.length;
+
+  participants.forEach((membershipId, index) => {
+    const payout = splitCents + (index < remainderCents ? 1 : 0);
+    const current = target.get(membershipId) ?? 0;
+    target.set(membershipId, current + payout);
+  });
 }
 
 function toUtcDateKey(value: Date): string {
@@ -125,65 +150,73 @@ function startOfNextUtcDay(value: Date): Date {
   );
 }
 
-async function getIncentivePayByMembershipForRange(
+async function getCompletedWorkOrderPayByMembershipForRange(
   ranchId: string,
   fromDate: Date,
   toDateExclusive: Date,
-): Promise<Map<string, number>> {
+): Promise<{
+  flatWorkPayByMembership: Map<string, number>;
+  incentivePayByMembership: Map<string, number>;
+}> {
+  const flatWorkPayByMembership = new Map<string, number>();
   const incentivePayByMembership = new Map<string, number>();
-  let incentiveOrderRows: {
+  let completedOrderRows: {
     workOrderId: string;
+    compensationType: "standard" | "flat_amount";
+    flatPayCents: number;
     incentivePayCents: number;
     completedAt: Date | null;
     incentiveEndsAt: Date | null;
+    reviewStatus: "pending" | "approved" | "changes_requested" | null;
   }[] = [];
 
   try {
-    incentiveOrderRows = await db
+    completedOrderRows = await db
       .select({
         workOrderId: workOrders.id,
+        compensationType: workOrders.compensationType,
+        flatPayCents: workOrders.flatPayCents,
         incentivePayCents: workOrders.incentivePayCents,
         completedAt: workOrders.completedAt,
         incentiveEndsAt: workOrders.incentiveEndsAt,
+        reviewStatus: workOrderCompletionReviews.status,
       })
       .from(workOrders)
+      .leftJoin(
+        workOrderCompletionReviews,
+        eq(workOrderCompletionReviews.workOrderId, workOrders.id),
+      )
       .where(
         and(
           eq(workOrders.ranchId, ranchId),
           eq(workOrders.status, "completed"),
-          gt(workOrders.incentivePayCents, 0),
           isNotNull(workOrders.completedAt),
           gte(workOrders.completedAt, fromDate),
           lt(workOrders.completedAt, toDateExclusive),
+          or(gt(workOrders.flatPayCents, 0), gt(workOrders.incentivePayCents, 0)),
         ),
       );
   } catch (error) {
-    const issueType = isMissingIncentiveSchemaError(error)
+    const issueType = isMissingWorkOrderPaySchemaError(error)
       ? "schema-mismatch"
       : "query-failure";
     console.warn(
-      `[payroll] incentive payout lookup skipped (${issueType}); continuing without incentives for this request.`,
+      `[payroll] completed work-order payout lookup skipped (${issueType}); continuing without work-order payouts for this request.`,
     );
-    return incentivePayByMembership;
+    return {
+      flatWorkPayByMembership,
+      incentivePayByMembership,
+    };
   }
 
-  const incentiveEligibleOrders = incentiveOrderRows
-    .filter(
-      (row) =>
-        row.completedAt !== null &&
-        row.incentiveEndsAt !== null &&
-        row.completedAt <= row.incentiveEndsAt,
-    )
-    .map((row) => ({
-      workOrderId: row.workOrderId,
-      incentivePayCents: row.incentivePayCents,
-    }));
-
-  if (!incentiveEligibleOrders.length) {
-    return incentivePayByMembership;
+  if (!completedOrderRows.length) {
+    return {
+      flatWorkPayByMembership,
+      incentivePayByMembership,
+    };
   }
 
-  const orderIds = incentiveEligibleOrders.map((row) => row.workOrderId);
+  const orderIds = completedOrderRows.map((row) => row.workOrderId);
   const [timeParticipantRows, assignmentParticipantRows] = await Promise.all([
     db
       .select({
@@ -215,10 +248,12 @@ async function getIncentivePayByMembershipForRange(
     assignedParticipantsByOrder.set(row.workOrderId, current);
   }
 
-  for (const order of incentiveEligibleOrders) {
-    const timedParticipants = [
-      ...(timedParticipantsByOrder.get(order.workOrderId) ?? new Set()),
-    ];
+  for (const order of completedOrderRows) {
+    if (order.reviewStatus !== null && order.reviewStatus !== "approved") {
+      continue;
+    }
+
+    const timedParticipants = [...(timedParticipantsByOrder.get(order.workOrderId) ?? new Set())];
     const participants =
       timedParticipants.length > 0
         ? timedParticipants.sort()
@@ -228,17 +263,24 @@ async function getIncentivePayByMembershipForRange(
       continue;
     }
 
-    const splitCents = Math.floor(order.incentivePayCents / participants.length);
-    const remainderCents = order.incentivePayCents - splitCents * participants.length;
+    if (order.compensationType === "flat_amount" && order.flatPayCents > 0) {
+      distributeEvenly(order.flatPayCents, participants, flatWorkPayByMembership);
+    }
 
-    participants.forEach((membershipId, index) => {
-      const bonus = splitCents + (index < remainderCents ? 1 : 0);
-      const current = incentivePayByMembership.get(membershipId) ?? 0;
-      incentivePayByMembership.set(membershipId, current + bonus);
-    });
+    if (
+      order.incentivePayCents > 0 &&
+      order.completedAt !== null &&
+      order.incentiveEndsAt !== null &&
+      order.completedAt <= order.incentiveEndsAt
+    ) {
+      distributeEvenly(order.incentivePayCents, participants, incentivePayByMembership);
+    }
   }
 
-  return incentivePayByMembership;
+  return {
+    flatWorkPayByMembership,
+    incentivePayByMembership,
+  };
 }
 
 export async function getPayrollSummaryForRange(
@@ -350,11 +392,12 @@ export async function getPayrollSummaryForRange(
     }
   }
 
-  const incentivePayByMembership = await getIncentivePayByMembershipForRange(
+  const { flatWorkPayByMembership, incentivePayByMembership } =
+    await getCompletedWorkOrderPayByMembershipForRange(
     ranchId,
     fromDate,
     toDateExclusive,
-  );
+    );
 
   const visibleMemberRows = memberRows.filter(
     (member) => !isPlatformAdminEmail(member.email),
@@ -370,6 +413,7 @@ export async function getPayrollSummaryForRange(
       const hasTrackedTime =
         (shiftSecondsByMembership.get(member.membershipId) ?? 0) > 0 ||
         (workSecondsByMembership.get(member.membershipId) ?? 0) > 0 ||
+        (flatWorkPayByMembership.get(member.membershipId) ?? 0) > 0 ||
         (incentivePayByMembership.get(member.membershipId) ?? 0) > 0;
       const hasAdvanceBalance =
         member.payAdvanceCents > 0 ||
@@ -387,8 +431,9 @@ export async function getPayrollSummaryForRange(
           : member.isActive
             ? member.payRateCents
             : 0;
+      const flatWorkPayCents = flatWorkPayByMembership.get(member.membershipId) ?? 0;
       const incentivePayCents = incentivePayByMembership.get(member.membershipId) ?? 0;
-      const grossPayCents = basePayCents + incentivePayCents;
+      const grossPayCents = basePayCents + flatWorkPayCents + incentivePayCents;
       const periodAdvanceCents = periodAdvanceByMembership.get(member.membershipId) ?? 0;
       const payAdvanceCents = member.payAdvanceCents + periodAdvanceCents;
       const totalPayCents = grossPayCents;
@@ -402,6 +447,7 @@ export async function getPayrollSummaryForRange(
         payRateCents: member.payRateCents,
         hoursWorked,
         basePayCents,
+        flatWorkPayCents,
         incentivePayCents,
         grossPayCents,
         payAdvanceCents,
@@ -415,6 +461,10 @@ export async function getPayrollSummaryForRange(
   );
   const totalBasePayCents = rows.reduce(
     (sum, row) => sum + row.basePayCents,
+    0,
+  );
+  const totalFlatWorkPayCents = rows.reduce(
+    (sum, row) => sum + row.flatWorkPayCents,
     0,
   );
   const totalIncentivePayCents = rows.reduce(
@@ -438,6 +488,7 @@ export async function getPayrollSummaryForRange(
     rows,
     totalHours,
     totalBasePayCents,
+    totalFlatWorkPayCents,
     totalIncentivePayCents,
     totalGrossPayCents,
     totalPayAdvanceCents,
@@ -670,8 +721,10 @@ export async function getPayrollBreakdownForRange(
           : member.isActive
             ? member.payRateCents
             : 0);
+      const flatWorkPayCents = summaryRow?.flatWorkPayCents ?? 0;
       const incentivePayCents = summaryRow?.incentivePayCents ?? 0;
-      const grossPayCents = summaryRow?.grossPayCents ?? basePayCents + incentivePayCents;
+      const grossPayCents =
+        summaryRow?.grossPayCents ?? basePayCents + flatWorkPayCents + incentivePayCents;
       const payAdvanceCents = summaryRow?.payAdvanceCents ?? 0;
       const totalPayCents = grossPayCents - payAdvanceCents;
 
@@ -685,6 +738,7 @@ export async function getPayrollBreakdownForRange(
         totalWorkedHours,
         paidHours,
         basePayCents,
+        flatWorkPayCents,
         incentivePayCents,
         grossPayCents,
         payAdvanceCents,

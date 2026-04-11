@@ -402,10 +402,11 @@ export default async function PayrollPage({
         </Card>
       )}
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
         <StatCard label="Team Members" value={`${summary.rows.length}`} />
         <StatCard label="Total Hours" value={`${summary.totalHours.toFixed(2)}h`} />
         <StatCard label="Base Pay" value={formatMoney(summary.totalBasePayCents)} />
+        <StatCard label="Work Order Pay" value={formatMoney(summary.totalFlatWorkPayCents)} />
         <StatCard label="Incentive Pay" value={formatMoney(summary.totalIncentivePayCents)} />
         <StatCard label="Total Pay" value={formatMoney(summary.totalPayCents)} />
       </section>
@@ -416,7 +417,7 @@ export default async function PayrollPage({
             <CardTitle className="text-base">Summary by team member</CardTitle>
             <CardDescription>
               Hourly uses shift hours. Piece work uses work-order timer hours. Salary uses a flat
-              period amount.
+              period amount. Flat-amount work orders pay once when the order is completed.
             </CardDescription>
           </div>
           {summary.rows.length ? (
@@ -430,6 +431,7 @@ export default async function PayrollPage({
                     <TableHeaderCell>Pay Rate</TableHeaderCell>
                     <TableHeaderCell>Hours</TableHeaderCell>
                     <TableHeaderCell>Base Pay</TableHeaderCell>
+                    <TableHeaderCell>Work Order Pay</TableHeaderCell>
                     <TableHeaderCell>Incentive Pay</TableHeaderCell>
                     <TableHeaderCell>Advances</TableHeaderCell>
                     <TableHeaderCell>Final Check</TableHeaderCell>
@@ -452,6 +454,7 @@ export default async function PayrollPage({
                       <TableCell>{formatMoney(row.payRateCents)}</TableCell>
                       <TableCell>{row.hoursWorked.toFixed(2)}</TableCell>
                       <TableCell>{formatMoney(row.basePayCents)}</TableCell>
+                      <TableCell>{formatMoney(row.flatWorkPayCents)}</TableCell>
                       <TableCell>{formatMoney(row.incentivePayCents)}</TableCell>
                       <TableCell>{formatMoney(row.payAdvanceCents)}</TableCell>
                       <TableCell>{formatMoney(row.totalPayCents - row.payAdvanceCents)}</TableCell>

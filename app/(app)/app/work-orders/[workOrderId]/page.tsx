@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CompletionReviewPanel } from "@/components/work-orders/completion-review-panel";
 import { EditWorkOrderForm } from "@/components/work-orders/edit-work-order-form";
 import { IncentiveCountdown } from "@/components/work-orders/incentive-countdown";
 import { PageHeader } from "@/components/patterns/page-header";
@@ -13,6 +14,18 @@ import {
 
 function formatMoney(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
+}
+
+function formatReviewStatus(status: "pending" | "approved" | "changes_requested" | null): string {
+  if (!status) {
+    return "No manager review";
+  }
+
+  if (status === "changes_requested") {
+    return "Changes requested";
+  }
+
+  return `Review ${status}`;
 }
 
 export default async function WorkOrderDetailPage({
@@ -54,6 +67,12 @@ export default async function WorkOrderDetailPage({
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="neutral">{workOrder.priority}</Badge>
               <Badge variant="neutral">{workOrder.status.replace("_", " ")}</Badge>
+              <Badge variant="neutral">{formatReviewStatus(workOrder.completionReviewStatus)}</Badge>
+              <Badge variant="neutral">
+                {workOrder.compensationType === "flat_amount"
+                  ? `Flat pay ${formatMoney(workOrder.flatPayCents)}`
+                  : "Regular pay"}
+              </Badge>
               <Badge variant="neutral">
                 {workOrder.incentivePayCents > 0
                   ? `Incentive ${formatMoney(workOrder.incentivePayCents)}`
@@ -68,6 +87,14 @@ export default async function WorkOrderDetailPage({
           <EditWorkOrderForm workOrder={workOrder} members={members} />
         </CardContent>
       </Card>
+
+      {workOrder.completionReview ? (
+        <CompletionReviewPanel
+          workOrderId={workOrder.id}
+          review={workOrder.completionReview}
+          timeZone={context.user.timeZone}
+        />
+      ) : null}
     </div>
   );
 }

@@ -42,6 +42,9 @@ export function TimeControlPanel({
 }: TimeControlPanelProps) {
   const router = useRouter();
   const isPieceWork = payType === "piece_work";
+  const trackableWorkOrderOptions = workOrderOptions.filter(
+    (option) => option.compensationType !== "flat_amount",
+  );
   const [startShiftState, startShiftFormAction] = useActionState(
     startShiftAction,
     initialTimeActionState,
@@ -166,24 +169,31 @@ export function TimeControlPanel({
             ) : (
               workOrderOptions.length ? (
                 <div className="space-y-2">
-                  <form action={startWorkFormAction} className="space-y-2">
-                    <select
-                      name="workOrderId"
-                      className="h-10 w-full rounded-xl border bg-surface px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      defaultValue=""
-                      required
-                    >
-                      <option value="" disabled>
-                        Select work order
-                      </option>
-                      {workOrderOptions.map((option) => (
-                        <option key={option.id} value={option.id}>
-                          {option.title}
+                  {trackableWorkOrderOptions.length ? (
+                    <form action={startWorkFormAction} className="space-y-2">
+                      <select
+                        name="workOrderId"
+                        className="h-10 w-full rounded-xl border bg-surface px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        defaultValue=""
+                        required
+                      >
+                        <option value="" disabled>
+                          Select work order
                         </option>
-                      ))}
-                    </select>
-                    <Button type="submit">Start work timer</Button>
-                  </form>
+                        {trackableWorkOrderOptions.map((option) => (
+                          <option key={option.id} value={option.id}>
+                            {option.title}
+                          </option>
+                        ))}
+                      </select>
+                      <Button type="submit">Start work timer</Button>
+                    </form>
+                  ) : (
+                    <p className="text-sm text-foreground-muted">
+                      Available work orders in this list are flat-amount tasks, so they can be
+                      completed without starting a timer.
+                    </p>
+                  )}
                   <form action={completeOrderFormAction} className="space-y-2">
                     <select
                       name="workOrderId"
