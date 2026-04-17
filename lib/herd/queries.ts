@@ -219,6 +219,8 @@ export interface AnimalDetailRecord {
   animalClass: string | null;
   breed: string | null;
   colorMarkings: string | null;
+  newbornPairPhotoDataUrl: string | null;
+  newbornPairPhotoCapturedAt: Date | null;
   status: AnimalStatus;
   birthDate: string | null;
   isBirthDateEstimated: boolean;
@@ -263,6 +265,8 @@ export async function getAnimalProfile(
       animalClass: animals.animalClass,
       breed: animals.breed,
       colorMarkings: animals.colorMarkings,
+      newbornPairPhotoDataUrl: animals.newbornPairPhotoDataUrl,
+      newbornPairPhotoCapturedAt: animals.newbornPairPhotoCapturedAt,
       status: animals.status,
       birthDate: animals.birthDate,
       isBirthDateEstimated: animals.isBirthDateEstimated,

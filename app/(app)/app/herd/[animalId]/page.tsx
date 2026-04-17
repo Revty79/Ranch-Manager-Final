@@ -1,6 +1,7 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Clock3, HeartPulse, MapPin, Milestone, UsersRound } from "lucide-react";
+import { Camera, Clock3, HeartPulse, MapPin, Milestone, UsersRound } from "lucide-react";
 import { BreedingRecordForm } from "@/components/herd/breeding-record-form";
 import { EditAnimalForm } from "@/components/herd/edit-animal-form";
 import { HealthRecordForm } from "@/components/herd/health-record-form";
@@ -156,6 +157,10 @@ export default async function AnimalDetailPage({
                 <span className="text-foreground-muted">Color/markings:</span>{" "}
                 {animal.colorMarkings ?? "Not set"}
               </p>
+              <p>
+                <span className="text-foreground-muted">Calf + mom photo:</span>{" "}
+                {animal.newbornPairPhotoDataUrl ? "On file" : "Not set"}
+              </p>
             </div>
             <Badge variant={statusVariant(animal.status)}>{formatAnimalStatus(animal.status)}</Badge>
           </CardContent>
@@ -225,6 +230,37 @@ export default async function AnimalDetailPage({
                 )}
               </p>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="space-y-3 py-6">
+            <div className="flex items-center gap-2">
+              <Camera className="h-4 w-4 text-accent" />
+              <CardTitle className="text-base">Calf + mom tracking photo</CardTitle>
+            </div>
+            {animal.newbornPairPhotoDataUrl ? (
+              <div className="space-y-2">
+                <Image
+                  src={animal.newbornPairPhotoDataUrl}
+                  alt={`${animal.tagId} calf and dam tracking photo`}
+                  width={1024}
+                  height={768}
+                  unoptimized
+                  className="h-52 w-full rounded-xl border object-cover"
+                />
+                <p className="text-xs text-foreground-muted">
+                  Captured{" "}
+                  {animal.newbornPairPhotoCapturedAt
+                    ? formatDateTime(animal.newbornPairPhotoCapturedAt)
+                    : "with record"}
+                </p>
+              </div>
+            ) : (
+              <p className="rounded-xl border bg-surface px-3 py-2 text-sm text-foreground-muted">
+                No calf + mom tracking photo uploaded yet.
+              </p>
+            )}
           </CardContent>
         </Card>
       </section>

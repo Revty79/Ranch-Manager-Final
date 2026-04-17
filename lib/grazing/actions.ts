@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireRole } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
 import {
+  animalGroupMemberships,
   animalGroups,
   animals,
   grazingPeriodAnimals,
@@ -215,17 +216,43 @@ export async function createGrazingPeriodAction(
     return { error: "Selected animal group is not in this ranch." };
   }
 
-  if (parsed.data.animalIds.length) {
+  const submittedAnimalIds = [...new Set(parsed.data.animalIds)];
+  let effectiveAnimalIds = submittedAnimalIds;
+
+  if (parsed.data.animalGroupId && submittedAnimalIds.length === 0) {
+    const groupMemberRows = await db
+      .select({
+        animalId: animalGroupMemberships.animalId,
+      })
+      .from(animalGroupMemberships)
+      .innerJoin(animals, eq(animalGroupMemberships.animalId, animals.id))
+      .where(
+        and(
+          eq(animalGroupMemberships.ranchId, context.ranch.id),
+          eq(animalGroupMemberships.animalGroupId, parsed.data.animalGroupId),
+          eq(animalGroupMemberships.isActive, true),
+          eq(animals.status, "active"),
+          eq(animals.isArchived, false),
+        ),
+      );
+
+    effectiveAnimalIds = [...new Set(groupMemberRows.map((row) => row.animalId))];
+    if (!effectiveAnimalIds.length) {
+      return { error: "Selected herd group has no active members to link." };
+    }
+  }
+
+  if (effectiveAnimalIds.length) {
     const validAnimals = await db
       .select({ id: animals.id })
       .from(animals)
       .where(
         and(
           eq(animals.ranchId, context.ranch.id),
-          inArray(animals.id, parsed.data.animalIds),
+          inArray(animals.id, effectiveAnimalIds),
         ),
       );
-    if (validAnimals.length !== parsed.data.animalIds.length) {
+    if (validAnimals.length !== effectiveAnimalIds.length) {
       return { error: "One or more selected animals are invalid for this ranch." };
     }
   }
@@ -246,9 +273,9 @@ export async function createGrazingPeriodAction(
       })
       .returning({ id: grazingPeriods.id });
 
-    if (parsed.data.animalIds.length) {
+    if (effectiveAnimalIds.length) {
       await tx.insert(grazingPeriodAnimals).values(
-        parsed.data.animalIds.map((animalId) => ({
+        effectiveAnimalIds.map((animalId) => ({
           ranchId: context.ranch.id,
           grazingPeriodId: period.id,
           animalId,

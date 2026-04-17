@@ -1,5 +1,6 @@
 import type {
   AnimalEventType,
+  AnimalGroupType,
   AnimalSex,
   AnimalSpecies,
   AnimalStatus,
@@ -43,6 +44,14 @@ export const animalStatusOptions: Array<{ value: AnimalStatus; label: string }> 
   { value: "culled", label: "Culled" },
   { value: "transferred", label: "Transferred" },
   { value: "archived", label: "Archived" },
+];
+
+export const animalGroupTypeOptions: Array<{ value: AnimalGroupType; label: string }> = [
+  { value: "management", label: "Management" },
+  { value: "breeding", label: "Breeding" },
+  { value: "health", label: "Health" },
+  { value: "marketing", label: "Marketing" },
+  { value: "custom", label: "Custom" },
 ];
 
 export const lifecycleEventOptions: Array<{
@@ -127,4 +136,8 @@ export function compareAnimalSpecies(a: AnimalSpecies, b: AnimalSpecies): number
 
 export function formatAnimalEventType(eventType: AnimalEventType): string {
   return eventType.replace("_", " ");
+}
+
+export function formatAnimalGroupType(groupType: AnimalGroupType): string {
+  return groupType.replace("_", " ");
 }

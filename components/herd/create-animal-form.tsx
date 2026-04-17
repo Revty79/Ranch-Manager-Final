@@ -123,6 +123,20 @@ export function CreateAnimalForm({ parentOptions }: CreateAnimalFormProps) {
       </FormFieldShell>
 
       <div className="md:col-span-2">
+        <FormFieldShell
+          label="Newborn calf + mom photo (optional)"
+          hint="On a phone, this can open the camera. JPG, PNG, WEBP up to 5 MB."
+        >
+          <Input
+            name="newbornPairPhoto"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            capture="environment"
+          />
+        </FormFieldShell>
+      </div>
+
+      <div className="md:col-span-2">
         <FormFieldShell label="Operational notes (optional)">
           <Textarea
             name="notes"

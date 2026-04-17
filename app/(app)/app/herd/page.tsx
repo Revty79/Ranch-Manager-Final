@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ClipboardList } from "lucide-react";
 import { CreateAnimalForm } from "@/components/herd/create-animal-form";
+import { CreateAnimalGroupForm } from "@/components/herd/create-animal-group-form";
+import { ManageAnimalGroupMembersForm } from "@/components/herd/manage-animal-group-members-form";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { PageHeader } from "@/components/patterns/page-header";
 import { StatCard } from "@/components/patterns/stat-card";
@@ -31,6 +33,7 @@ import {
   getHerdRegistrySummary,
   resolveAnimalRegistryFilters,
 } from "@/lib/herd/queries";
+import { getAnimalGroupWorkspace } from "@/lib/herd/group-queries";
 import { getProtocolDueItemsForRanch } from "@/lib/herd/protocol-queries";
 
 function statusVariant(status: string) {
@@ -76,12 +79,13 @@ export default async function HerdPage({
   const filters = resolveAnimalRegistryFilters(params);
   const canManage = roleCanManageOperations(context.membership.role);
 
-  const [animals, classOptions, parentOptions, summary, dueItems] = await Promise.all([
+  const [animals, classOptions, parentOptions, summary, dueItems, groupWorkspace] = await Promise.all([
     getAnimalRegistryRows(context.ranch.id, filters),
     getAnimalClassOptions(context.ranch.id),
     canManage ? getAnimalReferenceOptions(context.ranch.id) : Promise.resolve([]),
     getHerdRegistrySummary(context.ranch.id),
     getProtocolDueItemsForRanch(context.ranch.id, { limit: 6 }),
+    getAnimalGroupWorkspace(context.ranch.id),
   ]);
 
   const hasFilters =
@@ -275,6 +279,76 @@ export default async function HerdPage({
             )}
           </CardContent>
         </Card>
+      </section>
+
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-base font-semibold">Herd groups</h2>
+          <p className="text-sm text-foreground-muted">
+            Build operational herds, assign members, and use those groups in grazing-rotation planning.
+          </p>
+        </div>
+
+        <section className="grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
+          <Card>
+            <CardContent className="space-y-4 py-6">
+              <div>
+                <CardTitle className="text-base">Create herd group</CardTitle>
+                <CardDescription>
+                  Define practical groups such as cow-calf pairs, replacement heifers, or custom management cohorts.
+                </CardDescription>
+              </div>
+              {canManage ? (
+                <CreateAnimalGroupForm />
+              ) : (
+                <p className="rounded-xl border bg-surface px-4 py-3 text-sm text-foreground-muted">
+                  Owners and managers can create herd groups.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="space-y-4 py-6">
+              <div>
+                <CardTitle className="text-base">Manage group members</CardTitle>
+                <CardDescription>
+                  Membership here is the source-of-truth for herd-group rotations in land grazing workflows.
+                </CardDescription>
+              </div>
+              {groupWorkspace.groups.length ? (
+                canManage ? (
+                  <div className="space-y-3">
+                    {groupWorkspace.groups.map((group) => (
+                      <ManageAnimalGroupMembersForm
+                        key={group.id}
+                        group={group}
+                        animalOptions={groupWorkspace.animalOptions}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <ul className="space-y-2 text-sm text-foreground-muted">
+                    {groupWorkspace.groups.map((group) => (
+                      <li key={group.id} className="rounded-xl border bg-surface px-3 py-2">
+                        <p className="font-semibold text-foreground">{group.name}</p>
+                        <p>
+                          {group.groupType.replace("_", " ")} - {group.memberCount} active members
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                )
+              ) : (
+                <EmptyState
+                  title="No herd groups yet"
+                  description="Create your first group, then assign members for rotation planning."
+                  icon={<ClipboardList className="h-5 w-5 text-accent" />}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </section>
       </section>
 
       <section className="space-y-3">

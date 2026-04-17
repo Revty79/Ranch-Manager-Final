@@ -18,6 +18,13 @@ export interface HerdActionState {
   success?: string;
 }
 
+const MAX_NEWBORN_PAIR_PHOTO_BYTES = 5 * 1024 * 1024;
+const acceptedNewbornPairPhotoMimeTypes = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
+
 const optionalTextSchema = z.preprocess(
   (value) => (value == null ? "" : String(value).trim()),
   z.string(),
@@ -55,44 +62,51 @@ const lifecycleEventSchema = z.enum([
   "note",
 ]);
 
-const animalPayloadSchema = z
-  .object({
-    internalId: z.string().trim().min(1, "Internal ID is required."),
-    tagId: z.string().trim().min(1, "Tag / visual ID is required."),
-    alternateId: optionalTextSchema,
-    displayName: optionalTextSchema,
-    species: animalSpeciesSchema,
-    sex: animalSexSchema,
-    animalClass: optionalTextSchema,
-    breed: optionalTextSchema,
-    colorMarkings: optionalTextSchema,
-    birthDate: optionalDateSchema,
-    isBirthDateEstimated: z
-      .enum(["true", "false"])
-      .default("false")
-      .transform((value) => value === "true"),
-    sireAnimalId: optionalUuidSchema,
-    damAnimalId: optionalUuidSchema,
-    acquiredOn: optionalDateSchema,
-    acquisitionMethod: optionalTextSchema,
-    acquisitionSource: optionalTextSchema,
-    notes: optionalTextSchema,
-    status: animalStatusSchema,
-  })
-  .superRefine((value, ctx) => {
-    if (value.sireAnimalId && value.damAnimalId && value.sireAnimalId === value.damAnimalId) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["damAnimalId"],
-        message: "Sire and dam cannot reference the same animal.",
-      });
-    }
-  });
-
-const createAnimalSchema = animalPayloadSchema.omit({ status: true });
-const updateAnimalSchema = animalPayloadSchema.extend({
-  animalId: z.string().uuid(),
+const animalPayloadBaseSchema = z.object({
+  internalId: z.string().trim().min(1, "Internal ID is required."),
+  tagId: z.string().trim().min(1, "Tag / visual ID is required."),
+  alternateId: optionalTextSchema,
+  displayName: optionalTextSchema,
+  species: animalSpeciesSchema,
+  sex: animalSexSchema,
+  animalClass: optionalTextSchema,
+  breed: optionalTextSchema,
+  colorMarkings: optionalTextSchema,
+  birthDate: optionalDateSchema,
+  isBirthDateEstimated: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((value) => value === "true"),
+  sireAnimalId: optionalUuidSchema,
+  damAnimalId: optionalUuidSchema,
+  acquiredOn: optionalDateSchema,
+  acquisitionMethod: optionalTextSchema,
+  acquisitionSource: optionalTextSchema,
+  notes: optionalTextSchema,
+  status: animalStatusSchema,
 });
+
+function enforceDistinctParents(
+  value: { sireAnimalId?: string; damAnimalId?: string },
+  ctx: z.RefinementCtx,
+): void {
+  if (value.sireAnimalId && value.damAnimalId && value.sireAnimalId === value.damAnimalId) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["damAnimalId"],
+      message: "Sire and dam cannot reference the same animal.",
+    });
+  }
+}
+
+const createAnimalSchema = animalPayloadBaseSchema
+  .omit({ status: true })
+  .superRefine(enforceDistinctParents);
+const updateAnimalSchema = animalPayloadBaseSchema
+  .extend({
+    animalId: z.string().uuid(),
+  })
+  .superRefine(enforceDistinctParents);
 
 const createEventSchema = z.object({
   animalId: z.string().uuid(),
@@ -108,6 +122,43 @@ const createEventSchema = z.object({
 function normalizeText(value: string): string | null {
   const trimmed = value.trim();
   return trimmed.length ? trimmed : null;
+}
+
+interface NewbornPairPhotoUploadResult {
+  error?: string;
+  isProvided: boolean;
+  dataUrl: string | null;
+}
+
+async function parseNewbornPairPhotoUpload(
+  value: FormDataEntryValue | null,
+): Promise<NewbornPairPhotoUploadResult> {
+  if (!(value instanceof File) || value.size === 0) {
+    return { isProvided: false, dataUrl: null };
+  }
+
+  const mimeType = value.type.toLowerCase();
+  if (!acceptedNewbornPairPhotoMimeTypes.has(mimeType)) {
+    return {
+      error: "Photo must be a JPG, PNG, or WEBP image.",
+      isProvided: false,
+      dataUrl: null,
+    };
+  }
+
+  if (value.size > MAX_NEWBORN_PAIR_PHOTO_BYTES) {
+    return {
+      error: "Photo must be 5 MB or smaller.",
+      isProvided: false,
+      dataUrl: null,
+    };
+  }
+
+  const bytes = Buffer.from(await value.arrayBuffer());
+  return {
+    isProvided: true,
+    dataUrl: `data:${mimeType};base64,${bytes.toString("base64")}`,
+  };
 }
 
 function parseDateTime(value?: string): Date | null {
@@ -219,6 +270,14 @@ export async function createAnimalAction(
   });
   if (parentError) return { error: parentError };
 
+  const newbornPairPhotoUpload = await parseNewbornPairPhotoUpload(
+    formData.get("newbornPairPhoto"),
+  );
+  if (newbornPairPhotoUpload.error) {
+    return { error: newbornPairPhotoUpload.error };
+  }
+  const newbornPairPhotoCapturedAt = newbornPairPhotoUpload.dataUrl ? new Date() : null;
+
   try {
     const [created] = await db
       .insert(animals)
@@ -233,6 +292,8 @@ export async function createAnimalAction(
         animalClass: normalizeText(parsed.data.animalClass),
         breed: normalizeText(parsed.data.breed),
         colorMarkings: normalizeText(parsed.data.colorMarkings),
+        newbornPairPhotoDataUrl: newbornPairPhotoUpload.dataUrl,
+        newbornPairPhotoCapturedAt,
         status: "active",
         birthDate: parsed.data.birthDate ?? null,
         isBirthDateEstimated: parsed.data.isBirthDateEstimated,
@@ -256,6 +317,18 @@ export async function createAnimalAction(
       details: "Initial registry entry created from herd list.",
       recordedByMembershipId: context.membership.id,
     });
+
+    if (newbornPairPhotoCapturedAt) {
+      await db.insert(animalEvents).values({
+        ranchId: context.ranch.id,
+        animalId: created.id,
+        eventType: "note",
+        occurredAt: newbornPairPhotoCapturedAt,
+        summary: "Calf + mom photo captured.",
+        details: "Initial calf + mom tracking photo saved.",
+        recordedByMembershipId: context.membership.id,
+      });
+    }
 
     revalidatePath("/app/herd");
     return { success: "Animal created." };
@@ -307,6 +380,8 @@ export async function updateAnimalAction(
       status: animals.status,
       dispositionOn: animals.dispositionOn,
       dispositionReason: animals.dispositionReason,
+      newbornPairPhotoDataUrl: animals.newbornPairPhotoDataUrl,
+      newbornPairPhotoCapturedAt: animals.newbornPairPhotoCapturedAt,
     })
     .from(animals)
     .where(and(eq(animals.id, parsed.data.animalId), eq(animals.ranchId, context.ranch.id)))
@@ -330,6 +405,27 @@ export async function updateAnimalAction(
     damAnimalId: parsed.data.damAnimalId,
   });
   if (parentError) return { error: parentError };
+
+  const newbornPairPhotoUpload = await parseNewbornPairPhotoUpload(
+    formData.get("newbornPairPhoto"),
+  );
+  if (newbornPairPhotoUpload.error) {
+    return { error: newbornPairPhotoUpload.error };
+  }
+
+  const removeNewbornPairPhoto = formData.get("removeNewbornPairPhoto") === "true";
+  const hadExistingNewbornPairPhoto = Boolean(existing.newbornPairPhotoDataUrl);
+  const newPhotoCapturedAt = newbornPairPhotoUpload.isProvided ? new Date() : null;
+  const nextNewbornPairPhotoDataUrl = newbornPairPhotoUpload.isProvided
+    ? newbornPairPhotoUpload.dataUrl
+    : removeNewbornPairPhoto
+      ? null
+      : existing.newbornPairPhotoDataUrl;
+  const nextNewbornPairPhotoCapturedAt = newbornPairPhotoUpload.isProvided
+    ? newPhotoCapturedAt
+    : removeNewbornPairPhoto
+      ? null
+      : existing.newbornPairPhotoCapturedAt;
 
   const nextStatus = parsed.data.status;
   const shouldArchive = nextStatus === "archived";
@@ -376,6 +472,8 @@ export async function updateAnimalAction(
           animalClass: normalizeText(parsed.data.animalClass),
           breed: normalizeText(parsed.data.breed),
           colorMarkings: normalizeText(parsed.data.colorMarkings),
+          newbornPairPhotoDataUrl: nextNewbornPairPhotoDataUrl,
+          newbornPairPhotoCapturedAt: nextNewbornPairPhotoCapturedAt,
           status: nextStatus,
           birthDate: parsed.data.birthDate ?? null,
           isBirthDateEstimated: parsed.data.isBirthDateEstimated,
@@ -392,6 +490,32 @@ export async function updateAnimalAction(
           updatedAt: new Date(),
         })
         .where(eq(animals.id, parsed.data.animalId));
+
+      if (newbornPairPhotoUpload.isProvided) {
+        await tx.insert(animalEvents).values({
+          ranchId: context.ranch.id,
+          animalId: parsed.data.animalId,
+          eventType: "note",
+          occurredAt: newPhotoCapturedAt ?? new Date(),
+          summary: hadExistingNewbornPairPhoto
+            ? "Calf + mom photo updated."
+            : "Calf + mom photo captured.",
+          details: hadExistingNewbornPairPhoto
+            ? "Previous calf + mom tracking photo replaced with a new upload."
+            : "Calf + mom tracking photo added.",
+          recordedByMembershipId: context.membership.id,
+        });
+      } else if (removeNewbornPairPhoto && hadExistingNewbornPairPhoto) {
+        await tx.insert(animalEvents).values({
+          ranchId: context.ranch.id,
+          animalId: parsed.data.animalId,
+          eventType: "note",
+          occurredAt: new Date(),
+          summary: "Calf + mom photo removed.",
+          details: "Calf + mom tracking photo removed from this record.",
+          recordedByMembershipId: context.membership.id,
+        });
+      }
 
       if (hasStatusChanged) {
         const mappedEventType: AnimalEventType =

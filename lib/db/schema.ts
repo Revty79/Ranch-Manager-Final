@@ -673,6 +673,10 @@ export const animals = pgTable(
     animalClass: text("animal_class"),
     breed: text("breed"),
     colorMarkings: text("color_markings"),
+    newbornPairPhotoDataUrl: text("newborn_pair_photo_data_url"),
+    newbornPairPhotoCapturedAt: timestamp("newborn_pair_photo_captured_at", {
+      withTimezone: true,
+    }),
     status: animalStatusEnum("status").default("active").notNull(),
     birthDate: date("birth_date", { mode: "string" }),
     isBirthDateEstimated: boolean("is_birth_date_estimated").default(false).notNull(),

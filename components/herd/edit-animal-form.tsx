@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useActionState } from "react";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { FormFieldShell } from "@/components/patterns/form-field-shell";
@@ -148,6 +149,42 @@ export function EditAnimalForm({ animal, parentOptions }: EditAnimalFormProps) {
         <Input name="acquisitionMethod" defaultValue={animal.acquisitionMethod ?? ""} />
       </FormFieldShell>
       <div />
+
+      <div className="md:col-span-2">
+        <FormFieldShell
+          label="Newborn calf + mom photo"
+          hint="Upload a replacement photo or remove the existing one. JPG, PNG, WEBP up to 5 MB."
+        >
+          <div className="space-y-3">
+            {animal.newbornPairPhotoDataUrl ? (
+              <Image
+                src={animal.newbornPairPhotoDataUrl}
+                alt={`${animal.tagId} calf and dam tracking photo`}
+                width={1024}
+                height={768}
+                unoptimized
+                className="h-48 w-full rounded-xl border object-cover md:h-64"
+              />
+            ) : (
+              <p className="rounded-xl border bg-surface px-3 py-2 text-sm text-foreground-muted">
+                No calf + mom photo on this record yet.
+              </p>
+            )}
+            <Input
+              name="newbornPairPhoto"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              capture="environment"
+            />
+            {animal.newbornPairPhotoDataUrl ? (
+              <label className="flex items-center gap-2 text-sm text-foreground-muted">
+                <input type="checkbox" name="removeNewbornPairPhoto" value="true" />
+                Remove current photo
+              </label>
+            ) : null}
+          </div>
+        </FormFieldShell>
+      </div>
 
       <div className="md:col-span-2">
         <FormFieldShell label="Operational notes">

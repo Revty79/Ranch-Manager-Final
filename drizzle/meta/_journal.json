@@ -176,6 +176,13 @@
       "when": 1775886440345,
       "tag": "0024_married_blizzard",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1776385712741,
+      "tag": "0025_little_white_queen",
+      "breakpoints": true
     }
   ]
 }

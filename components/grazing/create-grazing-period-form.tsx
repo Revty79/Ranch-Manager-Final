@@ -83,7 +83,7 @@ export function CreateGrazingPeriodForm({ options }: CreateGrazingPeriodFormProp
       <div className="md:col-span-2">
         <FormFieldShell
           label="Linked animals (optional)"
-          hint="Hold Ctrl/Cmd to select multiple. If none selected, planning can still proceed."
+          hint="Hold Ctrl/Cmd to select multiple. If none are selected and a herd group is chosen, active group members are linked automatically."
         >
           <select
             name="animalIds"
