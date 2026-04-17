@@ -15,7 +15,7 @@ const initialState: GrazingActionState = {};
 interface CreateGrazingPeriodFormProps {
   options: {
     landUnits: Array<{ id: string; name: string; unitType: string }>;
-    animalGroups: Array<{ id: string; name: string }>;
+    animalGroups: Array<{ id: string; name: string; memberCount: number }>;
     animals: Array<{ id: string; label: string }>;
   };
 }
@@ -74,7 +74,7 @@ export function CreateGrazingPeriodForm({ options }: CreateGrazingPeriodFormProp
           <option value="">No group linkage</option>
           {options.animalGroups.map((group) => (
             <option key={group.id} value={group.id}>
-              {group.name}
+              {group.name} ({group.memberCount} active members)
             </option>
           ))}
         </select>

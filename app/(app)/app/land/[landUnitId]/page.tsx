@@ -49,6 +49,18 @@ function formatDate(value: string): string {
   }).format(new Date(`${value}T00:00:00Z`));
 }
 
+function formatDays(value: number | null): string {
+  if (value == null || !Number.isFinite(value)) return "â€”";
+  return `${value.toFixed(1)} days`;
+}
+
+function daysUntil(date: Date): number {
+  const today = new Date();
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  const target = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+  return Math.floor((target - start) / (24 * 60 * 60 * 1000));
+}
+
 function preferredAnimalLabel({
   species,
   displayName,
@@ -172,6 +184,52 @@ export default async function LandUnitDetailPage({
               ) : (
                 <p className="text-xs text-foreground-muted">No active occupants yet.</p>
               )}
+              <div className="rounded-xl border bg-surface px-3 py-2 text-xs text-foreground-muted">
+                {profile.currentLoadGrazingEstimate.canEstimate ? (
+                  <>
+                    <p className="font-semibold text-foreground">
+                      Max graze days at current load:{" "}
+                      {formatDays(profile.currentLoadGrazingEstimate.estimatedGrazingDays)}
+                    </p>
+                    <p>
+                      Projected move by:{" "}
+                      {profile.currentLoadGrazingEstimate.projectedMoveDate
+                        ? formatDate(
+                            profile.currentLoadGrazingEstimate.projectedMoveDate
+                              .toISOString()
+                              .slice(0, 10),
+                          )
+                        : "Not set"}
+                      {profile.currentLoadGrazingEstimate.projectedMoveDate
+                        ? (() => {
+                            const days = daysUntil(
+                              profile.currentLoadGrazingEstimate.projectedMoveDate,
+                            );
+                            if (days < 0) return ` (${Math.abs(days)}d overdue)`;
+                            if (days === 0) return " (move today)";
+                            return ` (${days}d left)`;
+                          })()
+                        : ""}
+                    </p>
+                    <p>
+                      Available forage:{" "}
+                      {profile.currentLoadGrazingEstimate.availableForageLbs != null
+                        ? profile.currentLoadGrazingEstimate.availableForageLbs.toFixed(0)
+                        : "--"}{" "}
+                      lbs Â· Demand/day:{" "}
+                      {profile.currentLoadGrazingEstimate.demandPerDayLbs != null
+                        ? profile.currentLoadGrazingEstimate.demandPerDayLbs.toFixed(0)
+                        : "--"}{" "}
+                      lbs
+                    </p>
+                  </>
+                ) : (
+                  <p>
+                    Max graze days unavailable. Need{" "}
+                    {profile.currentLoadGrazingEstimate.missingInputs.join(", ")}.
+                  </p>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -1,7 +1,8 @@
-import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
   animalGroups,
+  animalGroupMemberships,
   animalLocationAssignments,
   animals,
   grazingPeriodAnimals,
@@ -282,8 +283,13 @@ export interface GrazingWorkspace {
       estimatedForageLbsPerAcre: string | null;
       targetUtilizationPercent: number | null;
     }>;
-    animalGroups: Array<{ id: string; name: string }>;
+    animalGroups: Array<{ id: string; name: string; memberCount: number }>;
     animals: Array<{ id: string; label: string }>;
+    occupancyAssignments: Array<{
+      landUnitId: string;
+      animalId: string;
+      label: string;
+    }>;
   };
 }
 
@@ -353,9 +359,27 @@ export async function getGrazingWorkspace(ranchId: string): Promise<GrazingWorks
         .select({
           id: animalGroups.id,
           name: animalGroups.name,
+          memberCount: sql<number>`count(${animals.id})::int`,
         })
         .from(animalGroups)
+        .leftJoin(
+          animalGroupMemberships,
+          and(
+            eq(animalGroupMemberships.animalGroupId, animalGroups.id),
+            eq(animalGroupMemberships.ranchId, ranchId),
+            eq(animalGroupMemberships.isActive, true),
+          ),
+        )
+        .leftJoin(
+          animals,
+          and(
+            eq(animalGroupMemberships.animalId, animals.id),
+            eq(animals.status, "active"),
+            eq(animals.isArchived, false),
+          ),
+        )
         .where(and(eq(animalGroups.ranchId, ranchId), eq(animalGroups.isActive, true)))
+        .groupBy(animalGroups.id, animalGroups.name)
         .orderBy(asc(animalGroups.name)),
       db
         .select({
@@ -507,6 +531,24 @@ export async function getGrazingWorkspace(ranchId: string): Promise<GrazingWorks
     };
   });
 
+  const activeUnitById = new Map(
+    unitRows
+      .filter((unit) => unit.isActive)
+      .map((unit) => [unit.id, unit] as const),
+  );
+  const occupancyAssignments = occupancyRows
+    .filter((row) => activeUnitById.has(row.landUnitId))
+    .map((row) => {
+      const unit = activeUnitById.get(row.landUnitId)!;
+      const animalLabel = row.displayName ? `${row.displayName} (${row.tagId})` : row.tagId;
+      return {
+        landUnitId: row.landUnitId,
+        animalId: row.animalId,
+        label: `${unit.name}: ${animalLabel}`,
+      };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label));
+
   return {
     assumptions,
     activePeriods,
@@ -531,6 +573,7 @@ export async function getGrazingWorkspace(ranchId: string): Promise<GrazingWorks
           ? `${animal.displayName} (${animal.tagId})`
           : animal.tagId,
       })),
+      occupancyAssignments,
     },
   };
 }

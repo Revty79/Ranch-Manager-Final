@@ -774,6 +774,9 @@ export const animalGroupMemberships = pgTable(
     uniqueIndex("animal_group_memberships_active_uidx")
       .on(table.animalGroupId, table.animalId)
       .where(sql`${table.isActive} = true`),
+    uniqueIndex("animal_group_memberships_animal_active_uidx")
+      .on(table.ranchId, table.animalId)
+      .where(sql`${table.isActive} = true`),
   ],
 );
 

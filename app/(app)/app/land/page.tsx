@@ -28,6 +28,19 @@ function formatAcreage(value: string | null): string {
   return `${Number.parseFloat(value).toFixed(2)} ac`;
 }
 
+function formatDays(value: number | null): string {
+  if (value == null || !Number.isFinite(value)) return "â€”";
+  return `${value.toFixed(1)} days`;
+}
+
+function formatDate(value: Date): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(value);
+}
+
 function statusVariant(isActive: boolean) {
   return isActive ? "success" : "neutral";
 }
@@ -191,6 +204,7 @@ export default async function LandPage({
                   <TableHeaderCell>Acreage</TableHeaderCell>
                   <TableHeaderCell>Grazeable</TableHeaderCell>
                   <TableHeaderCell>Occupancy</TableHeaderCell>
+                  <TableHeaderCell>Max graze days</TableHeaderCell>
                   <TableHeaderCell>Status</TableHeaderCell>
                   <TableHeaderCell className="text-right">Actions</TableHeaderCell>
                 </TableRow>
@@ -212,6 +226,23 @@ export default async function LandPage({
                         <p>{unit.occupancyCount} total</p>
                         <p className="text-xs text-foreground-muted">{unit.horseOccupancyCount} horses</p>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      {unit.currentLoadGrazingEstimate.canEstimate ? (
+                        <div className="space-y-0.5 text-sm">
+                          <p>{formatDays(unit.currentLoadGrazingEstimate.estimatedGrazingDays)}</p>
+                          <p className="text-xs text-foreground-muted">
+                            move by{" "}
+                            {unit.currentLoadGrazingEstimate.projectedMoveDate
+                              ? formatDate(unit.currentLoadGrazingEstimate.projectedMoveDate)
+                              : "not set"}
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-foreground-muted">
+                          Need {unit.currentLoadGrazingEstimate.missingInputs.join(", ")}
+                        </p>
+                      )}
                     </TableCell>
                     <TableCell>
                       <Badge variant={statusVariant(unit.isActive)}>

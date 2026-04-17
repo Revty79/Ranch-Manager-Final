@@ -47,11 +47,13 @@ export async function getAnimalGroupWorkspace(ranchId: string): Promise<AnimalGr
     db
       .select({
         groupId: animalGroupMemberships.animalGroupId,
+        groupName: animalGroups.name,
         animalId: animals.id,
         tagId: animals.tagId,
         displayName: animals.displayName,
       })
       .from(animalGroupMemberships)
+      .innerJoin(animalGroups, eq(animalGroupMemberships.animalGroupId, animalGroups.id))
       .innerJoin(animals, eq(animalGroupMemberships.animalId, animals.id))
       .where(
         and(
@@ -95,6 +97,19 @@ export async function getAnimalGroupWorkspace(ranchId: string): Promise<AnimalGr
     membersByGroup.set(row.groupId, current);
   }
 
+  const activeGroupByAnimal = new Map<
+    string,
+    { groupId: string; groupName: string | null }
+  >();
+  for (const row of membershipRows) {
+    if (!activeGroupByAnimal.has(row.animalId)) {
+      activeGroupByAnimal.set(row.animalId, {
+        groupId: row.groupId,
+        groupName: row.groupName,
+      });
+    }
+  }
+
   return {
     groups: groupRows.map((group) => {
       const members = membersByGroup.get(group.id) ?? [];
@@ -113,8 +128,11 @@ export async function getAnimalGroupWorkspace(ranchId: string): Promise<AnimalGr
     }),
     animalOptions: animalRows.map((animal) => ({
       id: animal.id,
-      label: formatAnimalLabel(animal.tagId, animal.displayName),
+      label: `${formatAnimalLabel(animal.tagId, animal.displayName)}${
+        activeGroupByAnimal.get(animal.id)?.groupName
+          ? ` - currently in ${activeGroupByAnimal.get(animal.id)?.groupName}`
+          : ""
+      }`,
     })),
   };
 }
-

@@ -414,6 +414,7 @@ export async function assignAnimalToLandUnitAction(
   });
 
   revalidatePath("/app/land");
+  revalidatePath("/app/land/grazing");
   revalidatePath(`/app/land/${targetUnit.id}`);
   revalidatePath("/app");
   if (currentAssignment?.landUnitId) {
@@ -562,6 +563,7 @@ export async function bulkAssignAnimalsToLandUnitAction(
 
   revalidatePath("/app");
   revalidatePath("/app/land");
+  revalidatePath("/app/land/grazing");
   revalidatePath(`/app/land/${targetUnit.id}`);
   revalidatePath("/app/herd");
 
@@ -638,6 +640,7 @@ export async function removeAnimalFromLandUnitAction(
   });
 
   revalidatePath("/app/land");
+  revalidatePath("/app/land/grazing");
   revalidatePath(`/app/land/${landUnit.id}`);
   revalidatePath(`/app/herd/${assignment.animalId}`);
   revalidatePath("/app/herd");
@@ -803,6 +806,7 @@ export async function bulkMoveHeadcountFromUnitAction(
 
   revalidatePath("/app");
   revalidatePath("/app/land");
+  revalidatePath("/app/land/grazing");
   revalidatePath(`/app/land/${fromLandUnit.id}`);
   revalidatePath(`/app/land/${toLandUnit.id}`);
   revalidatePath("/app/herd");

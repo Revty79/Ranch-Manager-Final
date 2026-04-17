@@ -324,6 +324,9 @@ export default async function HerdPage({
                         key={group.id}
                         group={group}
                         animalOptions={groupWorkspace.animalOptions}
+                        reassignmentOptions={groupWorkspace.groups
+                          .filter((option) => option.id !== group.id && option.isActive)
+                          .map((option) => ({ id: option.id, name: option.name }))}
                       />
                     ))}
                   </div>

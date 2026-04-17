@@ -3,6 +3,7 @@ import { Leaf, SlidersHorizontal } from "lucide-react";
 import { CompleteGrazingPeriodForm } from "@/components/grazing/complete-grazing-period-form";
 import { CreateGrazingPeriodForm } from "@/components/grazing/create-grazing-period-form";
 import { GrazingAssumptionsForm } from "@/components/grazing/grazing-assumptions-form";
+import { GrazingUnitOccupancyForm } from "@/components/grazing/grazing-unit-occupancy-form";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { PageHeader } from "@/components/patterns/page-header";
 import { StatCard } from "@/components/patterns/stat-card";
@@ -206,6 +207,37 @@ export default async function LandGrazingPage({
             ) : (
               <p className="rounded-xl border bg-surface px-4 py-3 text-sm text-foreground-muted">
                 Owners and managers can record grazing periods.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </section>
+
+      <section>
+        <Card>
+          <CardContent className="space-y-4 py-6">
+            <div>
+              <CardTitle className="text-base">Move Animals On/Off Grazing Units</CardTitle>
+              <CardDescription>
+                Record live occupancy moves directly from grazing operations without leaving this
+                page.
+              </CardDescription>
+            </div>
+            {canManage ? (
+              workspace.formOptions.landUnits.length ? (
+                <GrazingUnitOccupancyForm
+                  landUnits={workspace.formOptions.landUnits}
+                  animals={workspace.formOptions.animals}
+                  occupancyAssignments={workspace.formOptions.occupancyAssignments}
+                />
+              ) : (
+                <p className="rounded-xl border bg-surface px-4 py-3 text-sm text-foreground-muted">
+                  Add at least one active land unit before recording occupancy moves.
+                </p>
+              )
+            ) : (
+              <p className="rounded-xl border bg-surface px-4 py-3 text-sm text-foreground-muted">
+                Owners and managers can record occupancy moves.
               </p>
             )}
           </CardContent>

@@ -6,6 +6,7 @@ import { FormFieldShell } from "@/components/patterns/form-field-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  deleteAnimalGroupAction,
   setAnimalGroupMembersAction,
   toggleAnimalGroupActiveAction,
   type HerdGroupActionState,
@@ -20,11 +21,13 @@ const initialState: HerdGroupActionState = {};
 interface ManageAnimalGroupMembersFormProps {
   group: AnimalGroupWorkspaceGroup;
   animalOptions: Array<{ id: string; label: string }>;
+  reassignmentOptions: Array<{ id: string; name: string }>;
 }
 
 export function ManageAnimalGroupMembersForm({
   group,
   animalOptions,
+  reassignmentOptions,
 }: ManageAnimalGroupMembersFormProps) {
   const [membershipState, membershipAction] = useActionState(
     setAnimalGroupMembersAction,
@@ -32,6 +35,10 @@ export function ManageAnimalGroupMembersForm({
   );
   const [toggleState, toggleAction] = useActionState(
     toggleAnimalGroupActiveAction,
+    initialState,
+  );
+  const [deleteState, deleteAction] = useActionState(
+    deleteAnimalGroupAction,
     initialState,
   );
 
@@ -67,7 +74,7 @@ export function ManageAnimalGroupMembersForm({
         <input type="hidden" name="animalGroupId" value={group.id} />
         <FormFieldShell
           label="Set active members"
-          hint="Select all animals that should belong to this group right now."
+          hint="Each animal can belong to only one active herd group. Adding one here moves it from any other group automatically."
         >
           <select
             name="animalIds"
@@ -96,6 +103,13 @@ export function ManageAnimalGroupMembersForm({
         />
       </form>
 
+      <form action={membershipAction} className="flex flex-col gap-2 border-t pt-3">
+        <input type="hidden" name="animalGroupId" value={group.id} />
+        <Button variant="secondary" size="sm" className="w-fit">
+          Remove all members
+        </Button>
+      </form>
+
       <form action={toggleAction} className="flex flex-col gap-2 border-t pt-3">
         <input type="hidden" name="animalGroupId" value={group.id} />
         <input type="hidden" name="nextIsActive" value={group.isActive ? "false" : "true"} />
@@ -105,7 +119,32 @@ export function ManageAnimalGroupMembersForm({
           {group.isActive ? "Pause group" : "Activate group"}
         </Button>
       </form>
+
+      <form action={deleteAction} className="flex flex-col gap-2 border-t pt-3">
+        <input type="hidden" name="animalGroupId" value={group.id} />
+        <FormFieldShell
+          label="Delete group"
+          hint="Choose a destination group to move current members, or leave blank to remove them from group membership."
+        >
+          <select
+            name="reassignmentAnimalGroupId"
+            defaultValue=""
+            className="h-10 w-full rounded-xl border bg-surface-strong px-3 text-sm"
+          >
+            <option value="">No reassignment (remove members)</option>
+            {reassignmentOptions.map((option) => (
+              <option key={option.id} value={option.id}>
+                Move members to {option.name}
+              </option>
+            ))}
+          </select>
+        </FormFieldShell>
+        {deleteState.error ? <p className="text-sm font-medium text-danger">{deleteState.error}</p> : null}
+        {deleteState.success ? <p className="text-sm font-medium text-accent">{deleteState.success}</p> : null}
+        <Button variant="danger" size="sm" className="w-fit">
+          Delete group
+        </Button>
+      </form>
     </article>
   );
 }
-

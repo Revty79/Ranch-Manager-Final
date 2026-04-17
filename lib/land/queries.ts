@@ -22,10 +22,19 @@ import {
   type LandUnitType,
   type MovementReason,
 } from "@/lib/db/schema";
+import { computeGrazingEstimate, type GrazingEstimateResult } from "@/lib/grazing/queries";
+import {
+  getOrCreateHerdLandSettings,
+  resolveGrazingAssumptions,
+} from "@/lib/grazing/settings";
 import { compareAnimalSpecies } from "@/lib/herd/constants";
 import { handlingUnitTypes, landUnitTypeOptions } from "./constants";
 
 const landUnitTypeSet = new Set<LandUnitType>(landUnitTypeOptions.map((option) => option.value));
+
+function todayDateKey(): string {
+  return new Date().toISOString().slice(0, 10);
+}
 
 export interface LandUnitFilters {
   search: string;
@@ -73,6 +82,7 @@ export interface LandUnitListRow {
   sortOrder: number;
   occupancyCount: number;
   horseOccupancyCount: number;
+  currentLoadGrazingEstimate: GrazingEstimateResult;
   updatedAt: Date;
 }
 
@@ -95,7 +105,7 @@ export async function getLandUnitsForRanch(
     conditions.push(eq(landUnits.isActive, filters.activity === "active"));
   }
 
-  return db
+  const unitRows = await db
     .select({
       id: landUnits.id,
       name: landUnits.name,
@@ -145,6 +155,56 @@ export async function getLandUnitsForRanch(
       landUnits.updatedAt,
     )
     .orderBy(asc(landUnits.sortOrder), asc(landUnits.name));
+
+  if (!unitRows.length) return [];
+
+  const [settingsRow, occupancyRows] = await Promise.all([
+    getOrCreateHerdLandSettings(ranchId),
+    db
+      .select({
+        landUnitId: animalLocationAssignments.landUnitId,
+        species: animals.species,
+        animalClass: animals.animalClass,
+      })
+      .from(animalLocationAssignments)
+      .innerJoin(animals, eq(animalLocationAssignments.animalId, animals.id))
+      .where(
+        and(
+          eq(animalLocationAssignments.ranchId, ranchId),
+          eq(animalLocationAssignments.isActive, true),
+          inArray(
+            animalLocationAssignments.landUnitId,
+            unitRows.map((row) => row.id),
+          ),
+        ),
+      ),
+  ]);
+
+  const assumptions = resolveGrazingAssumptions(settingsRow.grazingDefaults);
+  const occupancyByUnit = new Map<
+    string,
+    Array<{ species: AnimalSpecies; animalClass: string | null }>
+  >();
+  for (const row of occupancyRows) {
+    const current = occupancyByUnit.get(row.landUnitId) ?? [];
+    current.push({
+      species: row.species,
+      animalClass: row.animalClass,
+    });
+    occupancyByUnit.set(row.landUnitId, current);
+  }
+
+  return unitRows.map((row) => ({
+    ...row,
+    currentLoadGrazingEstimate: computeGrazingEstimate({
+      startedOn: todayDateKey(),
+      grazeableAcreage: row.grazeableAcreage,
+      estimatedForageLbsPerAcre: row.estimatedForageLbsPerAcre,
+      unitUtilizationPercent: row.targetUtilizationPercent,
+      participantAnimals: occupancyByUnit.get(row.id) ?? [],
+      assumptions,
+    }),
+  }));
 }
 
 export interface LandUnitSummary {
@@ -228,7 +288,7 @@ export interface LandMovementAnimalOption {
 }
 
 export interface LandUnitProfile {
-  landUnit: Omit<LandUnitListRow, "updatedAt"> & {
+  landUnit: Omit<LandUnitListRow, "updatedAt" | "currentLoadGrazingEstimate"> & {
     createdAt: Date;
     currentUse: string | null;
     currentStatus: string | null;
@@ -236,6 +296,7 @@ export interface LandUnitProfile {
   };
   currentOccupants: LandUnitCurrentOccupant[];
   occupancyBySpecies: Array<{ species: AnimalSpecies; count: number }>;
+  currentLoadGrazingEstimate: GrazingEstimateResult;
   sourceAnimalClassOptions: string[];
   movementHistory: LandMovementHistoryRow[];
   movementAnimalOptions: LandMovementAnimalOption[];
@@ -307,7 +368,13 @@ export async function getLandUnitProfile(
     return null;
   }
 
-  const [currentOccupants, movementHistory, movementAnimalRows, destinationUnitOptions] =
+  const [
+    currentOccupants,
+    movementHistory,
+    movementAnimalRows,
+    destinationUnitOptions,
+    settingsRow,
+  ] =
     await Promise.all([
     db
       .select({
@@ -399,6 +466,7 @@ export async function getLandUnitProfile(
         ),
       )
       .orderBy(asc(landUnits.sortOrder), asc(landUnits.name)),
+    getOrCreateHerdLandSettings(ranchId),
     ]);
 
   const activeLocationRows = movementAnimalRows.length
@@ -460,10 +528,24 @@ export async function getLandUnitProfile(
       .filter((value) => value.length > 0),
   )].sort((a, b) => a.localeCompare(b));
 
+  const assumptions = resolveGrazingAssumptions(settingsRow.grazingDefaults);
+  const currentLoadGrazingEstimate = computeGrazingEstimate({
+    startedOn: todayDateKey(),
+    grazeableAcreage: landUnit.grazeableAcreage,
+    estimatedForageLbsPerAcre: landUnit.estimatedForageLbsPerAcre,
+    unitUtilizationPercent: landUnit.targetUtilizationPercent,
+    participantAnimals: currentOccupants.map((occupant) => ({
+      species: occupant.species,
+      animalClass: occupant.animalClass,
+    })),
+    assumptions,
+  });
+
   return {
     landUnit,
     currentOccupants,
     occupancyBySpecies,
+    currentLoadGrazingEstimate,
     sourceAnimalClassOptions,
     movementHistory,
     movementAnimalOptions,
