@@ -21,12 +21,37 @@ import {
   users,
   workOrders,
 } from "@/lib/db/schema";
+import { getGrazingMoveAlertSummary } from "@/lib/grazing/queries";
 import { getProtocolDueItemsForRanch } from "@/lib/herd/protocol-queries";
 import { formatAnimalSpecies } from "@/lib/herd/constants";
 import { resolvePayrollDateRange } from "@/lib/payroll/date-range";
 import { getPayrollSummaryForRange } from "@/lib/payroll/queries";
 import { getWorkOrdersForRanch } from "@/lib/work-orders/queries";
 import { cn } from "@/lib/utils";
+
+const GRAZING_MOVE_SOON_HOURS = 72;
+
+function formatMoveCountdown(hoursUntilMove: number): string {
+  if (hoursUntilMove <= 0) {
+    const overdueHours = Math.abs(hoursUntilMove);
+    if (overdueHours === 0) return "move now";
+    if (overdueHours < 24) return `${overdueHours}h overdue`;
+    return `${Math.ceil(overdueHours / 24)}d overdue`;
+  }
+  if (hoursUntilMove < 24) return `in ${hoursUntilMove}h`;
+  return `in ${Math.ceil(hoursUntilMove / 24)}d`;
+}
+
+function formatDateTimeForZone(value: Date, timeZone: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone,
+  }).format(value);
+}
 
 export default async function AppHomePage() {
   const context = await requirePaidAccessContext();
@@ -46,6 +71,7 @@ export default async function AppHomePage() {
     [dispositionsCountRow],
     [occupiedUnitsCountRow],
     [activeGrazingCountRow],
+    grazingMoveAlerts,
     dueItems,
     recentMovementRows,
   ] = await Promise.all([
@@ -152,6 +178,10 @@ export default async function AppHomePage() {
           inArray(grazingPeriods.status, ["active", "planned"]),
         ),
       ),
+    getGrazingMoveAlertSummary(context.ranch.id, {
+      soonHours: GRAZING_MOVE_SOON_HOURS,
+      limit: 8,
+    }),
     getProtocolDueItemsForRanch(context.ranch.id, { limit: 300 }),
     db
       .select({
@@ -182,6 +212,9 @@ export default async function AppHomePage() {
   const dispositionsLast30 = dispositionsCountRow?.count ?? 0;
   const occupiedUnitsCount = occupiedUnitsCountRow?.count ?? 0;
   const activeGrazingCount = activeGrazingCountRow?.count ?? 0;
+  const moveDueNowCount = grazingMoveAlerts.dueNowCount;
+  const moveDueSoonCount = grazingMoveAlerts.dueSoonCount;
+  const moveOverdueCount = grazingMoveAlerts.overdueCount;
   const dueAttentionCount = dueItems.filter(
     (item) => item.dueState === "due_soon" || item.dueState === "overdue",
   ).length;
@@ -220,6 +253,12 @@ export default async function AppHomePage() {
       timeZone: context.user.timeZone,
     }).format(row.assignedAt),
   ]);
+  const grazingMoveRows = grazingMoveAlerts.rows.map((row) => [
+    row.landUnitName,
+    formatDateTimeForZone(row.moveBy, context.user.timeZone),
+    formatMoveCountdown(row.hoursUntilMove),
+    row.source === "occupancy_estimate" ? "occupancy estimate" : "recorded period",
+  ]);
   const dueRows = dueItems
     .filter((item) => item.dueState === "overdue" || item.dueState === "due_soon")
     .slice(0, 8)
@@ -242,6 +281,7 @@ export default async function AppHomePage() {
     recentRows.length > 0 || activeShiftsCount > 0 || openWorkOrdersCount > 0;
   const hasHerdLandActivity =
     movementRows.length > 0 ||
+    grazingMoveRows.length > 0 ||
     dueAttentionCount > 0 ||
     activeAnimalsCount > 0 ||
     occupiedUnitsCount > 0 ||
@@ -284,7 +324,7 @@ export default async function AppHomePage() {
         />
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <StatCard
           label="Active Animals"
           value={`${activeAnimalsCount}`}
@@ -308,6 +348,15 @@ export default async function AppHomePage() {
           label="Active Grazing Periods"
           value={`${activeGrazingCount}`}
           trend={activeGrazingCount > 0 ? "Planned or active rotation windows" : "No grazing periods yet"}
+        />
+        <StatCard
+          label="Move Now / Overdue"
+          value={`${moveDueNowCount}`}
+          trend={
+            moveDueNowCount > 0 || moveDueSoonCount > 0
+              ? `${moveDueSoonCount} due soon (${GRAZING_MOVE_SOON_HOURS}h), ${moveOverdueCount} overdue`
+              : "No projected move alerts right now"
+          }
         />
       </section>
 
@@ -340,6 +389,26 @@ export default async function AppHomePage() {
           columns={["Animal", "Protocol", "Due", "State"]}
           rows={dueRows}
           emptyLabel="No due or overdue breeding/health items right now."
+        />
+      </section>
+
+      <section>
+        <SectionHeader
+          title="Grazing Move Alerts"
+          description={`Projected move deadlines due now or within ${GRAZING_MOVE_SOON_HOURS} hours.`}
+          action={
+            <Link
+              href="/app/land/grazing"
+              className="text-sm font-semibold text-accent hover:underline"
+            >
+              Open grazing planner
+            </Link>
+          }
+        />
+        <DataTableShell
+          columns={["Land Unit", "Move By", "Countdown", "Source"]}
+          rows={grazingMoveRows}
+          emptyLabel={`No grazing moves due in the next ${GRAZING_MOVE_SOON_HOURS} hours.`}
         />
       </section>
 

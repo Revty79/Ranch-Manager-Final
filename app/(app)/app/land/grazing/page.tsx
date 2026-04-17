@@ -27,6 +27,8 @@ import {
 import { animalSpeciesOptions, formatAnimalSpecies } from "@/lib/herd/constants";
 
 type GrazingSearchParams = Record<string, string | string[] | undefined>;
+const MS_PER_HOUR = 60 * 60 * 1000;
+const MOVE_SOON_HOURS = 72;
 
 function formatDate(value: string): string {
   return new Intl.DateTimeFormat("en-US", {
@@ -35,6 +37,16 @@ function formatDate(value: string): string {
     year: "numeric",
     timeZone: "UTC",
   }).format(new Date(`${value}T00:00:00Z`));
+}
+
+function formatDateTime(value: Date): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(value);
 }
 
 function todayDateKey(): string {
@@ -46,17 +58,31 @@ function formatEstimateNumber(value: number | null, decimals = 1): string {
   return value.toFixed(decimals);
 }
 
-function rotationVariant(daysUntil: number) {
-  if (daysUntil < 0) return "danger";
-  if (daysUntil <= 3) return "warning";
-  return "neutral";
-}
-
 function daysUntil(date: Date): number {
   const today = new Date();
   const start = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
   const target = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
   return Math.floor((target - start) / (24 * 60 * 60 * 1000));
+}
+
+function hoursUntil(date: Date): number {
+  return Math.ceil((date.getTime() - Date.now()) / MS_PER_HOUR);
+}
+
+function describeMoveCountdown(date: Date): {
+  label: string;
+  variant: "danger" | "warning" | "neutral";
+} {
+  const hours = hoursUntil(date);
+  if (hours <= 0) {
+    const overdueHours = Math.abs(hours);
+    if (overdueHours === 0) return { label: "move now", variant: "danger" };
+    if (overdueHours < 24) return { label: `${overdueHours}h overdue`, variant: "danger" };
+    return { label: `${Math.ceil(overdueHours / 24)}d overdue`, variant: "danger" };
+  }
+  if (hours < 24) return { label: `in ${hours}h`, variant: "warning" };
+  if (hours <= MOVE_SOON_HOURS) return { label: `in ${Math.ceil(hours / 24)}d`, variant: "warning" };
+  return { label: `in ${Math.ceil(hours / 24)}d`, variant: "neutral" };
 }
 
 function toParamValue(value: string | string[] | undefined): string {
@@ -90,14 +116,21 @@ export default async function LandGrazingPage({
 
   const activeCount = workspace.activePeriods.length;
   const restingCount = workspace.restRows.filter((row) => row.state === "resting").length;
-  const rotationSoonCount = workspace.rotationSoon.length;
-  const overdueRotations = workspace.rotationSoon.filter((period) => {
-    const moveDate = period.plannedMoveOn
-      ? new Date(`${period.plannedMoveOn}T00:00:00Z`)
-      : period.estimate.projectedMoveDate;
-    if (!moveDate) return false;
-    return daysUntil(moveDate) < 0;
-  }).length;
+  const moveSignals = workspace.activePeriods
+    .map((period) => {
+      const moveDate = period.plannedMoveOn
+        ? new Date(`${period.plannedMoveOn}T00:00:00Z`)
+        : period.estimate.projectedMoveDate;
+      if (!moveDate) return null;
+      return { period, moveDate, hours: hoursUntil(moveDate) };
+    })
+    .filter((row): row is { period: (typeof workspace.activePeriods)[number]; moveDate: Date; hours: number } => Boolean(row));
+  const rotationSoonCount = moveSignals.filter(
+    (row) => row.hours > 0 && row.hours <= MOVE_SOON_HOURS,
+  ).length;
+  const moveNowCount = moveSignals.filter((row) => row.hours <= 0).length;
+  const overdueRotations = moveSignals.filter((row) => row.hours < 0).length;
+  const dueNowAlerts = moveSignals.filter((row) => row.hours <= 0).sort((a, b) => a.hours - b.hours);
 
   const defaultCalcLandUnitId = workspace.formOptions.landUnits[0]?.id ?? "";
   const calcLandUnitId = toParamValue(params.calcLandUnitId) || defaultCalcLandUnitId;
@@ -166,9 +199,38 @@ export default async function LandGrazingPage({
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Active/Planned Grazings" value={`${activeCount}`} trend="Units currently in use or queued" />
         <StatCard label="Resting Units" value={`${restingCount}`} trend="No active grazing period" />
-        <StatCard label="Rotation Soon" value={`${rotationSoonCount}`} trend="Move date near based on plan/estimate" />
-        <StatCard label="Overdue Moves" value={`${overdueRotations}`} trend="Projected move date passed" />
+        <StatCard label="Move Soon (72h)" value={`${rotationSoonCount}`} trend="Projected move deadline in next 3 days" />
+        <StatCard
+          label="Move Now / Overdue"
+          value={`${moveNowCount}`}
+          trend={overdueRotations ? `${overdueRotations} already overdue` : "No overdue units"}
+        />
       </section>
+
+      {dueNowAlerts.length ? (
+        <section>
+          <Card>
+            <CardContent className="space-y-3 py-6">
+              <CardTitle className="text-base text-danger">Move Animals Now</CardTitle>
+              <CardDescription>
+                These units have reached or passed projected move time based on current load and forage assumptions.
+              </CardDescription>
+              <ul className="space-y-2">
+                {dueNowAlerts.slice(0, 8).map((alert) => (
+                  <li key={`${alert.period.periodId}-${alert.period.landUnitId}`} className="rounded-lg border bg-surface px-3 py-2 text-sm">
+                    <Link href={`/app/land/${alert.period.landUnitId}`} className="font-semibold text-accent hover:underline">
+                      {alert.period.landUnitName}
+                    </Link>
+                    <p className="text-foreground-muted">
+                      Move by {formatDateTime(alert.moveDate)} ({describeMoveCountdown(alert.moveDate).label})
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </section>
+      ) : null}
 
       <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
         <Card>
@@ -375,7 +437,7 @@ export default async function LandGrazingPage({
                   <TableHeaderCell>Participants</TableHeaderCell>
                   <TableHeaderCell>Estimate snapshot</TableHeaderCell>
                   <TableHeaderCell>Projected move</TableHeaderCell>
-                  <TableHeaderCell>Days left</TableHeaderCell>
+                  <TableHeaderCell>Time left</TableHeaderCell>
                   <TableHeaderCell className="text-right">Actions</TableHeaderCell>
                 </TableRow>
               </TableHead>
@@ -384,7 +446,7 @@ export default async function LandGrazingPage({
                   const projectedDate = period.plannedMoveOn
                     ? new Date(`${period.plannedMoveOn}T00:00:00Z`)
                     : period.estimate.projectedMoveDate;
-                  const days = projectedDate ? daysUntil(projectedDate) : null;
+                  const countdown = projectedDate ? describeMoveCountdown(projectedDate) : null;
 
                   return (
                     <TableRow key={period.periodId}>
@@ -395,7 +457,15 @@ export default async function LandGrazingPage({
                         <p className="text-xs text-foreground-muted">{period.unitType.replace("_", " ")}</p>
                       </TableCell>
                       <TableCell>
-                        <p>Start: {formatDate(period.startedOn)}</p>
+                        <p>
+                          Start:{" "}
+                          {period.startedAt && period.source === "occupancy_estimate"
+                            ? formatDateTime(period.startedAt)
+                            : formatDate(period.startedOn)}
+                        </p>
+                        {period.source === "occupancy_estimate" ? (
+                          <p className="text-xs text-foreground-muted">derived from active occupancy</p>
+                        ) : null}
                         <p className="text-xs text-foreground-muted">status: {period.status}</p>
                       </TableCell>
                       <TableCell>
@@ -429,14 +499,10 @@ export default async function LandGrazingPage({
                       <TableCell>
                         {projectedDate ? (
                           <div className="space-y-1">
-                            <p>{formatDate(projectedDate.toISOString().slice(0, 10))}</p>
-                            {days != null ? (
-                              <Badge variant={rotationVariant(days)}>
-                                {days < 0
-                                  ? `${Math.abs(days)}d overdue`
-                                  : days === 0
-                                    ? "move today"
-                                    : `in ${days}d`}
+                            <p>{formatDateTime(projectedDate)}</p>
+                            {countdown != null ? (
+                              <Badge variant={countdown.variant}>
+                                {countdown.label}
                               </Badge>
                             ) : null}
                           </div>
@@ -445,20 +511,24 @@ export default async function LandGrazingPage({
                         )}
                       </TableCell>
                       <TableCell>
-                        {days == null ? (
+                        {countdown == null ? (
                           <span className="text-xs text-foreground-muted">No estimate</span>
                         ) : (
-                          <Badge variant={rotationVariant(days)}>
-                            {days < 0 ? `${Math.abs(days)}d overdue` : `${days}d left`}
+                          <Badge variant={countdown.variant}>
+                            {countdown.label}
                           </Badge>
                         )}
                       </TableCell>
                       <TableCell className="text-right">
-                        {canManage && period.status !== "completed" ? (
+                        {canManage &&
+                        period.status !== "completed" &&
+                        period.source === "recorded_period" ? (
                           <CompleteGrazingPeriodForm
                             grazingPeriodId={period.periodId}
                             defaultEndedOn={todayDateKey()}
                           />
+                        ) : period.source === "occupancy_estimate" ? (
+                          <span className="text-xs text-foreground-muted">Use occupancy move controls</span>
                         ) : (
                           <span className="text-xs text-foreground-muted">View only</span>
                         )}
@@ -471,8 +541,8 @@ export default async function LandGrazingPage({
           </TableContainer>
         ) : (
           <EmptyState
-            title="No active grazing periods"
-            description="Record the first grazing period above to begin rotation and rest tracking."
+            title="No active grazing use"
+            description="Record a grazing period or move animals onto a unit to start move alerts."
             icon={<Leaf className="h-5 w-5 text-accent" />}
           />
         )}
@@ -489,7 +559,9 @@ export default async function LandGrazingPage({
                     <TableRow>
                       <TableHeaderCell>Unit</TableHeaderCell>
                       <TableHeaderCell>State</TableHeaderCell>
+                      <TableHeaderCell>Rest started</TableHeaderCell>
                       <TableHeaderCell>Days resting</TableHeaderCell>
+                      <TableHeaderCell>Ready to graze</TableHeaderCell>
                       <TableHeaderCell>Target rest</TableHeaderCell>
                     </TableRow>
                   </TableHead>
@@ -503,7 +575,32 @@ export default async function LandGrazingPage({
                         </TableCell>
                         <TableCell>{row.state.replace("_", " ")}</TableCell>
                         <TableCell>
-                          {row.daysResting == null ? "--" : `${row.daysResting}d`}
+                          {row.restStartedAt ? (
+                            <span className="text-sm text-foreground-muted">
+                              {formatDateTime(row.restStartedAt)}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-foreground-muted">--</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {row.daysResting == null ? "--" : `${row.daysResting.toFixed(1)}d`}
+                        </TableCell>
+                        <TableCell>
+                          {row.readyAt ? (
+                            <div className="space-y-0.5">
+                              <p>{formatDateTime(row.readyAt)}</p>
+                              {row.hoursUntilReady != null ? (
+                                <p className="text-xs text-foreground-muted">
+                                  {row.restComplete
+                                    ? "ready now"
+                                    : `${row.hoursUntilReady}h until ready`}
+                                </p>
+                              ) : null}
+                            </div>
+                          ) : (
+                            <span className="text-xs text-foreground-muted">--</span>
+                          )}
                         </TableCell>
                         <TableCell>
                           {row.targetRestDays}d

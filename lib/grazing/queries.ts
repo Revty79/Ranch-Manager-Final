@@ -19,7 +19,8 @@ import {
 } from "./settings";
 import { compareAnimalSpecies } from "@/lib/herd/constants";
 
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const MS_PER_HOUR = 60 * 60 * 1000;
+const MS_PER_DAY = 24 * MS_PER_HOUR;
 
 export interface GrazingEstimateResult {
   canEstimate: boolean;
@@ -83,6 +84,7 @@ function resolveSpeciesDemandMultiplier(
 
 export function computeGrazingEstimate(params: {
   startedOn: string;
+  startedAt?: Date;
   grazeableAcreage: string | null;
   estimatedForageLbsPerAcre: string | null;
   unitUtilizationPercent: number | null;
@@ -137,8 +139,9 @@ export function computeGrazingEstimate(params: {
   const availableForageLbs =
     grazeableAcreage! * forageLbsPerAcre! * (utilizationPercent / 100);
   const estimatedGrazingDays = availableForageLbs / demandPerDayLbs;
+  const estimateStartAt = params.startedAt ?? parseDateKey(params.startedOn);
   const projectedMoveDate = addDays(
-    parseDateKey(params.startedOn),
+    estimateStartAt,
     Math.max(1, Math.ceil(estimatedGrazingDays)),
   );
 
@@ -243,11 +246,13 @@ export function computeGrazingEstimateFromSpeciesCounts(params: {
 
 export interface GrazingPeriodWorkspaceRow {
   periodId: string;
+  source: "recorded_period" | "occupancy_estimate";
   landUnitId: string;
   landUnitName: string;
   unitType: LandUnitType;
   status: GrazingPeriodStatus;
   startedOn: string;
+  startedAt: Date | null;
   endedOn: string | null;
   plannedMoveOn: string | null;
   notes: string | null;
@@ -263,9 +268,11 @@ export interface GrazingRestRow {
   unitType: LandUnitType;
   state: "in_use" | "resting" | "no_history";
   daysResting: number | null;
+  restStartedAt: Date | null;
+  readyAt: Date | null;
+  hoursUntilReady: number | null;
   targetRestDays: number;
   restComplete: boolean | null;
-  lastEndedOn: string | null;
 }
 
 export interface GrazingWorkspace {
@@ -293,11 +300,35 @@ export interface GrazingWorkspace {
   };
 }
 
+export interface GrazingMoveAlertRow {
+  periodId: string;
+  source: "recorded_period" | "occupancy_estimate";
+  landUnitId: string;
+  landUnitName: string;
+  moveBy: Date;
+  hoursUntilMove: number;
+}
+
+export interface GrazingMoveAlertSummary {
+  dueNowCount: number;
+  overdueCount: number;
+  dueSoonCount: number;
+  rows: GrazingMoveAlertRow[];
+}
+
 export async function getGrazingWorkspace(ranchId: string): Promise<GrazingWorkspace> {
   const settingsRow = await getOrCreateHerdLandSettings(ranchId);
   const assumptions = resolveGrazingAssumptions(settingsRow.grazingDefaults);
 
-  const [unitRows, periodRows, periodAnimalRows, occupancyRows, groupRows, animalRows] =
+  const [
+    unitRows,
+    periodRows,
+    periodAnimalRows,
+    occupancyRows,
+    latestMoveOutRows,
+    groupRows,
+    animalRows,
+  ] =
     await Promise.all([
       db
         .select({
@@ -322,6 +353,7 @@ export async function getGrazingWorkspace(ranchId: string): Promise<GrazingWorks
           endedOn: grazingPeriods.endedOn,
           plannedMoveOn: grazingPeriods.plannedMoveOn,
           notes: grazingPeriods.notes,
+          updatedAt: grazingPeriods.updatedAt,
         })
         .from(grazingPeriods)
         .where(eq(grazingPeriods.ranchId, ranchId))
@@ -346,6 +378,7 @@ export async function getGrazingWorkspace(ranchId: string): Promise<GrazingWorks
           displayName: animals.displayName,
           species: animals.species,
           animalClass: animals.animalClass,
+          assignedAt: animalLocationAssignments.assignedAt,
         })
         .from(animalLocationAssignments)
         .innerJoin(animals, eq(animalLocationAssignments.animalId, animals.id))
@@ -355,6 +388,19 @@ export async function getGrazingWorkspace(ranchId: string): Promise<GrazingWorks
             eq(animalLocationAssignments.isActive, true),
           ),
         ),
+      db
+        .select({
+          landUnitId: animalLocationAssignments.landUnitId,
+          lastEndedAt: sql<Date>`max(${animalLocationAssignments.endedAt})`,
+        })
+        .from(animalLocationAssignments)
+        .where(
+          and(
+            eq(animalLocationAssignments.ranchId, ranchId),
+            sql`${animalLocationAssignments.endedAt} is not null`,
+          ),
+        )
+        .groupBy(animalLocationAssignments.landUnitId),
       db
         .select({
           id: animalGroups.id,
@@ -443,11 +489,13 @@ export async function getGrazingWorkspace(ranchId: string): Promise<GrazingWorks
 
     workspaceRows.push({
       periodId: period.periodId,
+      source: "recorded_period",
       landUnitId: unit.id,
       landUnitName: unit.name,
       unitType: unit.unitType,
       status: period.status,
       startedOn: period.startedOn,
+      startedAt: parseDateKey(period.startedOn),
       endedOn: period.endedOn,
       plannedMoveOn: period.plannedMoveOn,
       notes: period.notes,
@@ -462,10 +510,79 @@ export async function getGrazingWorkspace(ranchId: string): Promise<GrazingWorks
     });
   }
 
-  const activePeriods = workspaceRows.filter(
-    (row) => row.status === "active" || row.status === "planned",
+  const unitsWithActiveOrPlannedPeriod = new Set(
+    workspaceRows
+      .filter((row) => row.status === "active" || row.status === "planned")
+      .map((row) => row.landUnitId),
   );
-  const recentPeriods = workspaceRows.slice(0, 15);
+
+  for (const unit of unitRows) {
+    if (unitsWithActiveOrPlannedPeriod.has(unit.id)) continue;
+    const participants = occupancyByUnit.get(unit.id) ?? [];
+    if (!participants.length) continue;
+
+    const startedAt = participants.reduce(
+      (earliest, row) => (row.assignedAt < earliest ? row.assignedAt : earliest),
+      participants[0]!.assignedAt,
+    );
+    const startedOn = startedAt.toISOString().slice(0, 10);
+    const estimate = computeGrazingEstimate({
+      startedOn,
+      startedAt,
+      grazeableAcreage: unit.grazeableAcreage,
+      estimatedForageLbsPerAcre: unit.estimatedForageLbsPerAcre,
+      unitUtilizationPercent: unit.targetUtilizationPercent,
+      participantAnimals: participants.map((animal) => ({
+        species: animal.species,
+        animalClass: animal.animalClass,
+      })),
+      assumptions,
+    });
+
+    const speciesMixMap = new Map<AnimalSpecies, number>();
+    for (const animal of participants) {
+      speciesMixMap.set(animal.species, (speciesMixMap.get(animal.species) ?? 0) + 1);
+    }
+    const participantSpeciesMix = [...speciesMixMap.entries()]
+      .map(([species, count]) => ({ species, count }))
+      .sort((a, b) => compareAnimalSpecies(a.species, b.species));
+
+    workspaceRows.push({
+      periodId: `occupancy-${unit.id}`,
+      source: "occupancy_estimate",
+      landUnitId: unit.id,
+      landUnitName: unit.name,
+      unitType: unit.unitType,
+      status: "active",
+      startedOn,
+      startedAt,
+      endedOn: null,
+      plannedMoveOn: null,
+      notes: "Derived from active occupancy movements.",
+      participantCount: participants.length,
+      participantLabels: participants
+        .slice(0, 4)
+        .map((animal) =>
+          animal.displayName ? `${animal.displayName} (${animal.tagId})` : animal.tagId,
+        ),
+      participantSpeciesMix,
+      estimate,
+    });
+  }
+
+  const activePeriods = workspaceRows
+    .filter((row) => row.status === "active" || row.status === "planned")
+    .sort((a, b) => {
+      const aMove = a.plannedMoveOn ? parseDateKey(a.plannedMoveOn) : a.estimate.projectedMoveDate;
+      const bMove = b.plannedMoveOn ? parseDateKey(b.plannedMoveOn) : b.estimate.projectedMoveDate;
+      if (aMove && bMove) return aMove.getTime() - bMove.getTime();
+      if (aMove) return -1;
+      if (bMove) return 1;
+      return a.landUnitName.localeCompare(b.landUnitName);
+    });
+  const recentPeriods = workspaceRows
+    .filter((row) => row.source === "recorded_period")
+    .slice(0, 15);
 
   const today = startOfToday();
   const soonThreshold = addDays(today, 3);
@@ -477,57 +594,92 @@ export async function getGrazingWorkspace(ranchId: string): Promise<GrazingWorks
     return moveDate <= soonThreshold;
   });
 
-  const latestCompletedByUnit = new Map<string, GrazingPeriodWorkspaceRow>();
-  for (const row of workspaceRows) {
-    if (!row.endedOn) continue;
+  const latestCompletedByUnit = new Map<string, { endedOn: string; updatedAt: Date }>();
+  for (const row of periodRows) {
+    if (row.status !== "completed" || !row.endedOn) continue;
     const existing = latestCompletedByUnit.get(row.landUnitId);
-    if (!existing || row.endedOn > (existing.endedOn ?? "")) {
-      latestCompletedByUnit.set(row.landUnitId, row);
+    if (
+      !existing ||
+      row.endedOn > existing.endedOn ||
+      (row.endedOn === existing.endedOn && row.updatedAt > existing.updatedAt)
+    ) {
+      latestCompletedByUnit.set(row.landUnitId, {
+        endedOn: row.endedOn,
+        updatedAt: row.updatedAt,
+      });
     }
   }
 
-  const activeUnitIds = new Set(activePeriods.map((period) => period.landUnitId));
+  const latestMoveOutByUnit = new Map(
+    latestMoveOutRows
+      .filter((row) => row.lastEndedAt)
+      .map((row) => [row.landUnitId, row.lastEndedAt] as const),
+  );
+
+  const activeUnitIds = new Set(
+    workspaceRows.filter((period) => period.status === "active").map((period) => period.landUnitId),
+  );
+  const occupiedUnitIds = new Set(occupancyRows.map((row) => row.landUnitId));
+  const inUseUnitIds = new Set([...activeUnitIds, ...occupiedUnitIds]);
+  const now = new Date();
+
   const restRows: GrazingRestRow[] = unitRows.map((unit) => {
     const targetRestDays = unit.targetRestDays ?? assumptions.defaultRestDays;
-    if (activeUnitIds.has(unit.id)) {
+    if (inUseUnitIds.has(unit.id)) {
       return {
         landUnitId: unit.id,
         landUnitName: unit.name,
         unitType: unit.unitType,
         state: "in_use",
         daysResting: null,
+        restStartedAt: null,
+        readyAt: null,
+        hoursUntilReady: null,
         targetRestDays,
         restComplete: null,
-        lastEndedOn: null,
       };
     }
 
+    const latestMoveOutAt = latestMoveOutByUnit.get(unit.id) ?? null;
     const latestCompleted = latestCompletedByUnit.get(unit.id);
-    if (!latestCompleted?.endedOn) {
+    const restStartedAt =
+      latestMoveOutAt ??
+      (latestCompleted?.endedOn ? parseDateKey(latestCompleted.endedOn) : null);
+
+    if (!restStartedAt) {
       return {
         landUnitId: unit.id,
         landUnitName: unit.name,
         unitType: unit.unitType,
         state: "no_history",
         daysResting: null,
+        restStartedAt: null,
+        readyAt: null,
+        hoursUntilReady: null,
         targetRestDays,
         restComplete: null,
-        lastEndedOn: null,
       };
     }
 
-    const daysResting = Math.floor(
-      (today.getTime() - parseDateKey(latestCompleted.endedOn).getTime()) / MS_PER_DAY,
-    );
+    const restingMs = Math.max(0, now.getTime() - restStartedAt.getTime());
+    const daysResting = restingMs / MS_PER_DAY;
+    const readyAt = addDays(restStartedAt, targetRestDays);
+    const restComplete = now.getTime() >= readyAt.getTime();
+    const hoursUntilReady = restComplete
+      ? 0
+      : Math.max(1, Math.ceil((readyAt.getTime() - now.getTime()) / MS_PER_HOUR));
+
     return {
       landUnitId: unit.id,
       landUnitName: unit.name,
       unitType: unit.unitType,
       state: "resting",
       daysResting,
+      restStartedAt,
+      readyAt,
+      hoursUntilReady,
       targetRestDays,
-      restComplete: daysResting >= targetRestDays,
-      lastEndedOn: latestCompleted.endedOn,
+      restComplete,
     };
   });
 
@@ -575,6 +727,54 @@ export async function getGrazingWorkspace(ranchId: string): Promise<GrazingWorks
       })),
       occupancyAssignments,
     },
+  };
+}
+
+function projectedMoveForPeriod(period: Pick<GrazingPeriodWorkspaceRow, "plannedMoveOn" | "estimate">): Date | null {
+  return period.plannedMoveOn ? parseDateKey(period.plannedMoveOn) : period.estimate.projectedMoveDate;
+}
+
+export async function getGrazingMoveAlertSummary(
+  ranchId: string,
+  options?: { soonHours?: number; limit?: number },
+): Promise<GrazingMoveAlertSummary> {
+  const soonHours = options?.soonHours ?? 72;
+  const limit = options?.limit ?? 12;
+  const now = new Date();
+  const workspace = await getGrazingWorkspace(ranchId);
+
+  const allAlerts = workspace.activePeriods
+    .map((period) => {
+      const moveBy = projectedMoveForPeriod(period);
+      if (!moveBy) return null;
+      const hoursUntilMove = Math.ceil((moveBy.getTime() - now.getTime()) / MS_PER_HOUR);
+      return {
+        periodId: period.periodId,
+        source: period.source,
+        landUnitId: period.landUnitId,
+        landUnitName: period.landUnitName,
+        moveBy,
+        hoursUntilMove,
+      } satisfies GrazingMoveAlertRow;
+    })
+    .filter((row): row is GrazingMoveAlertRow => Boolean(row));
+
+  const dueNowCount = allAlerts.filter((row) => row.hoursUntilMove <= 0).length;
+  const overdueCount = allAlerts.filter((row) => row.hoursUntilMove < 0).length;
+  const dueSoonCount = allAlerts.filter(
+    (row) => row.hoursUntilMove > 0 && row.hoursUntilMove <= soonHours,
+  ).length;
+
+  const rows = allAlerts
+    .filter((row) => row.hoursUntilMove <= 0 || row.hoursUntilMove <= soonHours)
+    .sort((a, b) => a.hoursUntilMove - b.hoursUntilMove)
+    .slice(0, limit);
+
+  return {
+    dueNowCount,
+    overdueCount,
+    dueSoonCount,
+    rows,
   };
 }
 
