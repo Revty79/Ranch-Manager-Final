@@ -21,6 +21,12 @@ export const metadata: Metadata = {
   title: "Ranch Manager",
   description:
     "Ranch operations SaaS for crew, work, time, payroll, herd, land, and billing access.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "Ranch Manager",
+    statusBarStyle: "default",
+  },
 };
 
 export default function RootLayout({
