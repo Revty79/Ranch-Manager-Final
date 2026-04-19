@@ -1,5 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { sessionCookieName, getValidSessionByToken, revokeSessionByToken } from "@/lib/auth/session";
+import {
+  sessionCookieName,
+  getValidSessionByToken,
+  revokeSessionByToken,
+  shouldUseSecureSessionCookies,
+} from "@/lib/auth/session";
 import { autoClockOutActiveTimeForUser } from "@/lib/time/maintenance";
 
 async function handleLogout(request: NextRequest) {
@@ -25,7 +30,7 @@ async function handleLogout(request: NextRequest) {
   response.cookies.set(sessionCookieName, "", {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: shouldUseSecureSessionCookies(),
     path: "/",
     expires: new Date(0),
   });

@@ -69,6 +69,7 @@ Optional:
 
 - `PLATFORM_ADMIN_EMAILS` (comma-separated allowlist for `/admin`)
 - `BILLING_COUPON_PEPPER` (optional secret for coupon hashing; falls back to `APP_SECRET`)
+- `ALLOW_INSECURE_COOKIES=true` (temporary non-HTTPS home-server testing only; disables secure auth/session cookie requirement)
 - `ALLOW_DEMO_SEED=true` (required to run demo seed)
 - `DEMO_SEED_PASSWORD` (override default demo password)
 

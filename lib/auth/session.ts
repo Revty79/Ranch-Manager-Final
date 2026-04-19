@@ -8,6 +8,15 @@ const SESSION_MAX_AGE_DAYS = 30;
 export const sessionCookieName =
   process.env.SESSION_COOKIE_NAME ?? "rmf_session_token";
 
+function isTrueEnv(value: string | undefined): boolean {
+  return value?.trim().toLowerCase() === "true";
+}
+
+export function shouldUseSecureSessionCookies(): boolean {
+  const allowInsecureCookies = isTrueEnv(process.env.ALLOW_INSECURE_COOKIES);
+  return process.env.NODE_ENV === "production" && !allowInsecureCookies;
+}
+
 export function hashSessionToken(token: string): string {
   const secret = process.env.APP_SECRET ?? "dev-only-secret-change-me";
   return createHmac("sha256", secret).update(token).digest("hex");
@@ -37,7 +46,7 @@ export async function setSessionCookie(token: string, expiresAt: Date) {
   cookieStore.set(sessionCookieName, token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: shouldUseSecureSessionCookies(),
     path: "/",
     expires: expiresAt,
   });
