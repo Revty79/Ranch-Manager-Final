@@ -25,10 +25,15 @@ export default async function OnboardingPage() {
         <div>
           <CardTitle className="text-2xl">Create your ranch workspace</CardTitle>
           <CardDescription className="mt-2">
-            One quick setup step. You will be assigned owner role for this ranch account.
+            One quick setup step with payroll defaults and optional starter recurring work
+            templates. You will be assigned owner role for this ranch account.
           </CardDescription>
         </div>
         <OnboardingForm />
+        <div className="rounded-xl border bg-surface p-3 text-sm text-foreground-muted">
+          <p className="font-semibold text-foreground">After setup</p>
+          <p>Invite your first manager/worker from Team, then open Work Orders and Payroll.</p>
+        </div>
       </CardContent>
     </Card>
   );

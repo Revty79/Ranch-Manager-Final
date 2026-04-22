@@ -295,9 +295,19 @@ export default async function AppHomePage() {
         title="Operations Dashboard"
         description="A clean snapshot of crew, work, payroll, herd lifecycle visibility, and land-use activity."
         actions={
-          <Link href="/app/work-orders" className={cn(buttonVariants())}>
-            New Work Order
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            {(context.membership.role === "owner" || context.membership.role === "manager") ? (
+              <Link
+                href="/app/needs-attention"
+                className={cn(buttonVariants({ variant: "secondary" }))}
+              >
+                Needs Attention
+              </Link>
+            ) : null}
+            <Link href="/app/work-orders" className={cn(buttonVariants())}>
+              New Work Order
+            </Link>
+          </div>
         }
       />
 

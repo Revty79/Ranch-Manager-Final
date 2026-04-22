@@ -13,8 +13,11 @@ import {
   type WorkOrderCompensationType,
   type WorkOrderIncentiveTimerType,
   workOrderAssignments,
+  workOrderTemplateAssignments,
+  workOrderTemplates,
   workOrders,
 } from "@/lib/db/schema";
+import { isDateKey, parseDateKey, toDateKey } from "./recurrence";
 
 export interface WorkOrderActionState {
   error?: string;
@@ -115,6 +118,106 @@ const workOrderSchema = z.object({
 const updateWorkOrderSchema = workOrderSchema.extend({
   workOrderId: z.string().uuid(),
 });
+const templateIncentiveTimerTypeSchema = z.enum(["none", "hours"]);
+const recurrenceCadenceSchema = z.enum(["daily", "weekly", "monthly", "custom"]);
+const createTemplateSchema = z
+  .object({
+    templateName: z.string().trim().min(2, "Template name must be at least 2 characters."),
+    title: z.string().trim().min(3, "Title must be at least 3 characters."),
+    description: z.string().trim().optional(),
+    priority: prioritySchema,
+    compensationType: compensationTypeSchema.default("standard"),
+    flatPay: z.coerce.number().min(0, "Flat pay must be zero or greater."),
+    incentivePay: z.coerce.number().min(0, "Incentive pay must be zero or greater."),
+    incentiveTimerType: templateIncentiveTimerTypeSchema.default("none"),
+    incentiveHours: optionalIncentiveHoursSchema,
+  })
+  .superRefine((value, ctx) => {
+    const flatPayCents = toCents(value.flatPay);
+    const incentivePayCents = toCents(value.incentivePay);
+
+    if (value.compensationType === "flat_amount" && flatPayCents <= 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["flatPay"],
+        message: "Enter a flat amount greater than zero.",
+      });
+    }
+
+    if (value.compensationType === "standard" && flatPayCents > 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["compensationType"],
+        message: "Switch to flat amount pay to use a flat work-order payout.",
+      });
+    }
+
+    if (incentivePayCents > 0 && value.incentiveTimerType === "none") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["incentiveTimerType"],
+        message: "Select an incentive timer when incentive pay is set.",
+      });
+    }
+
+    if (value.incentiveTimerType === "hours" && value.incentiveHours == null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["incentiveHours"],
+        message: "Enter incentive timer hours.",
+      });
+    }
+  });
+const createFromTemplateSchema = z.object({
+  templateId: z.string().uuid(),
+});
+const updateTemplateRecurrenceSchema = z
+  .object({
+    templateId: z.string().uuid(),
+    isActive: z.boolean(),
+    recurringEnabled: z.boolean(),
+    recurrenceCadence: z.preprocess(
+      (value) => (value == null || value === "" ? undefined : String(value)),
+      recurrenceCadenceSchema.optional(),
+    ),
+    recurrenceIntervalDays: z.preprocess(
+      (value) => (value == null || value === "" ? undefined : value),
+      z.coerce.number().int().min(1).max(365).optional(),
+    ),
+    nextGenerationOn: z.preprocess(
+      (value) => (value == null || value === "" ? undefined : String(value)),
+      z.string().optional(),
+    ),
+  })
+  .superRefine((value, ctx) => {
+    if (!value.recurringEnabled) {
+      return;
+    }
+
+    if (!value.recurrenceCadence) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["recurrenceCadence"],
+        message: "Choose a recurrence cadence.",
+      });
+    }
+
+    if (!value.nextGenerationOn || !isDateKey(value.nextGenerationOn)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["nextGenerationOn"],
+        message: "Enter a valid next generation date.",
+      });
+    }
+
+    if (value.recurrenceCadence === "custom" && !value.recurrenceIntervalDays) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["recurrenceIntervalDays"],
+        message: "Custom cadence requires interval days.",
+      });
+    }
+  });
 const reviewDecisionSchema = z.enum(["approve", "send_back"]);
 const reviewChecklistSchema = z.object({
   workOrderId: z.string().uuid(),
@@ -194,6 +297,13 @@ function parseAssigneeIds(formData: FormData): string[] {
   return [...new Set(formData.getAll("assigneeIds").map((id) => String(id)).filter(Boolean))];
 }
 
+function parseBooleanValue(formData: FormData, key: string): boolean {
+  return formData
+    .getAll(key)
+    .map((entry) => String(entry).toLowerCase())
+    .some((value) => value === "on" || value === "true" || value === "1");
+}
+
 function parseCheckbox(formData: FormData, key: string): boolean {
   return formData.get(key) === "on";
 }
@@ -241,6 +351,24 @@ async function replaceAssignments(workOrderId: string, assigneeIds: string[]) {
   await db.insert(workOrderAssignments).values(
     assigneeIds.map((membershipId) => ({
       workOrderId,
+      membershipId,
+    })),
+  );
+}
+
+async function replaceTemplateAssignments(templateId: string, ranchId: string, assigneeIds: string[]) {
+  await db
+    .delete(workOrderTemplateAssignments)
+    .where(eq(workOrderTemplateAssignments.templateId, templateId));
+
+  if (!assigneeIds.length) {
+    return;
+  }
+
+  await db.insert(workOrderTemplateAssignments).values(
+    assigneeIds.map((membershipId) => ({
+      ranchId,
+      templateId,
       membershipId,
     })),
   );
@@ -403,6 +531,239 @@ export async function updateWorkOrderAction(
   revalidatePath("/app/time");
   revalidatePath("/app/payroll");
   return { success: "Work order updated." };
+}
+
+export async function createWorkOrderTemplateAction(
+  _prevState: WorkOrderActionState,
+  formData: FormData,
+): Promise<WorkOrderActionState> {
+  const context = await requireRole(["owner", "manager"]);
+  const parsed = createTemplateSchema.safeParse({
+    templateName: formData.get("templateName"),
+    title: formData.get("title"),
+    description: formData.get("description"),
+    priority: formData.get("priority"),
+    compensationType: formData.get("compensationType"),
+    flatPay: formData.get("flatPay"),
+    incentivePay: formData.get("incentivePay"),
+    incentiveTimerType: formData.get("incentiveTimerType"),
+    incentiveHours: formData.get("incentiveHours"),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid template details." };
+  }
+
+  const assigneeIds = parseAssigneeIds(formData);
+  const validAssigneeIds = await validateAssigneesForRanch(context.ranch.id, assigneeIds);
+  if (!validAssigneeIds) {
+    return { error: "Invalid assignee selection." };
+  }
+
+  if (parsed.data.compensationType === "flat_amount" && validAssigneeIds.length === 0) {
+    return { error: "Flat-amount templates must include at least one default assignee." };
+  }
+
+  const compensationValues = resolveCompensationValues({
+    ...parsed.data,
+    status: "open",
+    dueAt: "",
+    incentiveDeadlineAt: undefined,
+  });
+
+  const incentivePayCents = toCents(parsed.data.incentivePay);
+  const incentiveTimerType: WorkOrderIncentiveTimerType =
+    incentivePayCents > 0 && parsed.data.incentiveTimerType === "hours" ? "hours" : "none";
+  const incentiveDurationHours =
+    incentiveTimerType === "hours" ? (parsed.data.incentiveHours ?? null) : null;
+
+  try {
+    const [template] = await db
+      .insert(workOrderTemplates)
+      .values({
+        ranchId: context.ranch.id,
+        templateName: parsed.data.templateName,
+        title: parsed.data.title,
+        description: parsed.data.description || null,
+        priority: parsed.data.priority,
+        compensationType: compensationValues.compensationType,
+        flatPayCents: compensationValues.flatPayCents,
+        incentivePayCents,
+        incentiveTimerType,
+        incentiveDurationHours,
+        isActive: true,
+        recurringEnabled: false,
+        recurrenceCadence: null,
+        recurrenceIntervalDays: null,
+        nextGenerationOn: null,
+        createdByMembershipId: context.membership.id,
+      })
+      .returning({ id: workOrderTemplates.id });
+
+    await replaceTemplateAssignments(template.id, context.ranch.id, validAssigneeIds);
+  } catch (error) {
+    const message =
+      error instanceof Error &&
+      error.message.includes("work_order_templates_ranch_name_uidx")
+        ? "Template name already exists in this ranch."
+        : "Unable to create template.";
+    return { error: message };
+  }
+
+  revalidatePath("/app/work-orders");
+  return { success: "Template created." };
+}
+
+export async function createWorkOrderFromTemplateAction(formData: FormData): Promise<void> {
+  const context = await requireRole(["owner", "manager"]);
+  const parsed = createFromTemplateSchema.safeParse({
+    templateId: formData.get("templateId"),
+  });
+
+  if (!parsed.success) {
+    return;
+  }
+
+  const [template] = await db
+    .select({
+      id: workOrderTemplates.id,
+      title: workOrderTemplates.title,
+      description: workOrderTemplates.description,
+      priority: workOrderTemplates.priority,
+      compensationType: workOrderTemplates.compensationType,
+      flatPayCents: workOrderTemplates.flatPayCents,
+      incentivePayCents: workOrderTemplates.incentivePayCents,
+      incentiveTimerType: workOrderTemplates.incentiveTimerType,
+      incentiveDurationHours: workOrderTemplates.incentiveDurationHours,
+      isActive: workOrderTemplates.isActive,
+    })
+    .from(workOrderTemplates)
+    .where(
+      and(
+        eq(workOrderTemplates.id, parsed.data.templateId),
+        eq(workOrderTemplates.ranchId, context.ranch.id),
+      ),
+    )
+    .limit(1);
+
+  if (!template || !template.isActive) {
+    return;
+  }
+
+  const templateAssignments = await db
+    .select({
+      membershipId: workOrderTemplateAssignments.membershipId,
+      email: users.email,
+    })
+    .from(workOrderTemplateAssignments)
+    .innerJoin(
+      ranchMemberships,
+      eq(workOrderTemplateAssignments.membershipId, ranchMemberships.id),
+    )
+    .innerJoin(users, eq(ranchMemberships.userId, users.id))
+    .where(
+      and(
+        eq(workOrderTemplateAssignments.ranchId, context.ranch.id),
+        eq(workOrderTemplateAssignments.templateId, parsed.data.templateId),
+        eq(ranchMemberships.isActive, true),
+      ),
+    );
+
+  const validAssigneeIds = templateAssignments
+    .filter((assignment) => !isPlatformAdminEmail(assignment.email))
+    .map((assignment) => assignment.membershipId);
+
+  if (template.compensationType === "flat_amount" && validAssigneeIds.length === 0) {
+    return;
+  }
+
+  const incentiveEndsAt =
+    template.incentiveTimerType === "hours" && template.incentiveDurationHours
+      ? new Date(Date.now() + template.incentiveDurationHours * 60 * 60 * 1000)
+      : null;
+
+  const [createdOrder] = await db
+    .insert(workOrders)
+    .values({
+      ranchId: context.ranch.id,
+      title: template.title,
+      description: template.description,
+      status: "open",
+      priority: template.priority,
+      dueAt: null,
+      completedAt: null,
+      compensationType: template.compensationType,
+      flatPayCents: template.flatPayCents,
+      incentivePayCents: template.incentivePayCents,
+      incentiveTimerType: template.incentiveTimerType,
+      incentiveDurationHours: template.incentiveDurationHours,
+      incentiveEndsAt,
+      templateId: template.id,
+      generatedForDate: null,
+      createdByMembershipId: context.membership.id,
+    })
+    .returning({ id: workOrders.id });
+
+  await replaceAssignments(createdOrder.id, validAssigneeIds);
+
+  revalidatePath("/app");
+  revalidatePath("/app/work-orders");
+  revalidatePath("/app/time");
+}
+
+export async function updateWorkOrderTemplateRecurrenceAction(formData: FormData): Promise<void> {
+  const context = await requireRole(["owner", "manager"]);
+  const parsed = updateTemplateRecurrenceSchema.safeParse({
+    templateId: formData.get("templateId"),
+    isActive: parseBooleanValue(formData, "isActive"),
+    recurringEnabled: parseBooleanValue(formData, "recurringEnabled"),
+    recurrenceCadence: formData.get("recurrenceCadence"),
+    recurrenceIntervalDays: formData.get("recurrenceIntervalDays"),
+    nextGenerationOn: formData.get("nextGenerationOn"),
+  });
+
+  if (!parsed.success) {
+    return;
+  }
+
+  const [template] = await db
+    .select({ id: workOrderTemplates.id })
+    .from(workOrderTemplates)
+    .where(
+      and(
+        eq(workOrderTemplates.id, parsed.data.templateId),
+        eq(workOrderTemplates.ranchId, context.ranch.id),
+      ),
+    )
+    .limit(1);
+
+  if (!template) {
+    return;
+  }
+
+  const nextGenerationOn =
+    parsed.data.recurringEnabled && parsed.data.nextGenerationOn
+      ? toDateKey(parseDateKey(parsed.data.nextGenerationOn) ?? new Date())
+      : null;
+
+  await db
+    .update(workOrderTemplates)
+    .set({
+      isActive: parsed.data.isActive,
+      recurringEnabled: parsed.data.recurringEnabled,
+      recurrenceCadence: parsed.data.recurringEnabled
+        ? (parsed.data.recurrenceCadence ?? null)
+        : null,
+      recurrenceIntervalDays:
+        parsed.data.recurringEnabled && parsed.data.recurrenceCadence === "custom"
+          ? (parsed.data.recurrenceIntervalDays ?? null)
+          : null,
+      nextGenerationOn,
+      updatedAt: new Date(),
+    })
+    .where(eq(workOrderTemplates.id, parsed.data.templateId));
+
+  revalidatePath("/app/work-orders");
 }
 
 export async function reviewCompletedWorkOrderAction(

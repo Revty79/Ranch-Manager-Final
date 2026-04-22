@@ -56,6 +56,10 @@ export const workOrderCompletionReviewStatusEnum = pgEnum(
   "work_order_completion_review_status",
   ["pending", "approved", "changes_requested"],
 );
+export const workOrderCompletionEvidenceTypeEnum = pgEnum(
+  "work_order_completion_evidence_type",
+  ["link", "photo", "file", "note"],
+);
 export const ranchMessagePriorityEnum = pgEnum("ranch_message_priority", [
   "normal",
   "urgent",
@@ -64,6 +68,12 @@ export const workOrderIncentiveTimerTypeEnum = pgEnum("work_order_incentive_time
   "none",
   "hours",
   "deadline",
+]);
+export const workOrderRecurrenceCadenceEnum = pgEnum("work_order_recurrence_cadence", [
+  "daily",
+  "weekly",
+  "monthly",
+  "custom",
 ]);
 export const payrollPeriodStatusEnum = pgEnum("payroll_period_status", ["open", "paid"]);
 export const animalSpeciesEnum = pgEnum("animal_species", [
@@ -304,6 +314,78 @@ export const sessions = pgTable(
   ],
 );
 
+export const workOrderTemplates = pgTable(
+  "work_order_templates",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ranchId: uuid("ranch_id")
+      .references(() => ranches.id, { onDelete: "cascade" })
+      .notNull(),
+    templateName: text("template_name").notNull(),
+    title: text("title").notNull(),
+    description: text("description"),
+    priority: workOrderPriorityEnum("priority").default("normal").notNull(),
+    compensationType: workOrderCompensationTypeEnum("compensation_type")
+      .default("standard")
+      .notNull(),
+    flatPayCents: integer("flat_pay_cents").default(0).notNull(),
+    incentivePayCents: integer("incentive_pay_cents").default(0).notNull(),
+    incentiveTimerType: workOrderIncentiveTimerTypeEnum("incentive_timer_type")
+      .default("none")
+      .notNull(),
+    incentiveDurationHours: integer("incentive_duration_hours"),
+    isActive: boolean("is_active").default(true).notNull(),
+    recurringEnabled: boolean("recurring_enabled").default(false).notNull(),
+    recurrenceCadence: workOrderRecurrenceCadenceEnum("recurrence_cadence"),
+    recurrenceIntervalDays: integer("recurrence_interval_days"),
+    nextGenerationOn: date("next_generation_on", { mode: "string" }),
+    createdByMembershipId: uuid("created_by_membership_id").references(
+      () => ranchMemberships.id,
+      { onDelete: "set null" },
+    ),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("work_order_templates_ranch_idx").on(table.ranchId),
+    index("work_order_templates_active_idx").on(table.isActive),
+    index("work_order_templates_next_gen_idx").on(table.nextGenerationOn),
+    uniqueIndex("work_order_templates_ranch_name_uidx").on(table.ranchId, table.templateName),
+  ],
+);
+
+export const workOrderTemplateAssignments = pgTable(
+  "work_order_template_assignments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ranchId: uuid("ranch_id")
+      .references(() => ranches.id, { onDelete: "cascade" })
+      .notNull(),
+    templateId: uuid("template_id")
+      .references(() => workOrderTemplates.id, { onDelete: "cascade" })
+      .notNull(),
+    membershipId: uuid("membership_id")
+      .references(() => ranchMemberships.id, { onDelete: "cascade" })
+      .notNull(),
+    assignedAt: timestamp("assigned_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("work_order_template_assignments_ranch_idx").on(table.ranchId),
+    index("work_order_template_assignments_template_idx").on(table.templateId),
+    index("work_order_template_assignments_membership_idx").on(table.membershipId),
+    uniqueIndex("work_order_template_assignments_unique").on(
+      table.templateId,
+      table.membershipId,
+    ),
+  ],
+);
+
 export const workOrders = pgTable(
   "work_orders",
   {
@@ -327,6 +409,10 @@ export const workOrders = pgTable(
       .notNull(),
     incentiveDurationHours: integer("incentive_duration_hours"),
     incentiveEndsAt: timestamp("incentive_ends_at", { withTimezone: true }),
+    templateId: uuid("template_id").references(() => workOrderTemplates.id, {
+      onDelete: "set null",
+    }),
+    generatedForDate: date("generated_for_date", { mode: "string" }),
     createdByMembershipId: uuid("created_by_membership_id").references(
       () => ranchMemberships.id,
       { onDelete: "set null" },
@@ -344,6 +430,10 @@ export const workOrders = pgTable(
     index("work_orders_due_idx").on(table.dueAt),
     index("work_orders_completed_idx").on(table.completedAt),
     index("work_orders_incentive_ends_idx").on(table.incentiveEndsAt),
+    index("work_orders_template_idx").on(table.templateId),
+    uniqueIndex("work_orders_template_generated_uidx")
+      .on(table.templateId, table.generatedForDate)
+      .where(sql`${table.templateId} is not null and ${table.generatedForDate} is not null`),
   ],
 );
 
@@ -392,6 +482,77 @@ export const workOrderCompletionReviews = pgTable(
     index("work_order_completion_reviews_status_idx").on(table.status),
     index("work_order_completion_reviews_requested_idx").on(table.requestedAt),
     uniqueIndex("work_order_completion_reviews_work_order_uidx").on(table.workOrderId),
+  ],
+);
+
+export const workOrderCompletionSubmissions = pgTable(
+  "work_order_completion_submissions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ranchId: uuid("ranch_id")
+      .references(() => ranches.id, { onDelete: "cascade" })
+      .notNull(),
+    workOrderId: uuid("work_order_id")
+      .references(() => workOrders.id, { onDelete: "cascade" })
+      .notNull(),
+    submittedByMembershipId: uuid("submitted_by_membership_id").references(
+      () => ranchMemberships.id,
+      { onDelete: "set null" },
+    ),
+    submittedAt: timestamp("submitted_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    completionNote: text("completion_note"),
+    checklistScopeCompleted: boolean("checklist_scope_completed")
+      .default(false)
+      .notNull(),
+    checklistQualityChecked: boolean("checklist_quality_checked")
+      .default(false)
+      .notNull(),
+    checklistCleanupCompleted: boolean("checklist_cleanup_completed")
+      .default(false)
+      .notNull(),
+    checklistFollowUpNoted: boolean("checklist_follow_up_noted")
+      .default(false)
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("work_order_completion_submissions_ranch_idx").on(table.ranchId),
+    index("work_order_completion_submissions_work_order_idx").on(table.workOrderId),
+    index("work_order_completion_submissions_submitted_idx").on(table.submittedAt),
+    uniqueIndex("work_order_completion_submissions_work_order_uidx").on(table.workOrderId),
+  ],
+);
+
+export const workOrderCompletionEvidence = pgTable(
+  "work_order_completion_evidence",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ranchId: uuid("ranch_id")
+      .references(() => ranches.id, { onDelete: "cascade" })
+      .notNull(),
+    submissionId: uuid("submission_id")
+      .references(() => workOrderCompletionSubmissions.id, { onDelete: "cascade" })
+      .notNull(),
+    evidenceType: workOrderCompletionEvidenceTypeEnum("evidence_type")
+      .default("link")
+      .notNull(),
+    label: text("label"),
+    url: text("url"),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("work_order_completion_evidence_ranch_idx").on(table.ranchId),
+    index("work_order_completion_evidence_submission_idx").on(table.submissionId),
   ],
 );
 
@@ -1043,9 +1204,13 @@ export type WorkOrderCompensationType =
   (typeof workOrderCompensationTypeEnum.enumValues)[number];
 export type WorkOrderCompletionReviewStatus =
   (typeof workOrderCompletionReviewStatusEnum.enumValues)[number];
+export type WorkOrderCompletionEvidenceType =
+  (typeof workOrderCompletionEvidenceTypeEnum.enumValues)[number];
 export type RanchMessagePriority = (typeof ranchMessagePriorityEnum.enumValues)[number];
 export type WorkOrderIncentiveTimerType =
   (typeof workOrderIncentiveTimerTypeEnum.enumValues)[number];
+export type WorkOrderRecurrenceCadence =
+  (typeof workOrderRecurrenceCadenceEnum.enumValues)[number];
 export type PayrollPeriodStatus = (typeof payrollPeriodStatusEnum.enumValues)[number];
 export type AnimalSpecies = (typeof animalSpeciesEnum.enumValues)[number];
 export type AnimalSex = (typeof animalSexEnum.enumValues)[number];

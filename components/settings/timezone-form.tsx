@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   updateUserTimeZoneAction,
@@ -9,51 +9,35 @@ import {
 import { Button } from "@/components/ui/button";
 
 const initialState: SettingsActionState = {};
-const fallbackTimeZones = [
-  "UTC",
-  "America/Los_Angeles",
-  "America/Denver",
-  "America/Chicago",
-  "America/New_York",
-];
 
 interface TimeZoneFormProps {
   currentTimeZone: string;
+  timeZoneOptions: string[];
 }
 
-export function TimeZoneForm({ currentTimeZone }: TimeZoneFormProps) {
+export function TimeZoneForm({ currentTimeZone, timeZoneOptions }: TimeZoneFormProps) {
   const router = useRouter();
   const [timeZone, setTimeZone] = useState(currentTimeZone);
+  const [browserTimeZone, setBrowserTimeZone] = useState<string | null>(null);
   const [state, formAction] = useActionState(updateUserTimeZoneAction, initialState);
-
-  const supportedTimeZones = useMemo(() => {
-    if (typeof Intl.supportedValuesOf === "function") {
-      try {
-        const values = Intl.supportedValuesOf("timeZone");
-        if (values.length) {
-          return values;
-        }
-      } catch {
-        // Fall through to fallback list.
-      }
-    }
-
-    return fallbackTimeZones;
-  }, []);
 
   useEffect(() => {
     setTimeZone(currentTimeZone);
   }, [currentTimeZone]);
 
   useEffect(() => {
+    try {
+      setBrowserTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    } catch {
+      setBrowserTimeZone(null);
+    }
+  }, []);
+
+  useEffect(() => {
     if (state.success) {
       router.refresh();
     }
   }, [router, state.success]);
-
-  const browserTimeZone = useMemo(() => {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone;
-  }, []);
 
   return (
     <form action={formAction} className="space-y-3">
@@ -69,7 +53,7 @@ export function TimeZoneForm({ currentTimeZone }: TimeZoneFormProps) {
           required
         />
         <datalist id="timezone-options">
-          {supportedTimeZones.map((zone) => (
+          {timeZoneOptions.map((zone) => (
             <option key={zone} value={zone} />
           ))}
         </datalist>

@@ -4,10 +4,19 @@ import { and, eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
-import { ranchMemberships, ranches, users } from "@/lib/db/schema";
+import {
+  payrollSettings,
+  ranchMemberships,
+  ranches,
+  users,
+  workOrderTemplateAssignments,
+  workOrderTemplates,
+  type RanchRole,
+} from "@/lib/db/schema";
 import { getPostAuthRedirectPath, requireUser } from "./context";
 import { hashPassword, verifyPassword } from "./password";
 import { autoClockOutActiveTimeForUser } from "@/lib/time/maintenance";
+import { getPublicDemoConfig } from "@/lib/demo/public";
 import {
   clearSessionCookie,
   createSession,
@@ -38,6 +47,8 @@ const onboardingSchema = z.object({
     .trim()
     .min(3, "Ranch name must be at least 3 characters.")
     .max(80, "Ranch name is too long."),
+  payrollCadence: z.enum(["weekly", "biweekly", "monthly"]).default("biweekly"),
+  includeStarterTemplates: z.boolean().default(true),
 });
 
 const resetPasswordSchema = z
@@ -53,8 +64,42 @@ const resetPasswordSchema = z
     path: ["confirmPassword"],
   });
 
+const demoRestrictedRoles = new Set<RanchRole>(["owner"]);
+
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
+}
+
+function parseCheckbox(formData: FormData, key: string): boolean {
+  return formData.get(key) === "on";
+}
+
+function utcDateKeyNow(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function resolvePayrollDefaults(cadence: "weekly" | "biweekly" | "monthly"): {
+  periodLengthDays: number;
+  paydayOffsetDays: number;
+} {
+  if (cadence === "weekly") {
+    return {
+      periodLengthDays: 7,
+      paydayOffsetDays: 3,
+    };
+  }
+
+  if (cadence === "monthly") {
+    return {
+      periodLengthDays: 30,
+      paydayOffsetDays: 7,
+    };
+  }
+
+  return {
+    periodLengthDays: 14,
+    paydayOffsetDays: 5,
+  };
 }
 
 async function createUniqueRanchSlug(name: string): Promise<string> {
@@ -193,6 +238,8 @@ export async function completeOnboardingAction(
 ): Promise<AuthActionState> {
   const parsed = onboardingSchema.safeParse({
     ranchName: formData.get("ranchName"),
+    payrollCadence: formData.get("payrollCadence"),
+    includeStarterTemplates: parseCheckbox(formData, "includeStarterTemplates"),
   });
 
   if (!parsed.success) {
@@ -214,6 +261,8 @@ export async function completeOnboardingAction(
 
   const ranchSlug = await createUniqueRanchSlug(parsed.data.ranchName);
   let newRanchId: string | null = null;
+  const payrollDefaults = resolvePayrollDefaults(parsed.data.payrollCadence);
+  const anchorStartDate = utcDateKeyNow();
 
   await db.transaction(async (tx) => {
     const [newRanch] = await tx
@@ -229,12 +278,83 @@ export async function completeOnboardingAction(
       });
     newRanchId = newRanch.id;
 
-    await tx.insert(ranchMemberships).values({
+    const [ownerMembership] = await tx
+      .insert(ranchMemberships)
+      .values({
+        ranchId: newRanch.id,
+        userId: user.id,
+        role: "owner",
+        isActive: true,
+      })
+      .returning({ id: ranchMemberships.id });
+
+    await tx.insert(payrollSettings).values({
       ranchId: newRanch.id,
-      userId: user.id,
-      role: "owner",
-      isActive: true,
+      anchorStartDate,
+      periodLengthDays: payrollDefaults.periodLengthDays,
+      paydayOffsetDays: payrollDefaults.paydayOffsetDays,
     });
+
+    if (parsed.data.includeStarterTemplates) {
+      const starterTemplates = [
+        {
+          templateName: "morning-livestock-check",
+          title: "Morning livestock check",
+          description:
+            "Walk assigned groups, confirm water/feed status, and note any immediate health issues.",
+          priority: "high" as const,
+          recurrenceCadence: "daily" as const,
+        },
+        {
+          templateName: "water-points-inspection",
+          title: "Water points inspection",
+          description:
+            "Inspect troughs/tanks/valves, clear obstructions, and confirm clean flow.",
+          priority: "high" as const,
+          recurrenceCadence: "daily" as const,
+        },
+        {
+          templateName: "fence-line-check",
+          title: "Fence line check",
+          description:
+            "Inspect perimeter and hot wire sections, flag weak posts, and schedule repairs.",
+          priority: "normal" as const,
+          recurrenceCadence: "weekly" as const,
+        },
+      ];
+
+      const createdTemplates = await tx
+        .insert(workOrderTemplates)
+        .values(
+          starterTemplates.map((template) => ({
+            ranchId: newRanch.id,
+            templateName: template.templateName,
+            title: template.title,
+            description: template.description,
+            priority: template.priority,
+            compensationType: "standard" as const,
+            flatPayCents: 0,
+            incentivePayCents: 0,
+            incentiveTimerType: "none" as const,
+            incentiveDurationHours: null,
+            isActive: true,
+            recurringEnabled: true,
+            recurrenceCadence: template.recurrenceCadence,
+            recurrenceIntervalDays: null,
+            nextGenerationOn: anchorStartDate,
+            createdByMembershipId: ownerMembership.id,
+          })),
+        )
+        .returning({ id: workOrderTemplates.id });
+
+      await tx.insert(workOrderTemplateAssignments).values(
+        createdTemplates.map((template) => ({
+          ranchId: newRanch.id,
+          templateId: template.id,
+          membershipId: ownerMembership.id,
+        })),
+      );
+    }
 
     await tx
       .update(users)
@@ -316,4 +436,66 @@ export async function logoutAction() {
   }
 
   redirect("/login");
+}
+
+export async function startPublicDemoSessionAction(
+  _prevState: AuthActionState,
+  _formData: FormData,
+): Promise<AuthActionState> {
+  void _prevState;
+  void _formData;
+
+  const config = getPublicDemoConfig();
+  if (!config.enabled) {
+    return {
+      error:
+        "Demo ranch access is currently unavailable. Please create an account to continue.",
+    };
+  }
+
+  const [demoMembership] = await db
+    .select({
+      userId: users.id,
+      role: ranchMemberships.role,
+      ranchId: ranches.id,
+    })
+    .from(users)
+    .innerJoin(ranchMemberships, eq(ranchMemberships.userId, users.id))
+    .innerJoin(ranches, eq(ranchMemberships.ranchId, ranches.id))
+    .where(
+      and(
+        eq(users.email, config.memberEmail),
+        eq(ranches.slug, config.ranchSlug),
+        eq(ranchMemberships.isActive, true),
+      ),
+    )
+    .limit(1);
+
+  if (!demoMembership) {
+    return {
+      error:
+        "Demo ranch is not ready yet. Ask the operator to run the demo seed, then try again.",
+    };
+  }
+
+  if (demoRestrictedRoles.has(demoMembership.role)) {
+    return {
+      error:
+        "Demo account configuration is invalid. Use a non-owner role for public demo entry.",
+    };
+  }
+
+  await db
+    .update(users)
+    .set({
+      onboardingState: "complete",
+      lastActiveRanchId: demoMembership.ranchId,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, demoMembership.userId));
+
+  const { token, expiresAt } = await createSession(demoMembership.userId);
+  await setSessionCookie(token, expiresAt);
+
+  redirect("/app");
 }

@@ -73,6 +73,19 @@ function parseDateKey(value: string): Date {
   return new Date(`${value}T00:00:00Z`);
 }
 
+function toValidDate(value: Date | string | null | undefined): Date | null {
+  if (!value) {
+    return null;
+  }
+
+  const candidate = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(candidate.getTime())) {
+    return null;
+  }
+
+  return candidate;
+}
+
 function resolveSpeciesDemandMultiplier(
   species: AnimalSpecies,
   assumptions: GrazingAssumptions,
@@ -610,9 +623,15 @@ export async function getGrazingWorkspace(ranchId: string): Promise<GrazingWorks
     }
   }
 
-  const latestMoveOutByUnit = new Map(
+  const latestMoveOutByUnit = new Map<string, Date>(
     latestMoveOutRows
-      .filter((row) => row.lastEndedAt)
+      .map((row) => ({
+        landUnitId: row.landUnitId,
+        lastEndedAt: toValidDate(row.lastEndedAt),
+      }))
+      .filter((row): row is { landUnitId: string; lastEndedAt: Date } =>
+        Boolean(row.lastEndedAt),
+      )
       .map((row) => [row.landUnitId, row.lastEndedAt] as const),
   );
 

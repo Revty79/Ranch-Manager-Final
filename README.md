@@ -121,6 +121,21 @@ The seed also creates practical herd/land demo data (cattle + horse records, lan
 movement history, grazing period, and breeding/health protocol activity) so `/app`, `/app/herd`,
 `/app/land`, and `/app/land/grazing` are walkthrough-ready.
 
+## Public Demo Ranch Flow
+
+You can expose a guided public demo entry at `/demo` that signs visitors into a seeded, non-owner
+demo account:
+
+- `PUBLIC_DEMO_ENABLED=true` to force-enable (or `false` to disable)
+- `PUBLIC_DEMO_RANCH_SLUG` (default: `demo-ranch`)
+- `PUBLIC_DEMO_MEMBER_EMAIL` (default: `manager@demoranch.local`)
+
+Behavior:
+
+- If `PUBLIC_DEMO_ENABLED` is unset, demo is enabled in non-production and disabled in production.
+- Public demo entry uses a non-owner account, so owner billing controls are not exposed through this path.
+- Keep demo seed data current with `ALLOW_DEMO_SEED=true npm run seed:demo`.
+
 ## Deploy Notes
 
 1. Set production environment variables.

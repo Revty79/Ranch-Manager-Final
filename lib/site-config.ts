@@ -1,11 +1,14 @@
 export const publicNav = [
   { label: "Product", href: "/" },
   { label: "Pricing", href: "/pricing" },
+  { label: "Demo", href: "/demo" },
   { label: "Log in", href: "/login" },
 ];
 
 export const appNav = [
   { label: "Dashboard", href: "/app" },
+  { label: "Today", href: "/app/today" },
+  { label: "Needs Attention", href: "/app/needs-attention" },
   { label: "Team", href: "/app/team" },
   { label: "Communication", href: "/app/communication" },
   { label: "Work Orders", href: "/app/work-orders" },

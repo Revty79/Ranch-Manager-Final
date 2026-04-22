@@ -4,14 +4,20 @@ import { db } from "@/lib/db/client";
 import {
   ranchMemberships,
   users,
+  workOrderCompletionEvidence,
   workOrderCompletionReviews,
+  workOrderCompletionSubmissions,
   workOrderAssignments,
   workOrders,
   type WorkOrderCompensationType,
+  type WorkOrderCompletionEvidenceType,
   type WorkOrderCompletionReviewStatus,
   type WorkOrderIncentiveTimerType,
   type WorkOrderPriority,
+  type WorkOrderRecurrenceCadence,
   type WorkOrderStatus,
+  workOrderTemplateAssignments,
+  workOrderTemplates,
 } from "@/lib/db/schema";
 
 export interface AssignableMember {
@@ -41,6 +47,26 @@ export interface WorkOrderListItem {
   assignees: { membershipId: string; fullName: string }[];
 }
 
+export interface WorkOrderTemplateListItem {
+  id: string;
+  templateName: string;
+  title: string;
+  description: string | null;
+  priority: WorkOrderPriority;
+  compensationType: WorkOrderCompensationType;
+  flatPayCents: number;
+  incentivePayCents: number;
+  incentiveTimerType: WorkOrderIncentiveTimerType;
+  incentiveDurationHours: number | null;
+  isActive: boolean;
+  recurringEnabled: boolean;
+  recurrenceCadence: WorkOrderRecurrenceCadence | null;
+  recurrenceIntervalDays: number | null;
+  nextGenerationOn: string | null;
+  createdAt: Date;
+  assignees: { membershipId: string; fullName: string }[];
+}
+
 export interface WorkOrderCompletionReviewDetail {
   status: WorkOrderCompletionReviewStatus;
   requestedByMembershipId: string | null;
@@ -54,6 +80,28 @@ export interface WorkOrderCompletionReviewDetail {
   checklistQualityVerified: boolean;
   checklistCleanupVerified: boolean;
   checklistFollowUpVerified: boolean;
+  workerSubmission: WorkerCompletionSubmissionDetail | null;
+}
+
+export interface WorkerCompletionEvidenceDetail {
+  id: string;
+  evidenceType: WorkOrderCompletionEvidenceType;
+  label: string | null;
+  url: string | null;
+  notes: string | null;
+  createdAt: Date;
+}
+
+export interface WorkerCompletionSubmissionDetail {
+  submittedByMembershipId: string | null;
+  submittedByFullName: string | null;
+  submittedAt: Date;
+  completionNote: string | null;
+  checklistScopeCompleted: boolean;
+  checklistQualityChecked: boolean;
+  checklistCleanupCompleted: boolean;
+  checklistFollowUpNoted: boolean;
+  evidence: WorkerCompletionEvidenceDetail[];
 }
 
 export interface WorkOrderDetail extends WorkOrderListItem {
@@ -171,6 +219,78 @@ export async function getWorkOrdersForRanch(
   }));
 }
 
+export async function getWorkOrderTemplatesForRanch(
+  ranchId: string,
+): Promise<WorkOrderTemplateListItem[]> {
+  const templateRows = await db
+    .select({
+      id: workOrderTemplates.id,
+      templateName: workOrderTemplates.templateName,
+      title: workOrderTemplates.title,
+      description: workOrderTemplates.description,
+      priority: workOrderTemplates.priority,
+      compensationType: workOrderTemplates.compensationType,
+      flatPayCents: workOrderTemplates.flatPayCents,
+      incentivePayCents: workOrderTemplates.incentivePayCents,
+      incentiveTimerType: workOrderTemplates.incentiveTimerType,
+      incentiveDurationHours: workOrderTemplates.incentiveDurationHours,
+      isActive: workOrderTemplates.isActive,
+      recurringEnabled: workOrderTemplates.recurringEnabled,
+      recurrenceCadence: workOrderTemplates.recurrenceCadence,
+      recurrenceIntervalDays: workOrderTemplates.recurrenceIntervalDays,
+      nextGenerationOn: workOrderTemplates.nextGenerationOn,
+      createdAt: workOrderTemplates.createdAt,
+    })
+    .from(workOrderTemplates)
+    .where(eq(workOrderTemplates.ranchId, ranchId))
+    .orderBy(desc(workOrderTemplates.createdAt));
+
+  if (!templateRows.length) {
+    return [];
+  }
+
+  const assignmentRows = await db
+    .select({
+      templateId: workOrderTemplateAssignments.templateId,
+      membershipId: workOrderTemplateAssignments.membershipId,
+      fullName: users.fullName,
+      email: users.email,
+    })
+    .from(workOrderTemplateAssignments)
+    .innerJoin(
+      ranchMemberships,
+      eq(workOrderTemplateAssignments.membershipId, ranchMemberships.id),
+    )
+    .innerJoin(users, eq(ranchMemberships.userId, users.id))
+    .where(
+      and(
+        eq(workOrderTemplateAssignments.ranchId, ranchId),
+        inArray(
+          workOrderTemplateAssignments.templateId,
+          templateRows.map((template) => template.id),
+        ),
+      ),
+    );
+
+  const assigneeMap = new Map<string, { membershipId: string; fullName: string }[]>();
+  for (const row of assignmentRows) {
+    if (isPlatformAdminEmail(row.email)) {
+      continue;
+    }
+    const current = assigneeMap.get(row.templateId) ?? [];
+    current.push({
+      membershipId: row.membershipId,
+      fullName: row.fullName,
+    });
+    assigneeMap.set(row.templateId, current);
+  }
+
+  return templateRows.map((template) => ({
+    ...template,
+    assignees: assigneeMap.get(template.id) ?? [],
+  }));
+}
+
 export async function getWorkOrderById(
   ranchId: string,
   workOrderId: string,
@@ -241,11 +361,45 @@ export async function getWorkOrderById(
     .where(eq(workOrderCompletionReviews.workOrderId, order.id))
     .limit(1);
 
+  const [submissionRow] = await db
+    .select({
+      id: workOrderCompletionSubmissions.id,
+      submittedByMembershipId: workOrderCompletionSubmissions.submittedByMembershipId,
+      submittedAt: workOrderCompletionSubmissions.submittedAt,
+      completionNote: workOrderCompletionSubmissions.completionNote,
+      checklistScopeCompleted: workOrderCompletionSubmissions.checklistScopeCompleted,
+      checklistQualityChecked: workOrderCompletionSubmissions.checklistQualityChecked,
+      checklistCleanupCompleted: workOrderCompletionSubmissions.checklistCleanupCompleted,
+      checklistFollowUpNoted: workOrderCompletionSubmissions.checklistFollowUpNoted,
+    })
+    .from(workOrderCompletionSubmissions)
+    .where(eq(workOrderCompletionSubmissions.workOrderId, order.id))
+    .limit(1);
+
+  const evidenceRows = submissionRow
+    ? await db
+        .select({
+          id: workOrderCompletionEvidence.id,
+          evidenceType: workOrderCompletionEvidence.evidenceType,
+          label: workOrderCompletionEvidence.label,
+          url: workOrderCompletionEvidence.url,
+          notes: workOrderCompletionEvidence.notes,
+          createdAt: workOrderCompletionEvidence.createdAt,
+        })
+        .from(workOrderCompletionEvidence)
+        .where(eq(workOrderCompletionEvidence.submissionId, submissionRow.id))
+        .orderBy(desc(workOrderCompletionEvidence.createdAt))
+    : [];
+
   let completionReview: WorkOrderCompletionReviewDetail | null = null;
   if (reviewRow) {
     const membershipIds = [
       ...new Set(
-        [reviewRow.requestedByMembershipId, reviewRow.reviewedByMembershipId].filter(
+        [
+          reviewRow.requestedByMembershipId,
+          reviewRow.reviewedByMembershipId,
+          submissionRow?.submittedByMembershipId ?? null,
+        ].filter(
           (membershipId): membershipId is string => Boolean(membershipId),
         ),
       ),
@@ -287,6 +441,28 @@ export async function getWorkOrderById(
       checklistQualityVerified: reviewRow.checklistQualityVerified,
       checklistCleanupVerified: reviewRow.checklistCleanupVerified,
       checklistFollowUpVerified: reviewRow.checklistFollowUpVerified,
+      workerSubmission: submissionRow
+        ? {
+            submittedByMembershipId: submissionRow.submittedByMembershipId,
+            submittedByFullName: submissionRow.submittedByMembershipId
+              ? (reviewNameMap.get(submissionRow.submittedByMembershipId) ?? null)
+              : null,
+            submittedAt: submissionRow.submittedAt,
+            completionNote: submissionRow.completionNote,
+            checklistScopeCompleted: submissionRow.checklistScopeCompleted,
+            checklistQualityChecked: submissionRow.checklistQualityChecked,
+            checklistCleanupCompleted: submissionRow.checklistCleanupCompleted,
+            checklistFollowUpNoted: submissionRow.checklistFollowUpNoted,
+            evidence: evidenceRows.map((evidence) => ({
+              id: evidence.id,
+              evidenceType: evidence.evidenceType,
+              label: evidence.label,
+              url: evidence.url,
+              notes: evidence.notes,
+              createdAt: evidence.createdAt,
+            })),
+          }
+        : null,
     };
   }
 

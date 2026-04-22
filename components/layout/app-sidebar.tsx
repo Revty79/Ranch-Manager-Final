@@ -9,6 +9,14 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ context }: AppSidebarProps) {
+  const navItems = appNav.filter((item) => {
+    if (item.href === "/app/needs-attention") {
+      return context.membership.role === "owner" || context.membership.role === "manager";
+    }
+
+    return true;
+  });
+
   return (
     <aside className="space-y-4">
       <Card>
@@ -21,7 +29,7 @@ export function AppSidebar({ context }: AppSidebarProps) {
         </CardContent>
       </Card>
       <nav className="rounded-2xl border bg-surface-strong p-2">
-        {appNav.map((item) => (
+        {navItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CheckCircle2, ClipboardCheck, MapPinned, ShieldCheck, UsersRound } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { SectionHeader } from "@/components/patterns/section-header";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
@@ -26,18 +26,24 @@ export default function LandingPage() {
               className={cn(buttonVariants({ size: "lg" }), "text-white")}
               style={{ color: "#fff" }}
             >
-              Start your ranch account
+              Start account
+            </Link>
+            <Link
+              href="/demo"
+              className={cn(buttonVariants({ size: "lg", variant: "secondary" }))}
+            >
+              View demo ranch
             </Link>
             <Link
               href="/pricing"
-              className={cn(buttonVariants({ size: "lg", variant: "secondary" }))}
+              className={cn(buttonVariants({ size: "lg", variant: "ghost" }))}
             >
               View pricing
             </Link>
           </div>
         </div>
         <div className="rounded-2xl border bg-background-muted/70 p-5">
-          <p className="mb-4 text-sm font-semibold text-foreground">Launch focus</p>
+          <p className="mb-4 text-sm font-semibold text-foreground">What this replaces</p>
           <ul className="space-y-3 text-sm text-foreground-muted">
             {marketingContent.launchFocus.map((point) => (
               <li key={point} className="flex gap-2">
@@ -51,8 +57,45 @@ export default function LandingPage() {
 
       <section>
         <SectionHeader
-          title="Built for launch operations"
-          description="The first release stays practical while covering crew execution plus herd and land foundations."
+          title="Owner Outcomes"
+          description="Specific outcomes ranch owners can verify in daily use."
+        />
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {marketingContent.buyerOutcomes.map((item) => (
+            <Card key={item.title} className="bg-surface">
+              <CardContent className="space-y-2 py-6">
+                <CardTitle>{item.title}</CardTitle>
+                <CardDescription className="text-sm">{item.description}</CardDescription>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <SectionHeader
+          title="How A Ranch Uses It"
+          description="Real workflow sequence built from live routes in the current product."
+        />
+        <div className="grid gap-4 lg:grid-cols-2">
+          {marketingContent.workflowStory.map((step) => (
+            <Card key={step.title} className="bg-surface">
+              <CardContent className="space-y-2 py-6">
+                <CardTitle className="text-base">{step.title}</CardTitle>
+                <CardDescription>{step.description}</CardDescription>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-foreground-muted">
+                  Route: {step.route}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <SectionHeader
+          title="Included In Launch"
+          description="Capabilities currently shipped in the bundled base plan."
         />
         <div className="grid gap-4 md:grid-cols-2">
           {marketingContent.featureCards.map((item) => (
@@ -66,70 +109,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section>
-        <SectionHeader
-          title="Public to product visual continuity"
-          description="The app workspace carries the same tone and structure your team sees here."
-        />
-        <div className="grid gap-4 lg:grid-cols-3">
-          <Card className="bg-surface">
-            <CardContent className="space-y-3 py-6">
-              <ClipboardCheck className="h-5 w-5 text-accent" />
-              <CardTitle className="text-base">Work Queue Snapshot</CardTitle>
-              <CardDescription>
-                Clean status rows with assignment and next-action visibility.
-              </CardDescription>
-            </CardContent>
-          </Card>
-          <Card className="bg-surface">
-            <CardContent className="space-y-3 py-6">
-              <UsersRound className="h-5 w-5 text-accent" />
-              <CardTitle className="text-base">Crew Coverage Panel</CardTitle>
-              <CardDescription>
-                Quick checks on active crew, open work, and role-based access.
-              </CardDescription>
-            </CardContent>
-          </Card>
-          <Card className="bg-surface">
-            <CardContent className="space-y-3 py-6">
-              <MapPinned className="h-5 w-5 text-accent" />
-              <CardTitle className="text-base">Land & Occupancy View</CardTitle>
-              <CardDescription>
-                Pasture and handling-unit records with movement-ready structure.
-              </CardDescription>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      <section className="grid gap-4 rounded-3xl border bg-surface-strong p-6 md:grid-cols-3">
-        <Card className="bg-surface">
-          <CardContent className="space-y-2 py-6">
-            <UsersRound className="h-5 w-5 text-accent" />
-            <CardTitle className="text-base">Tenant-safe architecture</CardTitle>
-            <CardDescription>Every ranch workspace is isolated by design.</CardDescription>
-          </CardContent>
-        </Card>
-        <Card className="bg-surface">
-          <CardContent className="space-y-2 py-6">
-            <ShieldCheck className="h-5 w-5 text-accent" />
-            <CardTitle className="text-base">Role-aware controls</CardTitle>
-            <CardDescription>Owners, managers, and workers get the right scope.</CardDescription>
-          </CardContent>
-        </Card>
-        <Card className="bg-surface">
-          <CardContent className="space-y-2 py-6">
-            <MapPinned className="h-5 w-5 text-accent" />
-            <CardTitle className="text-base">Grounded workflow design</CardTitle>
-            <CardDescription>Clear screens that support real ranch operations.</CardDescription>
-          </CardContent>
-        </Card>
-      </section>
-
       <section className="rounded-3xl border bg-surface-strong p-6 sm:p-8">
         <SectionHeader
-          title="Trust signals for launch"
-          description="Clear commitments, clear boundaries, and honest product scope."
+          title="Trust Signals For Launch"
+          description="Clear commitments, clear boundaries, and honest shipped scope."
         />
         <ul className="grid gap-3 text-sm text-foreground-muted sm:grid-cols-3">
           {marketingContent.trustNotes.map((note) => (
@@ -138,6 +121,31 @@ export default function LandingPage() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="rounded-3xl border bg-surface-strong p-6 sm:p-8">
+        <SectionHeader
+          title="See It Two Ways"
+          description="Start your own ranch workspace, or explore realistic seeded operations first."
+        />
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/signup"
+            className={cn(buttonVariants({ size: "lg" }), "text-white")}
+            style={{ color: "#fff" }}
+          >
+            Start account
+          </Link>
+          <Link
+            href="/demo"
+            className={cn(buttonVariants({ size: "lg", variant: "secondary" }))}
+          >
+            View demo ranch
+          </Link>
+          <Link href="/pricing" className={cn(buttonVariants({ size: "lg", variant: "ghost" }))}>
+            Review pricing
+          </Link>
+        </div>
       </section>
     </div>
   );

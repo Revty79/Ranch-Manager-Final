@@ -6,6 +6,14 @@
 ALLOW_DEMO_SEED=true npm run seed:demo
 ```
 
+## Public Demo Entry (Optional)
+
+- Enable guided public demo route at `/demo` with:
+  - `PUBLIC_DEMO_ENABLED=true`
+  - `PUBLIC_DEMO_RANCH_SLUG=demo-ranch`
+  - `PUBLIC_DEMO_MEMBER_EMAIL=manager@demoranch.local`
+- Demo entry signs users into a non-owner demo account so owner billing controls are not exposed.
+
 Demo credentials (default):
 
 - `owner@demoranch.local`

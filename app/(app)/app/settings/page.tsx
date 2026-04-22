@@ -9,6 +9,7 @@ import { hasBillingAccess } from "@/lib/billing/access";
 import { syncRanchFromCheckoutSession } from "@/lib/billing/stripe-sync";
 import { isTrialEligible, resolveTrialConfig } from "@/lib/billing/trial";
 import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
+import { getSupportedTimeZones } from "@/lib/timezone";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 
@@ -61,6 +62,7 @@ export default async function SettingsPage({
   const hasStripeSubscriptionAccess =
     context.ranch.subscriptionStatus === "active" ||
     context.ranch.subscriptionStatus === "trialing";
+  const supportedTimeZones = getSupportedTimeZones();
   const accessSource = context.ranch.betaLifetimeAccess
     ? "Beta lifetime code"
     : context.ranch.subscriptionStatus === "active" ||
@@ -239,7 +241,10 @@ export default async function SettingsPage({
           <CardDescription>
             Set your timezone so payroll, time tracking, and dates render consistently for your account.
           </CardDescription>
-          <TimeZoneForm currentTimeZone={context.user.timeZone} />
+          <TimeZoneForm
+            currentTimeZone={context.user.timeZone}
+            timeZoneOptions={supportedTimeZones}
+          />
         </CardContent>
       </Card>
 

@@ -3,7 +3,6 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-  completeWorkOrderAction,
   endShiftAction,
   endWorkSessionAction,
   startShiftAction,
@@ -12,6 +11,7 @@ import {
 } from "@/lib/time/actions";
 import type { PayType } from "@/lib/db/schema";
 import type { ShiftRecord, WorkOrderOption, WorkSessionRecord } from "@/lib/time/queries";
+import { CompleteWorkOrderForm } from "@/components/work-orders/complete-work-order-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 
@@ -61,23 +61,17 @@ export function TimeControlPanel({
     endWorkSessionAction,
     initialTimeActionState,
   );
-  const [completeOrderState, completeOrderFormAction] = useActionState(
-    completeWorkOrderAction,
-    initialTimeActionState,
-  );
 
   useEffect(() => {
     if (
       startShiftState.success ||
       endShiftState.success ||
       startWorkState.success ||
-      endWorkState.success ||
-      completeOrderState.success
+      endWorkState.success
     ) {
       router.refresh();
     }
   }, [
-    completeOrderState.success,
     endShiftState.success,
     endWorkState.success,
     router,
@@ -149,22 +143,18 @@ export function TimeControlPanel({
             {endWorkState.error ? (
               <p className="text-sm font-medium text-danger">{endWorkState.error}</p>
             ) : null}
-            {completeOrderState.error ? (
-              <p className="text-sm font-medium text-danger">{completeOrderState.error}</p>
-            ) : null}
             {activeWork ? (
-              <div className="flex flex-wrap gap-2">
+              <div className="space-y-2">
                 <form action={endWorkFormAction}>
                   <Button variant="secondary" type="submit">
                     Stop work timer
                   </Button>
                 </form>
-                <form action={completeOrderFormAction}>
-                  <input type="hidden" name="workOrderId" value={activeWork.workOrderId} />
-                  <Button variant="primary" type="submit">
-                    Complete work order
-                  </Button>
-                </form>
+                <CompleteWorkOrderForm
+                  workOrderId={activeWork.workOrderId}
+                  submitLabel="Complete work order"
+                  buttonVariant="primary"
+                />
               </div>
             ) : (
               workOrderOptions.length ? (
@@ -194,26 +184,14 @@ export function TimeControlPanel({
                       completed without starting a timer.
                     </p>
                   )}
-                  <form action={completeOrderFormAction} className="space-y-2">
-                    <select
-                      name="workOrderId"
-                      className="h-10 w-full rounded-xl border bg-surface px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      defaultValue=""
-                      required
-                    >
-                      <option value="" disabled>
-                        Select work order to complete
-                      </option>
-                      {workOrderOptions.map((option) => (
-                        <option key={option.id} value={option.id}>
-                          {option.title}
-                        </option>
-                      ))}
-                    </select>
-                    <Button variant="secondary" type="submit">
-                      Complete selected work order
-                    </Button>
-                  </form>
+                  <CompleteWorkOrderForm
+                    workOrderOptions={workOrderOptions.map((option) => ({
+                      id: option.id,
+                      title: option.title,
+                    }))}
+                    submitLabel="Complete selected work order"
+                    buttonVariant="secondary"
+                  />
                 </div>
               ) : (
                 <p className="text-sm text-foreground-muted">

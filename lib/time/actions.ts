@@ -7,7 +7,10 @@ import { requireAppContext } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
 import {
   ranchMemberships,
+  type WorkOrderCompletionEvidenceType,
+  workOrderCompletionEvidence,
   workOrderCompletionReviews,
+  workOrderCompletionSubmissions,
   workOrderAssignments,
   workOrders,
   workTimeEntries,
@@ -28,12 +31,68 @@ const startWorkSchema = z.object({
 });
 const completeWorkOrderSchema = z.object({
   workOrderId: z.string().uuid(),
+  completionNote: z
+    .string()
+    .trim()
+    .max(2000, "Completion note must be 2000 characters or fewer.")
+    .optional(),
+  checklistScopeCompleted: z.boolean(),
+  checklistQualityChecked: z.boolean(),
+  checklistCleanupCompleted: z.boolean(),
+  checklistFollowUpNoted: z.boolean(),
+  evidenceLabel1: z.string().trim().max(120).optional(),
+  evidenceUrl1: z.string().trim().max(500).optional(),
+  evidenceNotes1: z.string().trim().max(300).optional(),
+  evidenceLabel2: z.string().trim().max(120).optional(),
+  evidenceUrl2: z.string().trim().max(500).optional(),
+  evidenceNotes2: z.string().trim().max(300).optional(),
+  evidenceLabel3: z.string().trim().max(120).optional(),
+  evidenceUrl3: z.string().trim().max(500).optional(),
+  evidenceNotes3: z.string().trim().max(300).optional(),
 });
 const ACTIVE_SHIFT_RACE = Symbol("ACTIVE_SHIFT_RACE");
 const ACTIVE_WORK_RACE = Symbol("ACTIVE_WORK_RACE");
 
 function elapsedSeconds(start: Date, end: Date): number {
   return Math.max(Math.floor((end.getTime() - start.getTime()) / 1000), 0);
+}
+
+function parseCheckbox(formData: FormData, key: string): boolean {
+  return formData.get(key) === "on";
+}
+
+function normalizeOptionalText(value: string | undefined): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function isHttpUrl(value: string): boolean {
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+function inferEvidenceType(url: string | null): WorkOrderCompletionEvidenceType {
+  if (!url) {
+    return "note";
+  }
+
+  const lowered = url.toLowerCase();
+  if (/\.(png|jpe?g|gif|webp|heic|heif)(\?.*)?$/.test(lowered)) {
+    return "photo";
+  }
+  if (/\.(pdf|docx?|xlsx?|csv|txt|zip)(\?.*)?$/.test(lowered)) {
+    return "file";
+  }
+
+  return "link";
 }
 
 export async function startShiftAction(
@@ -380,11 +439,57 @@ export async function completeWorkOrderAction(
   const context = await requireAppContext();
   const parsed = completeWorkOrderSchema.safeParse({
     workOrderId: formData.get("workOrderId"),
+    completionNote: formData.get("completionNote"),
+    checklistScopeCompleted: parseCheckbox(formData, "checklistScopeCompleted"),
+    checklistQualityChecked: parseCheckbox(formData, "checklistQualityChecked"),
+    checklistCleanupCompleted: parseCheckbox(formData, "checklistCleanupCompleted"),
+    checklistFollowUpNoted: parseCheckbox(formData, "checklistFollowUpNoted"),
+    evidenceLabel1: formData.get("evidenceLabel1"),
+    evidenceUrl1: formData.get("evidenceUrl1"),
+    evidenceNotes1: formData.get("evidenceNotes1"),
+    evidenceLabel2: formData.get("evidenceLabel2"),
+    evidenceUrl2: formData.get("evidenceUrl2"),
+    evidenceNotes2: formData.get("evidenceNotes2"),
+    evidenceLabel3: formData.get("evidenceLabel3"),
+    evidenceUrl3: formData.get("evidenceUrl3"),
+    evidenceNotes3: formData.get("evidenceNotes3"),
   });
 
   if (!parsed.success) {
     return { error: "Select a valid work order to complete." };
   }
+
+  const evidenceInputs = [1, 2, 3].map((slot) => {
+    const label = normalizeOptionalText(
+      parsed.data[`evidenceLabel${slot}` as keyof typeof parsed.data] as string | undefined,
+    );
+    const url = normalizeOptionalText(
+      parsed.data[`evidenceUrl${slot}` as keyof typeof parsed.data] as string | undefined,
+    );
+    const notes = normalizeOptionalText(
+      parsed.data[`evidenceNotes${slot}` as keyof typeof parsed.data] as string | undefined,
+    );
+    return { label, url, notes };
+  });
+
+  for (const evidenceInput of evidenceInputs) {
+    if (!evidenceInput.url && !evidenceInput.label && !evidenceInput.notes) {
+      continue;
+    }
+
+    if (evidenceInput.url && !isHttpUrl(evidenceInput.url)) {
+      return { error: "Evidence links must start with http:// or https://." };
+    }
+  }
+
+  const completionEvidenceRows = evidenceInputs
+    .filter((evidenceInput) => evidenceInput.url || evidenceInput.label || evidenceInput.notes)
+    .map((evidenceInput) => ({
+      evidenceType: inferEvidenceType(evidenceInput.url),
+      label: evidenceInput.label,
+      url: evidenceInput.url,
+      notes: evidenceInput.notes,
+    }));
 
   const [workOrder] = await db
     .select({
@@ -496,6 +601,63 @@ export async function completeWorkOrderAction(
           updatedAt: completionTime,
         });
       }
+
+      const [existingSubmission] = await tx
+        .select({ id: workOrderCompletionSubmissions.id })
+        .from(workOrderCompletionSubmissions)
+        .where(eq(workOrderCompletionSubmissions.workOrderId, parsed.data.workOrderId))
+        .limit(1);
+
+      let submissionId = existingSubmission?.id ?? null;
+      if (submissionId) {
+        await tx
+          .update(workOrderCompletionSubmissions)
+          .set({
+            submittedByMembershipId: context.membership.id,
+            submittedAt: completionTime,
+            completionNote: normalizeOptionalText(parsed.data.completionNote),
+            checklistScopeCompleted: parsed.data.checklistScopeCompleted,
+            checklistQualityChecked: parsed.data.checklistQualityChecked,
+            checklistCleanupCompleted: parsed.data.checklistCleanupCompleted,
+            checklistFollowUpNoted: parsed.data.checklistFollowUpNoted,
+            updatedAt: completionTime,
+          })
+          .where(eq(workOrderCompletionSubmissions.id, submissionId));
+      } else {
+        const [submission] = await tx
+          .insert(workOrderCompletionSubmissions)
+          .values({
+            ranchId: context.ranch.id,
+            workOrderId: parsed.data.workOrderId,
+            submittedByMembershipId: context.membership.id,
+            submittedAt: completionTime,
+            completionNote: normalizeOptionalText(parsed.data.completionNote),
+            checklistScopeCompleted: parsed.data.checklistScopeCompleted,
+            checklistQualityChecked: parsed.data.checklistQualityChecked,
+            checklistCleanupCompleted: parsed.data.checklistCleanupCompleted,
+            checklistFollowUpNoted: parsed.data.checklistFollowUpNoted,
+            updatedAt: completionTime,
+          })
+          .returning({ id: workOrderCompletionSubmissions.id });
+        submissionId = submission.id;
+      }
+
+      await tx
+        .delete(workOrderCompletionEvidence)
+        .where(eq(workOrderCompletionEvidence.submissionId, submissionId));
+
+      if (completionEvidenceRows.length > 0) {
+        await tx.insert(workOrderCompletionEvidence).values(
+          completionEvidenceRows.map((evidenceRow) => ({
+            ranchId: context.ranch.id,
+            submissionId: submissionId!,
+            evidenceType: evidenceRow.evidenceType,
+            label: evidenceRow.label,
+            url: evidenceRow.url,
+            notes: evidenceRow.notes,
+          })),
+        );
+      }
     } else if (existingReview) {
       await tx
         .delete(workOrderCompletionReviews)
@@ -504,6 +666,7 @@ export async function completeWorkOrderAction(
   });
 
   revalidatePath("/app/time");
+  revalidatePath("/app/today");
   revalidatePath("/app/work-orders");
   revalidatePath(`/app/work-orders/${parsed.data.workOrderId}`);
   revalidatePath("/app/payroll");

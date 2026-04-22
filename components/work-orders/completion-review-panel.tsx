@@ -33,6 +33,10 @@ function formatReviewStatus(status: WorkOrderCompletionReviewDetail["status"]): 
   return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
+function formatBoolean(value: boolean): string {
+  return value ? "Yes" : "No";
+}
+
 export function CompletionReviewPanel({
   workOrderId,
   review,
@@ -79,6 +83,89 @@ export function CompletionReviewPanel({
           <p className="md:col-span-2">
             Reviewed at: {formatDateTime(review.reviewedAt, timeZone)}
           </p>
+        </div>
+
+        <div className="space-y-3 rounded-xl border bg-surface p-4">
+          <p className="text-sm font-semibold">Worker Proof Of Completion</p>
+          {review.workerSubmission ? (
+            <>
+              <div className="grid gap-2 text-sm md:grid-cols-2">
+                <p>
+                  Submitted by: {review.workerSubmission.submittedByFullName ?? "Unknown member"}
+                </p>
+                <p>
+                  Submitted at: {formatDateTime(review.workerSubmission.submittedAt, timeZone)}
+                </p>
+              </div>
+              <p className="rounded-xl border bg-surface-strong px-3 py-2 text-sm">
+                Worker note:{" "}
+                {review.workerSubmission.completionNote?.trim()
+                  ? review.workerSubmission.completionNote
+                  : "None provided"}
+              </p>
+              <div className="grid gap-2 rounded-xl border bg-surface-strong p-3 text-sm md:grid-cols-2">
+                <p>
+                  Scope completed:{" "}
+                  {formatBoolean(review.workerSubmission.checklistScopeCompleted)}
+                </p>
+                <p>
+                  Quality checked:{" "}
+                  {formatBoolean(review.workerSubmission.checklistQualityChecked)}
+                </p>
+                <p>
+                  Cleanup completed:{" "}
+                  {formatBoolean(review.workerSubmission.checklistCleanupCompleted)}
+                </p>
+                <p>
+                  Follow-up noted:{" "}
+                  {formatBoolean(review.workerSubmission.checklistFollowUpNoted)}
+                </p>
+              </div>
+              {review.workerSubmission.evidence.length ? (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">
+                    Worker evidence
+                  </p>
+                  <ul className="space-y-2">
+                    {review.workerSubmission.evidence.map((evidence) => (
+                      <li
+                        key={evidence.id}
+                        className="rounded-xl border bg-surface-strong px-3 py-2 text-sm"
+                      >
+                        <p className="font-medium">
+                          {evidence.label?.trim() ? evidence.label : "Evidence item"}
+                        </p>
+                        <p className="text-xs text-foreground-muted">
+                          Type: {evidence.evidenceType}
+                        </p>
+                        {evidence.url ? (
+                          <a
+                            href={evidence.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-xs font-semibold text-accent hover:underline"
+                          >
+                            Open link
+                          </a>
+                        ) : null}
+                        {evidence.notes?.trim() ? (
+                          <p className="mt-1 text-xs text-foreground-muted">{evidence.notes}</p>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <p className="text-sm text-foreground-muted">
+                  No supporting evidence links were attached.
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-sm text-foreground-muted">
+              No worker submission details were attached to this completion.
+            </p>
+          )}
         </div>
 
         {review.status === "pending" ? (
