@@ -88,18 +88,6 @@ export default function PricingPage() {
                 ))}
               </ul>
             </div>
-
-            <div>
-              <p className="mb-2 text-sm font-semibold text-foreground">Not included yet</p>
-              <ul className="space-y-2 text-sm text-foreground-muted">
-                {pricing.notIncludedYet.map((item) => (
-                  <li key={item} className="flex gap-2">
-                    <span className="mt-1 h-2 w-2 rounded-full bg-border" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
           </div>
         </CardContent>
       </Card>

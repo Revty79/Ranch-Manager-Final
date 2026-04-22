@@ -104,10 +104,10 @@ export const marketingContent = {
   ],
   pricing: {
     planName: "Bundled Base Plan",
-    amount: "$12.99",
-    cadence: "per ranch / month",
+    amount: "$19.99/mo or $199/yr",
+    cadence: "per ranch",
     description:
-      "One subscription unlocks the full base ranch operations package with no separate herd or land add-on required.",
+      "One subscription unlocks the full base ranch operations package with no separate herd or land add-on required, billed monthly or annually.",
     confidenceNotes: [
       "Single plan includes crew, work, time, payroll, herd, and land",
       "No hidden per-user pricing in this launch phase",
@@ -123,11 +123,6 @@ export const marketingContent = {
       "Animal event and location history foundation",
       "Internal ranch communication threads and private messages",
       "Owner-managed billing access controls",
-    ],
-    notIncludedYet: [
-      "Accounting and tax processing",
-      "Automation engines or AI assistants",
-      "GIS and hardware integrations",
     ],
   },
 };
