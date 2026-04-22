@@ -157,11 +157,12 @@ export default async function NeedsAttentionPage() {
           (row) => row.netPayableCents > 0 && !row.isCheckPickedUp,
         )
       : [];
+  const missingPayrollPeriodsCount = payrollWorkspace.periods.length === 0 ? 1 : 0;
   const payrollAttentionCount =
     overdueOpenPeriods.length +
     outstandingAdvanceRows.length +
     unpaidCheckRows.length +
-    (payrollWorkspace.periods.length === 0 ? 1 : 0);
+    missingPayrollPeriodsCount;
 
   const totalAttentionCount =
     overdueWorkOrders.length +
@@ -171,6 +172,43 @@ export default async function NeedsAttentionPage() {
     payrollAttentionCount +
     dueAttentionItems.length +
     grazingAlerts.rows.length;
+  const attentionBreakdown = [
+    {
+      label: "Overdue work orders",
+      count: overdueWorkOrders.length,
+      href: "#overdue-work-orders",
+    },
+    {
+      label: "Pending completion reviews",
+      count: pendingReviewOrders.length,
+      href: "#pending-completion-reviews",
+    },
+    {
+      label: "Stale active shifts",
+      count: staleShifts.length,
+      href: "#stale-shift-state",
+    },
+    {
+      label: "Stale work timers",
+      count: staleWorkTimers.length,
+      href: "#stale-work-timers",
+    },
+    {
+      label: "Payroll attention points",
+      count: payrollAttentionCount,
+      href: "#payroll-attention",
+    },
+    {
+      label: "Herd protocol due items",
+      count: dueAttentionItems.length,
+      href: "#herd-protocol-due-items",
+    },
+    {
+      label: "Grazing move alerts",
+      count: grazingAlerts.rows.length,
+      href: "#grazing-move-alerts",
+    },
+  ].filter((item) => item.count > 0);
 
   return (
     <div className="space-y-6">
@@ -208,6 +246,40 @@ export default async function NeedsAttentionPage() {
       </section>
 
       <Card>
+        <CardContent className="space-y-3 py-6">
+          <div>
+            <CardTitle className="text-base">Attention Breakdown</CardTitle>
+            <CardDescription>
+              Every item counted in &quot;Total Attention Items&quot; is listed here.
+            </CardDescription>
+          </div>
+          {attentionBreakdown.length ? (
+            <ul className="space-y-2">
+              {attentionBreakdown.map((item) => (
+                <li
+                  key={item.label}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-xl border bg-surface px-3 py-2"
+                >
+                  <span className="text-sm">{item.label}</span>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="warning">{item.count}</Badge>
+                    <Link
+                      href={item.href}
+                      className="text-xs font-semibold text-accent hover:underline"
+                    >
+                      View section
+                    </Link>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-foreground-muted">No active attention items.</p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card id="overdue-work-orders">
         <CardContent className="space-y-4 py-6">
           <div>
             <CardTitle className="text-base">Overdue Work Orders</CardTitle>
@@ -259,7 +331,7 @@ export default async function NeedsAttentionPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card id="pending-completion-reviews">
         <CardContent className="space-y-4 py-6">
           <div>
             <CardTitle className="text-base">Pending Completion Reviews</CardTitle>
@@ -292,7 +364,7 @@ export default async function NeedsAttentionPage() {
       </Card>
 
       <section className="grid gap-4 xl:grid-cols-2">
-        <Card>
+        <Card id="stale-shift-state">
           <CardContent className="space-y-4 py-6">
             <div>
               <CardTitle className="text-base">Stale Shift State</CardTitle>
@@ -321,7 +393,7 @@ export default async function NeedsAttentionPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card id="stale-work-timers">
           <CardContent className="space-y-4 py-6">
             <div>
               <CardTitle className="text-base">Stale Work Timers</CardTitle>
@@ -348,7 +420,7 @@ export default async function NeedsAttentionPage() {
         </Card>
       </section>
 
-      <Card>
+      <Card id="payroll-attention">
         <CardContent className="space-y-4 py-6">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
@@ -366,7 +438,7 @@ export default async function NeedsAttentionPage() {
           </div>
           {payrollWorkspace.periods.length === 0 ? (
             <p className="rounded-xl border bg-surface px-3 py-2 text-sm">
-              No payroll periods are configured yet.
+              No payroll periods are configured yet. This counts as 1 attention item.
             </p>
           ) : null}
           {overdueOpenPeriods.length ? (
@@ -419,7 +491,7 @@ export default async function NeedsAttentionPage() {
       </Card>
 
       <section className="grid gap-4 xl:grid-cols-2">
-        <Card>
+        <Card id="herd-protocol-due-items">
           <CardContent className="space-y-4 py-6">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
@@ -472,7 +544,7 @@ export default async function NeedsAttentionPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card id="grazing-move-alerts">
           <CardContent className="space-y-4 py-6">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
@@ -526,4 +598,3 @@ export default async function NeedsAttentionPage() {
     </div>
   );
 }
-

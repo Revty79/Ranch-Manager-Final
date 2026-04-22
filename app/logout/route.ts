@@ -26,7 +26,12 @@ async function handleLogout(request: NextRequest) {
     }
   }
 
-  const response = NextResponse.redirect(new URL("/login", request.url));
+  const response = new NextResponse(null, {
+    status: 303,
+    headers: {
+      Location: "/login",
+    },
+  });
   response.cookies.set(sessionCookieName, "", {
     httpOnly: true,
     sameSite: "lax",

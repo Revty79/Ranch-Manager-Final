@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { PageHeader } from "@/components/patterns/page-header";
 import { CouponCodeForm } from "@/components/billing/beta-code-form";
 import { CheckoutForm } from "@/components/billing/checkout-form";
@@ -8,7 +7,6 @@ import { requireAppContext } from "@/lib/auth/context";
 import { hasBillingAccess } from "@/lib/billing/access";
 import { syncRanchFromCheckoutSession } from "@/lib/billing/stripe-sync";
 import { isTrialEligible, resolveTrialConfig } from "@/lib/billing/trial";
-import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { getSupportedTimeZones } from "@/lib/timezone";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
@@ -69,7 +67,6 @@ export default async function SettingsPage({
         context.ranch.subscriptionStatus === "trialing"
       ? "Stripe subscription"
       : "No active access source";
-  const canSeeStatePreviews = isPlatformAdminEmail(context.user.email);
 
   return (
     <div className="space-y-6">
@@ -266,56 +263,6 @@ export default async function SettingsPage({
         </CardContent>
       </Card>
 
-      {canSeeStatePreviews ? (
-        <>
-          <section className="grid gap-4 xl:grid-cols-2">
-            <Card>
-              <CardContent className="space-y-2 py-6">
-                <CardTitle className="text-base">Access denied state</CardTitle>
-                <CardDescription>
-                  Preview the page shown when a user role lacks permission to open a route.
-                </CardDescription>
-                <Link
-                  href="/app/access-denied"
-                  className="text-sm font-semibold text-accent hover:underline"
-                >
-                  Open /app/access-denied
-                </Link>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="space-y-2 py-6">
-                <CardTitle className="text-base">Billing required state</CardTitle>
-                <CardDescription>
-                  Preview the page shown when ranch billing access is inactive.
-                </CardDescription>
-                <Link
-                  href="/app/billing-required"
-                  className="text-sm font-semibold text-accent hover:underline"
-                >
-                  Open /app/billing-required
-                </Link>
-              </CardContent>
-            </Card>
-          </section>
-
-          <Card>
-            <CardContent className="space-y-3 py-6">
-              <CardTitle className="text-base">State route previews</CardTitle>
-              <CardDescription className="text-sm">
-                Branded access-state routes for product messaging and safeguards.
-              </CardDescription>
-              <div className="flex flex-wrap gap-3 text-sm text-accent">
-                <Link href="/app/access-denied">/app/access-denied</Link>
-                <Link href="/app/billing-required">/app/billing-required</Link>
-                <Link href="/billing-required">/billing-required</Link>
-                <Link href="/no-ranch-access">/no-ranch-access</Link>
-                <Link href="/onboarding-incomplete">/onboarding-incomplete</Link>
-              </div>
-            </CardContent>
-          </Card>
-        </>
-      ) : null}
     </div>
   );
 }
