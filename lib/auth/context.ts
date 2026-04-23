@@ -12,6 +12,7 @@ import {
   type RanchRole,
 } from "@/lib/db/schema";
 import { resolveTimeZone } from "@/lib/timezone";
+import { isPlatformAdminEmail } from "./platform-admin-emails";
 import { getSessionTokenFromCookie, hashSessionToken } from "./session";
 
 export interface AuthUser {
@@ -36,6 +37,7 @@ export interface RanchContext {
     stripeSubscriptionId: string | null;
     subscriptionCurrentPeriodEnd: Date | null;
     betaLifetimeAccess: boolean;
+    allowPlatformAdminAccess: boolean;
   };
   membership: {
     id: string;
@@ -52,6 +54,7 @@ export interface AppContext extends RanchContext {
 async function getRanchContextForUser(
   userId: string,
   preferredRanchId: string | null,
+  isPlatformAdmin = false,
 ): Promise<RanchContext | null> {
   const memberships = await db
     .select({
@@ -69,18 +72,23 @@ async function getRanchContextForUser(
       stripeSubscriptionId: ranches.stripeSubscriptionId,
       subscriptionCurrentPeriodEnd: ranches.subscriptionCurrentPeriodEnd,
       betaLifetimeAccess: ranches.betaLifetimeAccess,
+      allowPlatformAdminAccess: ranches.allowPlatformAdminAccess,
     })
     .from(ranchMemberships)
     .innerJoin(ranches, eq(ranchMemberships.ranchId, ranches.id))
     .where(and(eq(ranchMemberships.userId, userId), eq(ranchMemberships.isActive, true)));
 
-  if (!memberships.length) {
+  const eligibleMemberships = isPlatformAdmin
+    ? memberships.filter((membership) => membership.allowPlatformAdminAccess)
+    : memberships;
+
+  if (!eligibleMemberships.length) {
     return null;
   }
 
   const activeMembership =
-    memberships.find((membership) => membership.ranchId === preferredRanchId) ??
-    memberships[0];
+    eligibleMemberships.find((membership) => membership.ranchId === preferredRanchId) ??
+    eligibleMemberships[0];
 
   return {
     ranch: {
@@ -94,6 +102,7 @@ async function getRanchContextForUser(
       stripeSubscriptionId: activeMembership.stripeSubscriptionId,
       subscriptionCurrentPeriodEnd: activeMembership.subscriptionCurrentPeriodEnd,
       betaLifetimeAccess: activeMembership.betaLifetimeAccess,
+      allowPlatformAdminAccess: activeMembership.allowPlatformAdminAccess,
     },
     membership: {
       id: activeMembership.membershipId,
@@ -151,7 +160,11 @@ export const getCurrentRanchContext = cache(async (): Promise<RanchContext | nul
     return null;
   }
 
-  return getRanchContextForUser(user.id, user.lastActiveRanchId);
+  return getRanchContextForUser(
+    user.id,
+    user.lastActiveRanchId,
+    isPlatformAdminEmail(user.email),
+  );
 });
 
 export async function getPostAuthRedirectPath(user: AuthUser): Promise<string> {
@@ -159,9 +172,14 @@ export async function getPostAuthRedirectPath(user: AuthUser): Promise<string> {
     return "/reset-password";
   }
 
-  const ranchContext = await getRanchContextForUser(user.id, user.lastActiveRanchId);
+  const isPlatformAdmin = isPlatformAdminEmail(user.email);
+  const ranchContext = await getRanchContextForUser(
+    user.id,
+    user.lastActiveRanchId,
+    isPlatformAdmin,
+  );
   if (!ranchContext || !ranchContext.ranch.onboardingCompleted) {
-    return "/onboarding";
+    return isPlatformAdmin ? "/admin" : "/onboarding";
   }
 
   if (!hasBillingAccess(ranchContext.ranch)) {
@@ -182,14 +200,19 @@ export async function requireUser(): Promise<AuthUser> {
 
 export async function requireAppContext(): Promise<AppContext> {
   const user = await requireUser();
+  const isPlatformAdmin = isPlatformAdminEmail(user.email);
   if (user.mustResetPassword) {
     redirect("/reset-password");
   }
 
-  const ranchContext = await getRanchContextForUser(user.id, user.lastActiveRanchId);
+  const ranchContext = await getRanchContextForUser(
+    user.id,
+    user.lastActiveRanchId,
+    isPlatformAdmin,
+  );
 
   if (!ranchContext || !ranchContext.ranch.onboardingCompleted) {
-    redirect("/onboarding");
+    redirect(isPlatformAdmin ? "/admin" : "/onboarding");
   }
 
   return {

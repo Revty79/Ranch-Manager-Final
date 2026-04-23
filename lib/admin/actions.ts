@@ -207,11 +207,14 @@ export async function enterRanchAsAdminAction(formData: FormData): Promise<void>
   if (!parsed.success) return;
 
   const [ranch] = await db
-    .select({ id: ranches.id })
+    .select({
+      id: ranches.id,
+      allowPlatformAdminAccess: ranches.allowPlatformAdminAccess,
+    })
     .from(ranches)
     .where(eq(ranches.id, parsed.data.ranchId))
     .limit(1);
-  if (!ranch) return;
+  if (!ranch || !ranch.allowPlatformAdminAccess) return;
 
   await db.transaction(async (tx) => {
     const [existingMembership] = await tx

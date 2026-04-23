@@ -7,6 +7,7 @@ import { requireAppContext } from "@/lib/auth/context";
 import { hasBillingAccess } from "@/lib/billing/access";
 import { syncRanchFromCheckoutSession } from "@/lib/billing/stripe-sync";
 import { isTrialEligible, resolveTrialConfig } from "@/lib/billing/trial";
+import { setRanchAdminAccessAction } from "@/lib/settings/actions";
 import { getSupportedTimeZones } from "@/lib/timezone";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
@@ -119,6 +120,40 @@ export default async function SettingsPage({
                 <span className="text-foreground-muted">Role:</span>{" "}
                 <Badge variant="success">{context.membership.role}</Badge>
               </p>
+              <p>
+                <span className="text-foreground-muted">Platform admin access:</span>{" "}
+                <Badge
+                  variant={context.ranch.allowPlatformAdminAccess ? "success" : "warning"}
+                >
+                  {context.ranch.allowPlatformAdminAccess ? "Allowed" : "Blocked"}
+                </Badge>
+              </p>
+            </div>
+            <div className="rounded-xl border bg-surface p-3 text-sm">
+              <p className="font-semibold text-foreground">Admin Access Failsafe</p>
+              <p className="mt-1 text-foreground-muted">
+                This switch controls whether platform admins can enter this ranch workspace from
+                the admin control center. Default is blocked.
+              </p>
+              {isOwner ? (
+                <form action={setRanchAdminAccessAction} className="mt-3">
+                  <input
+                    type="hidden"
+                    name="enabled"
+                    value={context.ranch.allowPlatformAdminAccess ? "false" : "true"}
+                  />
+                  <button
+                    type="submit"
+                    className="rounded-xl border bg-surface-strong px-3 py-2 text-xs font-semibold hover:bg-accent-soft"
+                  >
+                    {context.ranch.allowPlatformAdminAccess
+                      ? "Block admin access"
+                      : "Allow admin access"}
+                  </button>
+                </form>
+              ) : (
+                <p className="mt-3 text-foreground-muted">Only ranch owners can change this setting.</p>
+              )}
             </div>
           </CardContent>
         </Card>

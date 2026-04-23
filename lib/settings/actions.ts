@@ -3,9 +3,9 @@
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireAppContext } from "@/lib/auth/context";
+import { requireAppContext, requireRole } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
-import { users } from "@/lib/db/schema";
+import { ranches, users } from "@/lib/db/schema";
 import { isValidTimeZone } from "@/lib/timezone";
 
 export interface SettingsActionState {
@@ -20,6 +20,10 @@ const updateTimeZoneSchema = z.object({
     .min(1, "Timezone is required.")
     .max(100, "Timezone is too long.")
     .refine((value) => isValidTimeZone(value), "Select a valid timezone."),
+});
+
+const setAdminAccessSchema = z.object({
+  enabled: z.enum(["true", "false"]),
 });
 
 export async function updateUserTimeZoneAction(
@@ -45,4 +49,24 @@ export async function updateUserTimeZoneAction(
 
   revalidatePath("/app/settings");
   return { success: "Timezone updated." };
+}
+
+export async function setRanchAdminAccessAction(formData: FormData): Promise<void> {
+  const context = await requireRole(["owner"], { requirePaid: false });
+  const parsed = setAdminAccessSchema.safeParse({
+    enabled: formData.get("enabled"),
+  });
+  if (!parsed.success) return;
+
+  await db
+    .update(ranches)
+    .set({
+      allowPlatformAdminAccess: parsed.data.enabled === "true",
+      updatedAt: new Date(),
+    })
+    .where(eq(ranches.id, context.ranch.id));
+
+  revalidatePath("/app/settings");
+  revalidatePath("/app", "layout");
+  revalidatePath("/admin");
 }

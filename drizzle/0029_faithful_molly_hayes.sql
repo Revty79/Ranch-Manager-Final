@@ -1,0 +1,1 @@
+ALTER TABLE "ranches" ADD COLUMN "allow_platform_admin_access" boolean DEFAULT false NOT NULL;

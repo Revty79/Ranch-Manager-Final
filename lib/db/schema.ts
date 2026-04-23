@@ -202,6 +202,9 @@ export const ranches = pgTable(
     }),
     subscriptionUpdatedAt: timestamp("subscription_updated_at", { withTimezone: true }),
     betaLifetimeAccess: boolean("beta_lifetime_access").default(false).notNull(),
+    allowPlatformAdminAccess: boolean("allow_platform_admin_access")
+      .default(false)
+      .notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
