@@ -4,6 +4,11 @@ import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import {
+  getEditableSectionsForRole,
+  sanitizeCapabilityOverridesForRole,
+  type MembershipCapabilityOverrides,
+} from "@/lib/auth/capabilities";
 import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { db } from "@/lib/db/client";
 import { ranchMemberships, sessions, users } from "@/lib/db/schema";
@@ -66,6 +71,32 @@ function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
 }
 
+function resolveCapabilityOverridesFromFormData(
+  formData: FormData,
+  role: z.infer<typeof roleSchema>,
+): MembershipCapabilityOverrides {
+  const editableSections = getEditableSectionsForRole(role);
+  if (!editableSections.length) {
+    return {};
+  }
+
+  const sectionOverrides: Record<string, unknown> = {};
+  for (const section of editableSections) {
+    const value = formData.get(`sectionAccess.${section}`);
+    if (typeof value === "string" && value.length > 0) {
+      sectionOverrides[section] = value;
+    }
+  }
+
+  return sanitizeCapabilityOverridesForRole(role, { sections: sectionOverrides });
+}
+
+function capabilityOverridesToRecord(
+  value: MembershipCapabilityOverrides,
+): Record<string, unknown> {
+  return value as Record<string, unknown>;
+}
+
 export async function createTeamMemberAction(
   _prevState: TeamActionState,
   formData: FormData,
@@ -86,6 +117,7 @@ export async function createTeamMemberAction(
   }
 
   const role = parsed.data.role;
+  const capabilityOverrides = sanitizeCapabilityOverridesForRole(role, {});
   if (context.membership.role === "manager" && role === "owner") {
     return { error: "Managers cannot assign owner role." };
   }
@@ -151,6 +183,7 @@ export async function createTeamMemberAction(
       ranchId: context.ranch.id,
       userId,
       role,
+      capabilityOverrides: capabilityOverridesToRecord(capabilityOverrides),
       payType: parsed.data.payType,
       payRateCents,
       payAdvanceCents,
@@ -225,6 +258,11 @@ export async function updateTeamMemberAction(
     return { error: "Managers cannot assign owner role." };
   }
 
+  const capabilityOverrides = resolveCapabilityOverridesFromFormData(
+    formData,
+    parsed.data.role,
+  );
+
   await db.transaction(async (tx) => {
     await tx
       .update(users)
@@ -238,6 +276,7 @@ export async function updateTeamMemberAction(
       .update(ranchMemberships)
       .set({
         role: parsed.data.role,
+        capabilityOverrides: capabilityOverridesToRecord(capabilityOverrides),
         payType: parsed.data.payType,
         payRateCents: toCents(parsed.data.payRate),
         payAdvanceCents: toCents(parsed.data.payAdvance),

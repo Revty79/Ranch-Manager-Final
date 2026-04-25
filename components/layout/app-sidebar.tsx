@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { appNav } from "@/lib/site-config";
+import { appSectionByHref, hasSectionAccess } from "@/lib/auth/capabilities";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { AppContext } from "@/lib/auth/context";
@@ -10,11 +11,12 @@ interface AppSidebarProps {
 
 export function AppSidebar({ context }: AppSidebarProps) {
   const navItems = appNav.filter((item) => {
-    if (item.href === "/app/needs-attention") {
-      return context.membership.role === "owner" || context.membership.role === "manager";
+    const section = appSectionByHref[item.href];
+    if (!section) {
+      return true;
     }
 
-    return true;
+    return hasSectionAccess(context.membership.sectionAccess, section, "view");
   });
 
   return (

@@ -1,0 +1,1 @@
+ALTER TABLE "ranches" ADD COLUMN "time_zone" text DEFAULT 'UTC' NOT NULL;

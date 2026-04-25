@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { hasSectionAccess } from "@/lib/auth/capabilities";
 import { getCurrentRanchContext, getCurrentUser } from "@/lib/auth/context";
 import { hasBillingAccess } from "@/lib/billing/access";
 import {
@@ -23,10 +24,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "No ranch access" }, { status: 403 });
   }
 
-  if (
-    ranchContext.membership.role === "worker" ||
-    ranchContext.membership.role === "seasonal_worker"
-  ) {
+  if (!hasSectionAccess(ranchContext.membership.sectionAccess, "herd", "manage")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

@@ -3,7 +3,7 @@
 import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireRole } from "@/lib/auth/context";
+import { requireSectionManage } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
 import {
   animalGroupMemberships,
@@ -122,7 +122,7 @@ export async function updateGrazingAssumptionsAction(
   _prevState: GrazingActionState,
   formData: FormData,
 ): Promise<GrazingActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("land");
   const parsed = updateGrazingAssumptionsSchema.safeParse({
     planningDemandBasis: formData.get("planningDemandBasis"),
     demandLbsPerAnimalUnitDay: formData.get("demandLbsPerAnimalUnitDay"),
@@ -172,7 +172,7 @@ export async function createGrazingPeriodAction(
   _prevState: GrazingActionState,
   formData: FormData,
 ): Promise<GrazingActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("land");
   const parsed = createGrazingPeriodSchema.safeParse({
     landUnitId: formData.get("landUnitId"),
     animalGroupId: formData.get("animalGroupId"),
@@ -294,7 +294,7 @@ export async function completeGrazingPeriodAction(
   _prevState: GrazingActionState,
   formData: FormData,
 ): Promise<GrazingActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("land");
   const parsed = completeGrazingPeriodSchema.safeParse({
     grazingPeriodId: formData.get("grazingPeriodId"),
     endedOn: formData.get("endedOn"),

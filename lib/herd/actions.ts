@@ -4,7 +4,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { requireRole } from "@/lib/auth/context";
+import { requireSectionManage } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
 import {
   animalEvents,
@@ -249,7 +249,7 @@ export async function createAnimalAction(
   _prevState: HerdActionState,
   formData: FormData,
 ): Promise<HerdActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("herd");
   const parsed = createAnimalSchema.safeParse({
     internalId: formData.get("internalId"),
     tagId: formData.get("tagId"),
@@ -366,7 +366,7 @@ export async function updateAnimalAction(
   _prevState: HerdActionState,
   formData: FormData,
 ): Promise<HerdActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("herd");
   const parsed = updateAnimalSchema.safeParse({
     animalId: formData.get("animalId"),
     internalId: formData.get("internalId"),
@@ -604,7 +604,7 @@ export async function updateAnimalAction(
 }
 
 export async function deleteAnimalAction(formData: FormData): Promise<void> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("herd");
   const parsed = deleteAnimalSchema.safeParse({
     animalId: formData.get("animalId"),
     confirmTagId: formData.get("confirmTagId"),
@@ -644,7 +644,7 @@ export async function createAnimalEventAction(
   _prevState: HerdActionState,
   formData: FormData,
 ): Promise<HerdActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("herd");
   const parsed = createEventSchema.safeParse({
     animalId: formData.get("animalId"),
     eventType: formData.get("eventType"),

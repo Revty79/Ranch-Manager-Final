@@ -18,7 +18,8 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/components/ui/table";
-import { roleCanManageOperations, requirePaidAccessContext } from "@/lib/auth/context";
+import { hasSectionAccess } from "@/lib/auth/capabilities";
+import { requireSectionAccess } from "@/lib/auth/context";
 import type { AnimalSpecies } from "@/lib/db/schema";
 import {
   computeGrazingEstimateFromSpeciesCounts,
@@ -109,9 +110,9 @@ export default async function LandGrazingPage({
 }: {
   searchParams: Promise<GrazingSearchParams>;
 }) {
-  const context = await requirePaidAccessContext();
+  const context = await requireSectionAccess("land");
   const params = await searchParams;
-  const canManage = roleCanManageOperations(context.membership.role);
+  const canManage = hasSectionAccess(context.membership.sectionAccess, "land", "manage");
   const workspace = await getGrazingWorkspace(context.ranch.id);
 
   const activeCount = workspace.activePeriods.length;

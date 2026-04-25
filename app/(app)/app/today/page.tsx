@@ -5,7 +5,8 @@ import { PageHeader } from "@/components/patterns/page-header";
 import { StatCard } from "@/components/patterns/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
-import { requirePaidAccessContext } from "@/lib/auth/context";
+import { hasSectionAccess } from "@/lib/auth/capabilities";
+import { requireSectionAccess } from "@/lib/auth/context";
 import {
   getPrivateMessagingWorkspace,
   getRanchMessageThreads,
@@ -114,7 +115,18 @@ function resolveNextAction(params: {
 }
 
 export default async function WorkerTodayPage() {
-  const context = await requirePaidAccessContext();
+  const context = await requireSectionAccess("today");
+  const canManageTime = hasSectionAccess(context.membership.sectionAccess, "time", "manage");
+  const canViewCommunication = hasSectionAccess(
+    context.membership.sectionAccess,
+    "communication",
+    "view",
+  );
+  const canViewWorkOrders = hasSectionAccess(
+    context.membership.sectionAccess,
+    "workOrders",
+    "view",
+  );
   const [activeShift, activeWork, workOrderOptions, assignedWork, threads, privateWorkspace] =
     await Promise.all([
       getActiveShiftForMembership(context.ranch.id, context.membership.id),
@@ -154,18 +166,22 @@ export default async function WorkerTodayPage() {
         description="Your shift state, current work, and next action in one place."
         actions={
           <div className="flex flex-wrap gap-2">
-            <Link
-              href="/app/communication"
-              className="rounded-xl border bg-surface px-3 py-2 text-sm font-semibold text-foreground-muted hover:bg-accent-soft hover:text-foreground"
-            >
-              Open Communication
-            </Link>
-            <Link
-              href="/app/work-orders"
-              className="rounded-xl border bg-surface px-3 py-2 text-sm font-semibold text-foreground-muted hover:bg-accent-soft hover:text-foreground"
-            >
-              Open Work Orders
-            </Link>
+            {canViewCommunication ? (
+              <Link
+                href="/app/communication"
+                className="rounded-xl border bg-surface px-3 py-2 text-sm font-semibold text-foreground-muted hover:bg-accent-soft hover:text-foreground"
+              >
+                Open Communication
+              </Link>
+            ) : null}
+            {canViewWorkOrders ? (
+              <Link
+                href="/app/work-orders"
+                className="rounded-xl border bg-surface px-3 py-2 text-sm font-semibold text-foreground-muted hover:bg-accent-soft hover:text-foreground"
+              >
+                Open Work Orders
+              </Link>
+            ) : null}
           </div>
         }
       />
@@ -210,13 +226,23 @@ export default async function WorkerTodayPage() {
         </CardContent>
       </Card>
 
-      <TimeControlPanel
-        activeShift={activeShift}
-        activeWork={activeWork}
-        workOrderOptions={workOrderOptions}
-        payType={context.membership.payType}
-        timeZone={context.user.timeZone}
-      />
+      {canManageTime ? (
+        <TimeControlPanel
+          activeShift={activeShift}
+          activeWork={activeWork}
+          workOrderOptions={workOrderOptions}
+          payType={context.membership.payType}
+          timeZone={context.user.timeZone}
+        />
+      ) : (
+        <Card>
+          <CardContent className="py-6">
+            <p className="rounded-xl border bg-surface px-4 py-3 text-sm text-foreground-muted">
+              Time controls are disabled for your membership right now.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       <section className="grid gap-4 xl:grid-cols-2">
         <Card>
@@ -297,4 +323,3 @@ export default async function WorkerTodayPage() {
     </div>
   );
 }
-

@@ -15,7 +15,8 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/components/ui/table";
-import { roleCanManageOperations, requirePaidAccessContext } from "@/lib/auth/context";
+import { hasSectionAccess } from "@/lib/auth/capabilities";
+import { requireSectionAccess } from "@/lib/auth/context";
 import { formatLandUnitType, landUnitTypeOptions } from "@/lib/land/constants";
 import {
   getLandUnitsForRanch,
@@ -50,10 +51,10 @@ export default async function LandPage({
 }: {
   searchParams: Promise<{ q?: string; unitType?: string; activity?: string }>;
 }) {
-  const context = await requirePaidAccessContext();
+  const context = await requireSectionAccess("land");
   const params = await searchParams;
   const filters = resolveLandUnitFilters(params);
-  const canManage = roleCanManageOperations(context.membership.role);
+  const canManage = hasSectionAccess(context.membership.sectionAccess, "land", "manage");
 
   const [units, summary] = await Promise.all([
     getLandUnitsForRanch(context.ranch.id, filters),

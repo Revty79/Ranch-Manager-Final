@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { hasSectionAccess } from "@/lib/auth/capabilities";
 import { getCurrentRanchContext, getCurrentUser } from "@/lib/auth/context";
 import { hasBillingAccess } from "@/lib/billing/access";
 import { buildPayrollBreakdownCsv, buildPayrollCsv } from "@/lib/payroll/csv";
@@ -24,10 +25,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "No ranch access" }, { status: 403 });
   }
 
-  if (
-    ranchContext.membership.role === "worker" ||
-    ranchContext.membership.role === "seasonal_worker"
-  ) {
+  if (!hasSectionAccess(ranchContext.membership.sectionAccess, "payroll", "manage")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -52,7 +50,7 @@ export async function GET(request: NextRequest) {
       range.fromDate,
       range.toDateExclusive,
     );
-    csv = buildPayrollBreakdownCsv(breakdown, user.timeZone);
+    csv = buildPayrollBreakdownCsv(breakdown, ranchContext.ranch.timeZone);
     filename = `payroll-breakdown-${ranchSlug || "ranch"}-${range.from}-to-${range.to}.csv`;
   } else {
     const summary = await getPayrollSummaryForRange(

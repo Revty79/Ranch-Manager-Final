@@ -1,0 +1,1 @@
+ALTER TABLE "ranch_memberships" ADD COLUMN "capability_overrides" jsonb DEFAULT '{}'::jsonb NOT NULL;

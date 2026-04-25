@@ -3,7 +3,7 @@
 import { and, eq, inArray, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireRole } from "@/lib/auth/context";
+import { requireSectionManage } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
 import {
   animalEvents,
@@ -74,7 +74,7 @@ export async function createAnimalGroupAction(
   _prevState: HerdGroupActionState,
   formData: FormData,
 ): Promise<HerdGroupActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("herd");
   const parsed = createAnimalGroupSchema.safeParse({
     name: formData.get("name"),
     groupType: formData.get("groupType"),
@@ -111,7 +111,7 @@ export async function setAnimalGroupMembersAction(
   _prevState: HerdGroupActionState,
   formData: FormData,
 ): Promise<HerdGroupActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("herd");
   const parsed = setAnimalGroupMembersSchema.safeParse({
     animalGroupId: formData.get("animalGroupId"),
     animalIds: formData.getAll("animalIds").map((value) => String(value)),
@@ -341,7 +341,7 @@ export async function toggleAnimalGroupActiveAction(
   _prevState: HerdGroupActionState,
   formData: FormData,
 ): Promise<HerdGroupActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("herd");
   const parsed = toggleAnimalGroupSchema.safeParse({
     animalGroupId: formData.get("animalGroupId"),
     nextIsActive: formData.get("nextIsActive"),
@@ -389,7 +389,7 @@ export async function deleteAnimalGroupAction(
   _prevState: HerdGroupActionState,
   formData: FormData,
 ): Promise<HerdGroupActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("herd");
   const parsed = deleteAnimalGroupSchema.safeParse({
     animalGroupId: formData.get("animalGroupId"),
     reassignmentAnimalGroupId: formData.get("reassignmentAnimalGroupId"),
@@ -547,4 +547,3 @@ export async function deleteAnimalGroupAction(
       : `Deleted ${sourceGroup.name}. ${activeAnimalIds.length} animals were removed from that herd group.`,
   };
 }
-

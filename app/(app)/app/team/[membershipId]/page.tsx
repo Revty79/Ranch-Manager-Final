@@ -69,6 +69,7 @@ export default async function TeamMemberDetailPage({
             membershipId={member.membershipId}
             fullName={member.fullName}
             role={member.role}
+            sectionAccess={member.sectionAccess}
             payType={member.payType}
             payRateCents={member.payRateCents}
             payAdvanceCents={member.payAdvanceCents}

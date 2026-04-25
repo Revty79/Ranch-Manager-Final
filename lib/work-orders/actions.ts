@@ -4,7 +4,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
-import { requireRole } from "@/lib/auth/context";
+import { requireSectionManage } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
 import {
   ranchMemberships,
@@ -378,7 +378,7 @@ export async function createWorkOrderAction(
   _prevState: WorkOrderActionState,
   formData: FormData,
 ): Promise<WorkOrderActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("workOrders");
   const parsed = workOrderSchema.safeParse({
     title: formData.get("title"),
     description: formData.get("description"),
@@ -441,7 +441,7 @@ export async function updateWorkOrderAction(
   _prevState: WorkOrderActionState,
   formData: FormData,
 ): Promise<WorkOrderActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("workOrders");
   const parsed = updateWorkOrderSchema.safeParse({
     workOrderId: formData.get("workOrderId"),
     title: formData.get("title"),
@@ -537,7 +537,7 @@ export async function createWorkOrderTemplateAction(
   _prevState: WorkOrderActionState,
   formData: FormData,
 ): Promise<WorkOrderActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("workOrders");
   const parsed = createTemplateSchema.safeParse({
     templateName: formData.get("templateName"),
     title: formData.get("title"),
@@ -615,7 +615,7 @@ export async function createWorkOrderTemplateAction(
 }
 
 export async function createWorkOrderFromTemplateAction(formData: FormData): Promise<void> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("workOrders");
   const parsed = createFromTemplateSchema.safeParse({
     templateId: formData.get("templateId"),
   });
@@ -712,7 +712,7 @@ export async function createWorkOrderFromTemplateAction(formData: FormData): Pro
 }
 
 export async function updateWorkOrderTemplateRecurrenceAction(formData: FormData): Promise<void> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("workOrders");
   const parsed = updateTemplateRecurrenceSchema.safeParse({
     templateId: formData.get("templateId"),
     isActive: parseBooleanValue(formData, "isActive"),
@@ -770,7 +770,7 @@ export async function reviewCompletedWorkOrderAction(
   _prevState: WorkOrderActionState,
   formData: FormData,
 ): Promise<WorkOrderActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("workOrders");
   const parsed = reviewChecklistSchema.safeParse({
     workOrderId: formData.get("workOrderId"),
     decision: formData.get("decision"),

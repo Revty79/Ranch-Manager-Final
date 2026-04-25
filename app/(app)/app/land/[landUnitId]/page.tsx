@@ -19,7 +19,8 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/components/ui/table";
-import { roleCanManageOperations, requirePaidAccessContext } from "@/lib/auth/context";
+import { hasSectionAccess } from "@/lib/auth/capabilities";
+import { requireSectionAccess } from "@/lib/auth/context";
 import type { AnimalSpecies } from "@/lib/db/schema";
 import { getLandUnitGrazingHistory } from "@/lib/grazing/queries";
 import { formatAnimalSpecies } from "@/lib/herd/constants";
@@ -81,9 +82,9 @@ export default async function LandUnitDetailPage({
 }: {
   params: Promise<{ landUnitId: string }>;
 }) {
-  const context = await requirePaidAccessContext();
+  const context = await requireSectionAccess("land");
   const { landUnitId } = await params;
-  const canManage = roleCanManageOperations(context.membership.role);
+  const canManage = hasSectionAccess(context.membership.sectionAccess, "land", "manage");
 
   const profile = await getLandUnitProfile(context.ranch.id, landUnitId);
   if (!profile) notFound();

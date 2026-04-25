@@ -12,6 +12,15 @@ import {
   type RanchRole,
 } from "@/lib/db/schema";
 import { resolveTimeZone } from "@/lib/timezone";
+import {
+  hasSectionAccess,
+  resolvePreferredAppPath,
+  resolveSectionAccess,
+  type AppSection,
+  type MembershipCapabilityOverrides,
+  type SectionAccessLevel,
+  type SectionAccessMap,
+} from "./capabilities";
 import { isPlatformAdminEmail } from "./platform-admin-emails";
 import { getSessionTokenFromCookie, hashSessionToken } from "./session";
 
@@ -30,6 +39,7 @@ export interface RanchContext {
     id: string;
     name: string;
     slug: string;
+    timeZone: string;
     onboardingCompleted: boolean;
     subscriptionStatus: string;
     subscriptionPlanKey: string | null;
@@ -42,6 +52,8 @@ export interface RanchContext {
   membership: {
     id: string;
     role: RanchRole;
+    capabilityOverrides: MembershipCapabilityOverrides;
+    sectionAccess: SectionAccessMap;
     payType: PayType;
     isActive: boolean;
   };
@@ -60,11 +72,13 @@ async function getRanchContextForUser(
     .select({
       membershipId: ranchMemberships.id,
       role: ranchMemberships.role,
+      capabilityOverrides: ranchMemberships.capabilityOverrides,
       payType: ranchMemberships.payType,
       isActive: ranchMemberships.isActive,
       ranchId: ranches.id,
       ranchName: ranches.name,
       ranchSlug: ranches.slug,
+      ranchTimeZone: ranches.timeZone,
       onboardingCompleted: ranches.onboardingCompleted,
       subscriptionStatus: ranches.subscriptionStatus,
       subscriptionPlanKey: ranches.subscriptionPlanKey,
@@ -95,6 +109,7 @@ async function getRanchContextForUser(
       id: activeMembership.ranchId,
       name: activeMembership.ranchName,
       slug: activeMembership.ranchSlug,
+      timeZone: resolveTimeZone(activeMembership.ranchTimeZone),
       onboardingCompleted: activeMembership.onboardingCompleted,
       subscriptionStatus: activeMembership.subscriptionStatus,
       subscriptionPlanKey: activeMembership.subscriptionPlanKey,
@@ -107,6 +122,12 @@ async function getRanchContextForUser(
     membership: {
       id: activeMembership.membershipId,
       role: activeMembership.role,
+      capabilityOverrides:
+        (activeMembership.capabilityOverrides as MembershipCapabilityOverrides) ?? {},
+      sectionAccess: resolveSectionAccess(
+        activeMembership.role,
+        activeMembership.capabilityOverrides,
+      ),
       payType: activeMembership.payType,
       isActive: activeMembership.isActive,
     },
@@ -186,7 +207,7 @@ export async function getPostAuthRedirectPath(user: AuthUser): Promise<string> {
     return "/app/billing-required";
   }
 
-  return "/app";
+  return resolvePreferredAppPath(ranchContext.membership.sectionAccess);
 }
 
 export async function requireUser(): Promise<AuthUser> {
@@ -216,7 +237,10 @@ export async function requireAppContext(): Promise<AppContext> {
   }
 
   return {
-    user,
+    user: {
+      ...user,
+      timeZone: ranchContext.ranch.timeZone,
+    },
     ...ranchContext,
   };
 }
@@ -243,6 +267,30 @@ export async function requireRole(
   }
 
   return context;
+}
+
+export async function requireSectionAccess(
+  section: AppSection,
+  required: SectionAccessLevel = "view",
+  options?: { requirePaid?: boolean },
+): Promise<AppContext> {
+  const context =
+    options?.requirePaid === false
+      ? await requireAppContext()
+      : await requirePaidAccessContext();
+
+  if (!hasSectionAccess(context.membership.sectionAccess, section, required)) {
+    redirect("/app/access-denied");
+  }
+
+  return context;
+}
+
+export async function requireSectionManage(
+  section: AppSection,
+  options?: { requirePaid?: boolean },
+): Promise<AppContext> {
+  return requireSectionAccess(section, "manage", options);
 }
 
 export function roleCanManageOperations(role: RanchRole): boolean {

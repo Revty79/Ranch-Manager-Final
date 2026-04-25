@@ -3,7 +3,7 @@
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireRole } from "@/lib/auth/context";
+import { requireSectionManage } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
 import {
   animalEvents,
@@ -178,7 +178,7 @@ export async function createLandUnitAction(
   _prevState: LandActionState,
   formData: FormData,
 ): Promise<LandActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("land");
   const parsed = landUnitSchema.safeParse({
     name: formData.get("name"),
     code: formData.get("code"),
@@ -232,7 +232,7 @@ export async function updateLandUnitAction(
   _prevState: LandActionState,
   formData: FormData,
 ): Promise<LandActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("land");
   const parsed = updateLandUnitSchema.safeParse({
     landUnitId: formData.get("landUnitId"),
     name: formData.get("name"),
@@ -301,7 +301,7 @@ export async function assignAnimalToLandUnitAction(
   _prevState: LandActionState,
   formData: FormData,
 ): Promise<LandActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("land");
   const parsed = assignAnimalSchema.safeParse({
     landUnitId: formData.get("landUnitId"),
     animalId: formData.get("animalId"),
@@ -429,7 +429,7 @@ export async function bulkAssignAnimalsToLandUnitAction(
   _prevState: LandActionState,
   formData: FormData,
 ): Promise<LandActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("land");
   const parsed = bulkAssignAnimalsSchema.safeParse({
     landUnitId: formData.get("landUnitId"),
     species: formData.get("species"),
@@ -576,7 +576,7 @@ export async function removeAnimalFromLandUnitAction(
   _prevState: LandActionState,
   formData: FormData,
 ): Promise<LandActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("land");
   const parsed = removeAnimalSchema.safeParse({
     landUnitId: formData.get("landUnitId"),
     animalId: formData.get("animalId"),
@@ -651,7 +651,7 @@ export async function bulkMoveHeadcountFromUnitAction(
   _prevState: LandActionState,
   formData: FormData,
 ): Promise<LandActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("land");
   const parsed = splitMoveAnimalsSchema.safeParse({
     fromLandUnitId: formData.get("fromLandUnitId"),
     toLandUnitId: formData.get("toLandUnitId"),

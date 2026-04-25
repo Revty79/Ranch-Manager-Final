@@ -3,7 +3,7 @@ import { CouponCodeForm } from "@/components/billing/beta-code-form";
 import { CheckoutForm } from "@/components/billing/checkout-form";
 import { CustomerPortalForm } from "@/components/billing/customer-portal-form";
 import { TimeZoneForm } from "@/components/settings/timezone-form";
-import { requireAppContext } from "@/lib/auth/context";
+import { requireSectionAccess } from "@/lib/auth/context";
 import { hasBillingAccess } from "@/lib/billing/access";
 import { syncRanchFromCheckoutSession } from "@/lib/billing/stripe-sync";
 import { isTrialEligible, resolveTrialConfig } from "@/lib/billing/trial";
@@ -32,7 +32,7 @@ export default async function SettingsPage({
   const query = await searchParams;
   const billingQueryState = query.billing;
   const checkoutSessionId = query.session_id;
-  let context = await requireAppContext();
+  let context = await requireSectionAccess("settings", "view", { requirePaid: false });
   let checkoutSyncError: string | null = null;
 
   if (
@@ -48,7 +48,7 @@ export default async function SettingsPage({
     if (!syncResult.ok) {
       checkoutSyncError = syncResult.error ?? "Unable to sync checkout status.";
     } else {
-      context = await requireAppContext();
+      context = await requireSectionAccess("settings", "view", { requirePaid: false });
     }
   }
 
@@ -269,14 +269,23 @@ export default async function SettingsPage({
 
       <Card>
         <CardContent className="space-y-3 py-6">
-          <CardTitle>Timezone</CardTitle>
+          <CardTitle>Ranch Timezone</CardTitle>
           <CardDescription>
-            Set your timezone so payroll, time tracking, and dates render consistently for your account.
+            Owners set one timezone for this ranch. All members in this ranch use it for payroll,
+            scheduling, and timestamp rendering.
           </CardDescription>
-          <TimeZoneForm
-            currentTimeZone={context.user.timeZone}
-            timeZoneOptions={supportedTimeZones}
-          />
+          {isOwner ? (
+            <TimeZoneForm
+              currentTimeZone={context.ranch.timeZone}
+              timeZoneOptions={supportedTimeZones}
+            />
+          ) : (
+            <p className="rounded-xl border bg-surface px-4 py-3 text-sm text-foreground-muted">
+              Current ranch timezone:{" "}
+              <span className="font-semibold text-foreground">{context.ranch.timeZone}</span>. Only
+              ranch owners can change this setting.
+            </p>
+          )}
         </CardContent>
       </Card>
 

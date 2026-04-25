@@ -3,7 +3,7 @@
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireRole } from "@/lib/auth/context";
+import { requireSectionManage } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
 import {
   animalEvents,
@@ -170,7 +170,7 @@ export async function recordBreedingEventAction(
   _prevState: HerdRecordActionState,
   formData: FormData,
 ): Promise<HerdRecordActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("herd");
   const parsed = breedingRecordSchema.safeParse({
     animalId: formData.get("animalId"),
     serviceDate: formData.get("serviceDate"),
@@ -250,7 +250,7 @@ export async function recordPregnancyCheckAction(
   _prevState: HerdRecordActionState,
   formData: FormData,
 ): Promise<HerdRecordActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("herd");
   const parsed = pregnancyCheckSchema.safeParse({
     animalId: formData.get("animalId"),
     checkDate: formData.get("checkDate"),
@@ -292,7 +292,7 @@ export async function recordHealthEventAction(
   _prevState: HerdRecordActionState,
   formData: FormData,
 ): Promise<HerdRecordActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("herd");
   const parsed = healthRecordSchema.safeParse({
     animalId: formData.get("animalId"),
     healthRecordType: formData.get("healthRecordType"),
@@ -340,7 +340,7 @@ export async function createProtocolTemplateAction(
   _prevState: HerdRecordActionState,
   formData: FormData,
 ): Promise<HerdRecordActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("herd");
   const parsed = createProtocolSchema.safeParse({
     name: formData.get("name"),
     protocolType: formData.get("protocolType"),
@@ -376,7 +376,7 @@ export async function toggleProtocolTemplateActiveAction(
   _prevState: HerdRecordActionState,
   formData: FormData,
 ): Promise<HerdRecordActionState> {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("herd");
   const parsed = toggleProtocolSchema.safeParse({
     templateId: formData.get("templateId"),
     setActive: formData.get("setActive"),

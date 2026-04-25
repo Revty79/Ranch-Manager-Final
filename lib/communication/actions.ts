@@ -3,7 +3,7 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requirePaidAccessContext } from "@/lib/auth/context";
+import { requireSectionManage } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
 import { ranchDirectMessages, ranchMemberships, ranchMessages } from "@/lib/db/schema";
 
@@ -48,7 +48,7 @@ export async function createRanchMessageAction(
   _prevState: CommunicationActionState,
   formData: FormData,
 ): Promise<CommunicationActionState> {
-  const context = await requirePaidAccessContext();
+  const context = await requireSectionManage("communication");
   const parsed = threadSchema.safeParse({
     title: formData.get("title"),
     body: formData.get("body"),
@@ -78,7 +78,7 @@ export async function createRanchReplyAction(
   _prevState: CommunicationActionState,
   formData: FormData,
 ): Promise<CommunicationActionState> {
-  const context = await requirePaidAccessContext();
+  const context = await requireSectionManage("communication");
   const parsed = replySchema.safeParse({
     parentMessageId: formData.get("parentMessageId"),
     body: formData.get("body"),
@@ -145,7 +145,7 @@ export async function createPrivateMessageAction(
   _prevState: CommunicationActionState,
   formData: FormData,
 ): Promise<CommunicationActionState> {
-  const context = await requirePaidAccessContext();
+  const context = await requireSectionManage("communication");
   const parsed = privateMessageSchema.safeParse({
     recipientMembershipId: formData.get("recipientMembershipId"),
     body: formData.get("body"),

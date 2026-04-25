@@ -270,6 +270,7 @@ export async function completeOnboardingAction(
       .values({
         name: parsed.data.ranchName,
         slug: ranchSlug,
+        timeZone: user.timeZone,
         onboardingCompleted: true,
         subscriptionStatus: "inactive",
       })

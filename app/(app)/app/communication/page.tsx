@@ -7,10 +7,8 @@ import { EmptyState } from "@/components/patterns/empty-state";
 import { PageHeader } from "@/components/patterns/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
-import {
-  requirePaidAccessContext,
-  roleCanManageOperations,
-} from "@/lib/auth/context";
+import { hasSectionAccess } from "@/lib/auth/capabilities";
+import { requireSectionAccess } from "@/lib/auth/context";
 import { archiveStaleCommunicationForRanch } from "@/lib/communication/maintenance";
 import {
   getPrivateMessagingWorkspace,
@@ -74,8 +72,13 @@ export default async function CommunicationPage({
 }: {
   searchParams: Promise<CommunicationSearchParams>;
 }) {
-  const context = await requirePaidAccessContext();
-  const canReviewArchive = roleCanManageOperations(context.membership.role);
+  const context = await requireSectionAccess("communication");
+  const canManageCommunication = hasSectionAccess(
+    context.membership.sectionAccess,
+    "communication",
+    "manage",
+  );
+  const canReviewArchive = canManageCommunication;
   const params = await searchParams;
   const archiveView = resolveArchiveView(params.view, canReviewArchive);
   const isArchiveView = archiveView === "archived";
@@ -165,10 +168,16 @@ export default async function CommunicationPage({
                 Use private notes for sensitive requests and respectful coaching.
               </CardDescription>
             </div>
-            <SendPrivateMessageForm
-              members={privateWorkspace.members}
-              defaultRecipientMembershipId={privateWorkspace.selectedMembershipId}
-            />
+            {canManageCommunication ? (
+              <SendPrivateMessageForm
+                members={privateWorkspace.members}
+                defaultRecipientMembershipId={privateWorkspace.selectedMembershipId}
+              />
+            ) : (
+              <p className="rounded-xl border bg-surface px-4 py-3 text-sm text-foreground-muted">
+                You can view communication history, but posting and private messaging are disabled.
+              </p>
+            )}
           </CardContent>
         </Card>
       )}
@@ -336,7 +345,7 @@ export default async function CommunicationPage({
         </Card>
       </section>
 
-      {!isArchiveView ? (
+      {!isArchiveView && canManageCommunication ? (
         <Card>
           <CardContent className="space-y-4 py-6">
             <div>
@@ -409,7 +418,7 @@ export default async function CommunicationPage({
                     )}
                   </div>
 
-                  {!isArchiveView ? (
+                  {!isArchiveView && canManageCommunication ? (
                     <ReplyMessageForm parentMessageId={thread.id} />
                   ) : null}
                 </CardContent>

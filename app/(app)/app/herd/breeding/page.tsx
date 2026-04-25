@@ -15,7 +15,8 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/components/ui/table";
-import { roleCanManageOperations, requirePaidAccessContext } from "@/lib/auth/context";
+import { hasSectionAccess } from "@/lib/auth/capabilities";
+import { requireSectionAccess } from "@/lib/auth/context";
 import { formatAnimalEventType, formatAnimalSpecies } from "@/lib/herd/constants";
 import {
   getProtocolDueItemsForRanch,
@@ -51,8 +52,8 @@ function animalLabel(tagId: string, displayName: string | null): string {
 }
 
 export default async function HerdBreedingPage() {
-  const context = await requirePaidAccessContext();
-  const canManage = roleCanManageOperations(context.membership.role);
+  const context = await requireSectionAccess("herd");
+  const canManage = hasSectionAccess(context.membership.sectionAccess, "herd", "manage");
 
   const [dueItems, templates, recentBreeding, recentHealth] = await Promise.all([
     getProtocolDueItemsForRanch(context.ranch.id, { limit: 60 }),

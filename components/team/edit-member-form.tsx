@@ -3,6 +3,12 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
+  getEditableSectionsForRole,
+  getSectionLabel,
+  type SectionAccessLevel,
+  type SectionAccessMap,
+} from "@/lib/auth/capabilities";
+import {
   deleteTeamMemberAction,
   toggleTeamMemberStatusAction,
   type TeamActionState,
@@ -17,6 +23,7 @@ interface EditMemberFormProps {
   membershipId: string;
   fullName: string;
   role: "owner" | "manager" | "worker" | "seasonal_worker";
+  sectionAccess: SectionAccessMap;
   payType: "hourly" | "salary" | "piece_work";
   payRateCents: number;
   payAdvanceCents: number;
@@ -29,6 +36,7 @@ export function EditMemberForm({
   membershipId,
   fullName,
   role,
+  sectionAccess,
   payType,
   payRateCents,
   payAdvanceCents,
@@ -41,6 +49,12 @@ export function EditMemberForm({
     initialState,
   );
   const [deleteState, deleteAction] = useActionState(deleteTeamMemberAction, initialState);
+  const editableSections = getEditableSectionsForRole(role);
+  const accessOptions: Array<{ value: SectionAccessLevel; label: string }> = [
+    { value: "none", label: "Hidden" },
+    { value: "view", label: "View only" },
+    { value: "manage", label: "Can use" },
+  ];
 
   useEffect(() => {
     if (deleteState.success) {
@@ -106,6 +120,32 @@ export function EditMemberForm({
             required
           />
         </FormFieldShell>
+        {editableSections.length ? (
+          <div className="md:col-span-2 space-y-2 rounded-xl border bg-surface p-3">
+            <p className="text-sm font-semibold">App section access</p>
+            <p className="text-xs text-foreground-muted">
+              Choose what this member can see or use. Team, Payroll, and Needs Attention remain
+              restricted to manager-level roles.
+            </p>
+            <div className="grid gap-3 md:grid-cols-2">
+              {editableSections.map((section) => (
+                <FormFieldShell key={section} label={getSectionLabel(section)}>
+                  <select
+                    name={`sectionAccess.${section}`}
+                    defaultValue={sectionAccess[section]}
+                    className="h-10 w-full rounded-xl border bg-surface px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {accessOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </FormFieldShell>
+              ))}
+            </div>
+          </div>
+        ) : null}
         <div className="md:col-span-2 flex flex-col gap-2">
           {updateState.error ? (
             <p className="text-sm font-medium text-danger">{updateState.error}</p>

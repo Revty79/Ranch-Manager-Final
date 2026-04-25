@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  updateUserTimeZoneAction,
+  updateRanchTimeZoneAction,
   type SettingsActionState,
 } from "@/lib/settings/actions";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ export function TimeZoneForm({ currentTimeZone, timeZoneOptions }: TimeZoneFormP
   const router = useRouter();
   const [timeZone, setTimeZone] = useState(currentTimeZone);
   const [browserTimeZone, setBrowserTimeZone] = useState<string | null>(null);
-  const [state, formAction] = useActionState(updateUserTimeZoneAction, initialState);
+  const [state, formAction] = useActionState(updateRanchTimeZoneAction, initialState);
 
   useEffect(() => {
     setTimeZone(currentTimeZone);
@@ -60,7 +60,7 @@ export function TimeZoneForm({ currentTimeZone, timeZoneOptions }: TimeZoneFormP
       </label>
       <div className="flex flex-wrap gap-2">
         <Button type="submit" variant="secondary">
-          Save timezone
+          Save ranch timezone
         </Button>
         {browserTimeZone ? (
           <Button
@@ -73,7 +73,7 @@ export function TimeZoneForm({ currentTimeZone, timeZoneOptions }: TimeZoneFormP
         ) : null}
       </div>
       <p className="text-xs text-foreground-muted">
-        Current timezone: {currentTimeZone}
+        Current ranch timezone: {currentTimeZone}
         {browserTimeZone ? ` | Browser timezone: ${browserTimeZone}` : ""}
       </p>
       {state.error ? <p className="text-sm font-medium text-danger">{state.error}</p> : null}

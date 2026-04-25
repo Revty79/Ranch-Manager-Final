@@ -190,6 +190,7 @@ export const ranches = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull(),
     slug: text("slug").notNull().unique(),
+    timeZone: text("time_zone").default("UTC").notNull(),
     onboardingCompleted: boolean("onboarding_completed").default(false).notNull(),
     stripeCustomerId: text("stripe_customer_id"),
     stripeSubscriptionId: text("stripe_subscription_id"),
@@ -230,6 +231,10 @@ export const ranchMemberships = pgTable(
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
     role: ranchRoleEnum("role").default("worker").notNull(),
+    capabilityOverrides: jsonb("capability_overrides")
+      .$type<Record<string, unknown>>()
+      .default(sql`'{}'::jsonb`)
+      .notNull(),
     payType: payTypeEnum("pay_type").default("hourly").notNull(),
     payRateCents: integer("pay_rate_cents").default(0).notNull(),
     payAdvanceCents: integer("pay_advance_cents").default(0).notNull(),

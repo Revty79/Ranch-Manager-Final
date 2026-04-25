@@ -8,7 +8,8 @@ import { DataTableShell } from "@/components/patterns/data-table-shell";
 import { buttonVariants } from "@/components/ui/button";
 import { ClipboardList } from "lucide-react";
 import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
-import { requirePaidAccessContext } from "@/lib/auth/context";
+import { hasSectionAccess } from "@/lib/auth/capabilities";
+import { requireSectionAccess } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
 import {
   animalEvents,
@@ -54,10 +55,26 @@ function formatDateTimeForZone(value: Date, timeZone: string): string {
 }
 
 export default async function AppHomePage() {
-  const context = await requirePaidAccessContext();
-  const canViewPayroll =
-    context.membership.role === "owner" || context.membership.role === "manager";
+  const context = await requireSectionAccess("dashboard");
+  const canViewPayroll = hasSectionAccess(
+    context.membership.sectionAccess,
+    "payroll",
+    "view",
+  );
+  const canViewNeedsAttention = hasSectionAccess(
+    context.membership.sectionAccess,
+    "needsAttention",
+    "manage",
+  );
+  const canViewWorkOrders = hasSectionAccess(
+    context.membership.sectionAccess,
+    "workOrders",
+    "view",
+  );
   const payrollRange = resolvePayrollDateRange();
+  const overviewGridClass = canViewPayroll
+    ? "grid gap-4 md:grid-cols-2 xl:grid-cols-4"
+    : "grid gap-4 md:grid-cols-2 xl:grid-cols-3";
 
   const [
     activeCrewRows,
@@ -296,7 +313,7 @@ export default async function AppHomePage() {
         description="A clean snapshot of crew, work, payroll, herd lifecycle visibility, and land-use activity."
         actions={
           <div className="flex flex-wrap gap-2">
-            {(context.membership.role === "owner" || context.membership.role === "manager") ? (
+            {canViewNeedsAttention ? (
               <Link
                 href="/app/needs-attention"
                 className={cn(buttonVariants({ variant: "secondary" }))}
@@ -304,14 +321,16 @@ export default async function AppHomePage() {
                 Needs Attention
               </Link>
             ) : null}
-            <Link href="/app/work-orders" className={cn(buttonVariants())}>
-              New Work Order
-            </Link>
+            {canViewWorkOrders ? (
+              <Link href="/app/work-orders" className={cn(buttonVariants())}>
+                New Work Order
+              </Link>
+            ) : null}
           </div>
         }
       />
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className={overviewGridClass}>
         <StatCard
           label="Active Crew"
           value={`${activeCrewCount}`}
@@ -327,11 +346,13 @@ export default async function AppHomePage() {
           value={`${activeShiftsCount}`}
           trend={activeShiftsCount > 0 ? "Currently clocked in" : "Clock starts on first shift"}
         />
-        <StatCard
-          label="Payroll This Period"
-          value={canViewPayroll ? `$${(totalPayrollCents / 100).toFixed(2)}` : "Restricted"}
-          trend={canViewPayroll ? `${payrollRange.from} to ${payrollRange.to}` : "Owner/manager only"}
-        />
+        {canViewPayroll ? (
+          <StatCard
+            label="Payroll This Period"
+            value={`$${(totalPayrollCents / 100).toFixed(2)}`}
+            trend={`${payrollRange.from} to ${payrollRange.to}`}
+          />
+        ) : null}
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">

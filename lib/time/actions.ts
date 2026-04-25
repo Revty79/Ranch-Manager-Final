@@ -3,7 +3,7 @@
 import { and, eq, isNull, notInArray, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireAppContext } from "@/lib/auth/context";
+import { requireSectionManage } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
 import {
   ranchMemberships,
@@ -101,7 +101,7 @@ export async function startShiftAction(
 ): Promise<TimeActionState> {
   void _prevState;
   void _formData;
-  const context = await requireAppContext();
+  const context = await requireSectionManage("time");
   const activeShift = await getActiveShiftForMembership(
     context.ranch.id,
     context.membership.id,
@@ -163,7 +163,7 @@ export async function endShiftAction(
 ): Promise<TimeActionState> {
   void _prevState;
   void _formData;
-  const context = await requireAppContext();
+  const context = await requireSectionManage("time");
   const activeShift = await getActiveShiftForMembership(
     context.ranch.id,
     context.membership.id,
@@ -213,7 +213,7 @@ export async function pauseShiftAction(
 ): Promise<TimeActionState> {
   void _prevState;
   void _formData;
-  const context = await requireAppContext();
+  const context = await requireSectionManage("time");
   const activeShift = await getActiveShiftForMembership(
     context.ranch.id,
     context.membership.id,
@@ -261,7 +261,7 @@ export async function resumeShiftAction(
 ): Promise<TimeActionState> {
   void _prevState;
   void _formData;
-  const context = await requireAppContext();
+  const context = await requireSectionManage("time");
   const activeShift = await getActiveShiftForMembership(
     context.ranch.id,
     context.membership.id,
@@ -295,7 +295,7 @@ export async function startWorkSessionAction(
   _prevState: TimeActionState,
   formData: FormData,
 ): Promise<TimeActionState> {
-  const context = await requireAppContext();
+  const context = await requireSectionManage("time");
   const parsed = startWorkSchema.safeParse({
     workOrderId: formData.get("workOrderId"),
   });
@@ -436,7 +436,7 @@ export async function completeWorkOrderAction(
   _prevState: TimeActionState,
   formData: FormData,
 ): Promise<TimeActionState> {
-  const context = await requireAppContext();
+  const context = await requireSectionManage("time");
   const parsed = completeWorkOrderSchema.safeParse({
     workOrderId: formData.get("workOrderId"),
     completionNote: formData.get("completionNote"),
@@ -679,7 +679,7 @@ export async function endWorkSessionAction(
 ): Promise<TimeActionState> {
   void _prevState;
   void _formData;
-  const context = await requireAppContext();
+  const context = await requireSectionManage("time");
   const activeWork = await getActiveWorkSessionForMembership(
     context.ranch.id,
     context.membership.id,

@@ -17,7 +17,8 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/components/ui/table";
-import { roleCanManageOperations, requirePaidAccessContext } from "@/lib/auth/context";
+import { hasSectionAccess } from "@/lib/auth/capabilities";
+import { requireSectionAccess } from "@/lib/auth/context";
 import {
   animalSexOptions,
   animalSpeciesOptions,
@@ -74,10 +75,10 @@ export default async function HerdPage({
     animalClass?: string;
   }>;
 }) {
-  const context = await requirePaidAccessContext();
+  const context = await requireSectionAccess("herd");
   const params = await searchParams;
   const filters = resolveAnimalRegistryFilters(params);
-  const canManage = roleCanManageOperations(context.membership.role);
+  const canManage = hasSectionAccess(context.membership.sectionAccess, "herd", "manage");
 
   const [animals, classOptions, parentOptions, summary, dueItems, groupWorkspace] = await Promise.all([
     getAnimalRegistryRows(context.ranch.id, filters),

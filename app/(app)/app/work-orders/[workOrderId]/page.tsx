@@ -6,7 +6,7 @@ import { IncentiveCountdown } from "@/components/work-orders/incentive-countdown
 import { PageHeader } from "@/components/patterns/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { requireRole } from "@/lib/auth/context";
+import { requireSectionManage } from "@/lib/auth/context";
 import {
   getAssignableMembersForRanch,
   getWorkOrderById,
@@ -33,7 +33,7 @@ export default async function WorkOrderDetailPage({
 }: {
   params: Promise<{ workOrderId: string }>;
 }) {
-  const context = await requireRole(["owner", "manager"]);
+  const context = await requireSectionManage("workOrders");
   const { workOrderId } = await params;
 
   const [workOrder, members] = await Promise.all([

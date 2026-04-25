@@ -16,7 +16,8 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/components/ui/table";
-import { requirePaidAccessContext } from "@/lib/auth/context";
+import { hasSectionAccess } from "@/lib/auth/capabilities";
+import { requireSectionAccess } from "@/lib/auth/context";
 import {
   createWorkOrderFromTemplateAction,
   updateWorkOrderTemplateRecurrenceAction,
@@ -31,8 +32,6 @@ import {
 import { cn } from "@/lib/utils";
 
 const statusTabs = ["all", "draft", "open", "in_progress", "completed", "cancelled"] as const;
-const workerRoles = new Set(["worker", "seasonal_worker"]);
-
 function statusVariant(status: string) {
   if (status === "completed") {
     return "success";
@@ -128,11 +127,16 @@ export default async function WorkOrdersPage({
 }: {
   searchParams: Promise<{ status?: string; q?: string }>;
 }) {
-  const context = await requirePaidAccessContext();
+  const context = await requireSectionAccess("workOrders");
+  const canManageWorkOrders = hasSectionAccess(
+    context.membership.sectionAccess,
+    "workOrders",
+    "manage",
+  );
   await materializeDueRecurringWorkOrdersForRanch(context.ranch.id);
   const params = await searchParams;
 
-  if (workerRoles.has(context.membership.role)) {
+  if (!canManageWorkOrders) {
     const assignedOrders = await getAssignedWorkForMembership(
       context.ranch.id,
       context.membership.id,

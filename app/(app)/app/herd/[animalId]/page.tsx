@@ -24,7 +24,8 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/components/ui/table";
-import { roleCanManageOperations, requirePaidAccessContext } from "@/lib/auth/context";
+import { hasSectionAccess } from "@/lib/auth/capabilities";
+import { requireSectionAccess } from "@/lib/auth/context";
 import {
   formatAnimalEventType,
   formatAnimalSex,
@@ -73,9 +74,9 @@ export default async function AnimalDetailPage({
 }: {
   params: Promise<{ animalId: string }>;
 }) {
-  const context = await requirePaidAccessContext();
+  const context = await requireSectionAccess("herd");
   const { animalId } = await params;
-  const canManage = roleCanManageOperations(context.membership.role);
+  const canManage = hasSectionAccess(context.membership.sectionAccess, "herd", "manage");
 
   const profile = await getAnimalProfile(context.ranch.id, animalId);
   if (!profile) notFound();

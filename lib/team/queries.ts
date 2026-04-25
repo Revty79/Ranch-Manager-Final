@@ -1,4 +1,9 @@
 import { and, asc, eq } from "drizzle-orm";
+import {
+  resolveSectionAccess,
+  type MembershipCapabilityOverrides,
+  type SectionAccessMap,
+} from "@/lib/auth/capabilities";
 import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { db } from "@/lib/db/client";
 import { ranchMemberships, users } from "@/lib/db/schema";
@@ -9,6 +14,8 @@ export interface TeamMemberRow {
   fullName: string;
   email: string;
   role: "owner" | "manager" | "worker" | "seasonal_worker";
+  capabilityOverrides: MembershipCapabilityOverrides;
+  sectionAccess: SectionAccessMap;
   payType: "hourly" | "salary" | "piece_work";
   payRateCents: number;
   payAdvanceCents: number;
@@ -36,6 +43,7 @@ export async function getTeamMembersForRanch(
       fullName: users.fullName,
       email: users.email,
       role: ranchMemberships.role,
+      capabilityOverrides: ranchMemberships.capabilityOverrides,
       payType: ranchMemberships.payType,
       payRateCents: ranchMemberships.payRateCents,
       payAdvanceCents: ranchMemberships.payAdvanceCents,
@@ -48,7 +56,14 @@ export async function getTeamMembersForRanch(
     .where(whereClause)
     .orderBy(asc(users.fullName));
 
-  return rows.filter((row) => !isPlatformAdminEmail(row.email));
+  return rows
+    .filter((row) => !isPlatformAdminEmail(row.email))
+    .map((row) => ({
+      ...row,
+      capabilityOverrides:
+        (row.capabilityOverrides as MembershipCapabilityOverrides) ?? {},
+      sectionAccess: resolveSectionAccess(row.role, row.capabilityOverrides),
+    }));
 }
 
 export async function getTeamMemberByMembership(
@@ -62,6 +77,7 @@ export async function getTeamMemberByMembership(
       fullName: users.fullName,
       email: users.email,
       role: ranchMemberships.role,
+      capabilityOverrides: ranchMemberships.capabilityOverrides,
       payType: ranchMemberships.payType,
       payRateCents: ranchMemberships.payRateCents,
       payAdvanceCents: ranchMemberships.payAdvanceCents,
@@ -83,5 +99,10 @@ export async function getTeamMemberByMembership(
     return null;
   }
 
-  return row;
+  return {
+    ...row,
+    capabilityOverrides:
+      (row.capabilityOverrides as MembershipCapabilityOverrides) ?? {},
+    sectionAccess: resolveSectionAccess(row.role, row.capabilityOverrides),
+  };
 }

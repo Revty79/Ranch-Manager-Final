@@ -14,7 +14,8 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/components/ui/table";
-import { requirePaidAccessContext } from "@/lib/auth/context";
+import { hasSectionAccess } from "@/lib/auth/capabilities";
+import { requireSectionAccess } from "@/lib/auth/context";
 import {
   getActiveShiftForMembership,
   getActiveShiftRosterForRanch,
@@ -67,7 +68,8 @@ function isWorkerRole(role: "owner" | "manager" | "worker" | "seasonal_worker"):
 }
 
 export default async function TimePage() {
-  const context = await requirePaidAccessContext();
+  const context = await requireSectionAccess("time");
+  const canManageTime = hasSectionAccess(context.membership.sectionAccess, "time", "manage");
   const isPieceWorkMember = context.membership.payType === "piece_work";
   const [activeShift, activeWork, recentShifts, recentWorkSessions, workOrderOptions] =
     await Promise.all([
@@ -83,7 +85,7 @@ export default async function TimePage() {
     ]);
 
   const activeShiftRoster =
-    isWorkerRole(context.membership.role)
+    isWorkerRole(context.membership.role) || !canManageTime
       ? []
       : await getActiveShiftRosterForRanch(context.ranch.id);
 
@@ -137,13 +139,23 @@ export default async function TimePage() {
         />
       </section>
 
-      <TimeControlPanel
-        activeShift={activeShift}
-        activeWork={activeWork}
-        workOrderOptions={workOrderOptions}
-        payType={context.membership.payType}
-        timeZone={context.user.timeZone}
-      />
+      {canManageTime ? (
+        <TimeControlPanel
+          activeShift={activeShift}
+          activeWork={activeWork}
+          workOrderOptions={workOrderOptions}
+          payType={context.membership.payType}
+          timeZone={context.user.timeZone}
+        />
+      ) : (
+        <Card>
+          <CardContent className="py-6">
+            <p className="rounded-xl border bg-surface px-4 py-3 text-sm text-foreground-muted">
+              Time controls are disabled for your membership right now.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       <section className="grid gap-4 xl:grid-cols-2">
         <Card>
@@ -244,7 +256,7 @@ export default async function TimePage() {
         </Card>
       </section>
 
-      {!isWorkerRole(context.membership.role) ? (
+      {!isWorkerRole(context.membership.role) && canManageTime ? (
         <Card>
           <CardContent className="space-y-3 py-6">
             <div>
