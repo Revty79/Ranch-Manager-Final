@@ -25,7 +25,7 @@ export function EditAnimalForm({ animal, parentOptions }: EditAnimalFormProps) {
   const [state, formAction] = useActionState(updateAnimalAction, initialState);
 
   return (
-    <form action={formAction} className="grid gap-3 md:grid-cols-2">
+    <form action={formAction} encType="multipart/form-data" className="grid gap-3 md:grid-cols-2">
       <input type="hidden" name="animalId" value={animal.id} />
 
       <FormFieldShell label="Tag / visual ID">
@@ -173,7 +173,7 @@ export function EditAnimalForm({ animal, parentOptions }: EditAnimalFormProps) {
             <Input
               name="newbornPairPhoto"
               type="file"
-              accept="image/jpeg,image/png,image/webp"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
               capture="environment"
             />
             {animal.newbornPairPhotoDataUrl ? (

@@ -21,6 +21,7 @@ export interface HerdActionState {
 const MAX_NEWBORN_PAIR_PHOTO_BYTES = 5 * 1024 * 1024;
 const acceptedNewbornPairPhotoMimeTypes = new Set([
   "image/jpeg",
+  "image/jpg",
   "image/png",
   "image/webp",
 ]);

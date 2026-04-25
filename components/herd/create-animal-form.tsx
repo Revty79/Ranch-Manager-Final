@@ -22,7 +22,7 @@ export function CreateAnimalForm({ parentOptions }: CreateAnimalFormProps) {
   const [state, formAction] = useActionState(createAnimalAction, initialState);
 
   return (
-    <form action={formAction} className="grid gap-3 md:grid-cols-2">
+    <form action={formAction} encType="multipart/form-data" className="grid gap-3 md:grid-cols-2">
       <FormFieldShell label="Tag / visual ID">
         <Input name="tagId" placeholder="A-1042" required />
       </FormFieldShell>
@@ -130,7 +130,7 @@ export function CreateAnimalForm({ parentOptions }: CreateAnimalFormProps) {
           <Input
             name="newbornPairPhoto"
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/jpeg,image/jpg,image/png,image/webp"
             capture="environment"
           />
         </FormFieldShell>
