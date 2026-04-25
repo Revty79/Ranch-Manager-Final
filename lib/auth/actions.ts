@@ -20,6 +20,7 @@ import {
   normalizeUsername,
   USERNAME_VALIDATION_MESSAGE,
 } from "./username";
+import { isPlatformAdminEmail } from "./platform-admin-emails";
 import { autoClockOutActiveTimeForUser } from "@/lib/time/maintenance";
 import { getPublicDemoConfig } from "@/lib/demo/public";
 import {
@@ -277,6 +278,7 @@ export async function completeOnboardingAction(
   }
 
   const user = await requireUser();
+  const isPlatformAdmin = isPlatformAdminEmail(user.email);
 
   const [existingMembership] = await db
     .select({ id: ranchMemberships.id })
@@ -303,6 +305,7 @@ export async function completeOnboardingAction(
         timeZone: user.timeZone,
         onboardingCompleted: true,
         subscriptionStatus: "inactive",
+        allowPlatformAdminAccess: isPlatformAdmin,
       })
       .returning({
         id: ranches.id,

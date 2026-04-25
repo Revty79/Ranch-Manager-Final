@@ -196,6 +196,10 @@ export async function getPostAuthRedirectPath(user: AuthUser): Promise<string> {
     return "/reset-password";
   }
 
+  if (user.onboardingState !== "complete") {
+    return "/onboarding";
+  }
+
   const isPlatformAdmin = isPlatformAdminEmail(user.email);
   const ranchContext = await getRanchContextForUser(
     user.id,
@@ -224,11 +228,15 @@ export async function requireUser(): Promise<AuthUser> {
 
 export async function requireAppContext(): Promise<AppContext> {
   const user = await requireUser();
-  const isPlatformAdmin = isPlatformAdminEmail(user.email);
   if (user.mustResetPassword) {
     redirect("/reset-password");
   }
 
+  if (user.onboardingState !== "complete") {
+    redirect("/onboarding");
+  }
+
+  const isPlatformAdmin = isPlatformAdminEmail(user.email);
   const ranchContext = await getRanchContextForUser(
     user.id,
     user.lastActiveRanchId,
