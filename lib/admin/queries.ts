@@ -12,6 +12,7 @@ export async function getAdminUsers() {
   return db
     .select({
       id: users.id,
+      username: users.username,
       email: users.email,
       fullName: users.fullName,
       onboardingState: users.onboardingState,

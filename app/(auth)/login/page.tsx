@@ -16,7 +16,7 @@ export default async function LoginPage() {
         <div>
           <CardTitle className="text-2xl">Log in</CardTitle>
           <CardDescription className="mt-2">
-            Access your ranch workspace with your account credentials.
+            Access your ranch workspace with your username and password.
           </CardDescription>
         </div>
         <LoginForm />

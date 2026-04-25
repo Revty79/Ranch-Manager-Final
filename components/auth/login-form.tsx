@@ -13,8 +13,8 @@ export function LoginForm() {
 
   return (
     <form action={formAction} className="space-y-4">
-      <FormFieldShell label="Email">
-        <Input name="email" type="email" placeholder="you@ranch.com" required />
+      <FormFieldShell label="Username">
+        <Input name="username" placeholder="john-doe" required />
       </FormFieldShell>
       <FormFieldShell label="Password">
         <Input name="password" type="password" placeholder="Your password" required />

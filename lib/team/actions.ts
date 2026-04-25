@@ -10,6 +10,12 @@ import {
   type MembershipCapabilityOverrides,
 } from "@/lib/auth/capabilities";
 import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
+import {
+  createInternalMemberEmail,
+  isValidUsername,
+  normalizeUsername,
+  USERNAME_VALIDATION_MESSAGE,
+} from "@/lib/auth/username";
 import { db } from "@/lib/db/client";
 import { ranchMemberships, sessions, users } from "@/lib/db/schema";
 import { requireRole } from "@/lib/auth/context";
@@ -22,6 +28,23 @@ export interface TeamActionState {
 
 const roleSchema = z.enum(["owner", "manager", "worker", "seasonal_worker"]);
 const payTypeSchema = z.enum(["hourly", "salary", "piece_work"]);
+const usernameSchema = z
+  .string()
+  .trim()
+  .min(3, USERNAME_VALIDATION_MESSAGE)
+  .max(40, USERNAME_VALIDATION_MESSAGE)
+  .transform(normalizeUsername)
+  .refine((value) => isValidUsername(value), USERNAME_VALIDATION_MESSAGE);
+const optionalEmailSchema = z.preprocess(
+  (value) => (typeof value === "string" ? value.trim() : ""),
+  z
+    .string()
+    .max(320, "Email is too long.")
+    .refine(
+      (value) => value.length === 0 || z.string().email().safeParse(value).success,
+      "Enter a valid email.",
+    ),
+);
 const payAdvanceSchema = z.preprocess(
   (value) => (value === null || value === undefined || value === "" ? 0 : value),
   z.coerce.number().min(0, "Pay advance must be zero or more."),
@@ -29,7 +52,8 @@ const payAdvanceSchema = z.preprocess(
 
 const createMemberSchema = z.object({
   fullName: z.string().trim().min(2, "Full name is required."),
-  email: z.string().trim().email("A valid email is required."),
+  username: usernameSchema,
+  email: optionalEmailSchema,
   tempPassword: z.string().trim().optional(),
   role: roleSchema.default("worker"),
   payType: payTypeSchema.default("hourly"),
@@ -40,6 +64,7 @@ const createMemberSchema = z.object({
 const editMemberSchema = z.object({
   membershipId: z.string().uuid(),
   fullName: z.string().trim().min(2, "Full name is required."),
+  username: usernameSchema,
   role: roleSchema,
   payType: payTypeSchema,
   payRate: z.coerce.number().min(0, "Pay rate must be zero or more."),
@@ -69,6 +94,31 @@ function toCents(value: number): number {
 
 function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
+}
+
+async function resolveMemberEmail(
+  username: string,
+  providedEmail: string,
+): Promise<string> {
+  const normalizedProvidedEmail = normalizeEmail(providedEmail);
+  if (normalizedProvidedEmail.length > 0) {
+    return normalizedProvidedEmail;
+  }
+
+  for (let suffix = 0; suffix < 200; suffix += 1) {
+    const internalEmail = createInternalMemberEmail(username, suffix);
+    const [existing] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, internalEmail))
+      .limit(1);
+
+    if (!existing) {
+      return internalEmail;
+    }
+  }
+
+  throw new Error("Unable to allocate internal member email.");
 }
 
 function resolveCapabilityOverridesFromFormData(
@@ -104,6 +154,7 @@ export async function createTeamMemberAction(
   const context = await requireRole(["owner", "manager"]);
   const parsed = createMemberSchema.safeParse({
     fullName: formData.get("fullName"),
+    username: formData.get("username"),
     email: formData.get("email"),
     tempPassword: formData.get("tempPassword"),
     role: formData.get("role"),
@@ -122,7 +173,7 @@ export async function createTeamMemberAction(
     return { error: "Managers cannot assign owner role." };
   }
 
-  const email = normalizeEmail(parsed.data.email);
+  const username = parsed.data.username;
   const tempPassword = parsed.data.tempPassword?.trim() ?? "";
   const payRateCents = toCents(parsed.data.payRate);
   const payAdvanceCents = toCents(parsed.data.payAdvance);
@@ -130,12 +181,14 @@ export async function createTeamMemberAction(
   const [existingUser] = await db
     .select({
       id: users.id,
+      username: users.username,
+      email: users.email,
       fullName: users.fullName,
       onboardingState: users.onboardingState,
       lastActiveRanchId: users.lastActiveRanchId,
     })
     .from(users)
-    .where(eq(users.email, email))
+    .where(eq(users.username, username))
     .limit(1);
 
   if (!existingUser && tempPassword.length < 8) {
@@ -143,6 +196,23 @@ export async function createTeamMemberAction(
       error:
         "Temporary password is required (8+ chars) when creating a new user login.",
     };
+  }
+
+  const emailForCreate =
+    existingUser?.email ?? (await resolveMemberEmail(username, parsed.data.email));
+  if (!existingUser) {
+    const [emailTakenByAnotherUser] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, emailForCreate))
+      .limit(1);
+
+    if (emailTakenByAnotherUser) {
+      return {
+        error:
+          "That email is already used by another account. Leave email empty or choose a different email.",
+      };
+    }
   }
 
   const [existingMembership] = existingUser
@@ -170,7 +240,8 @@ export async function createTeamMemberAction(
           .insert(users)
           .values({
             fullName: parsed.data.fullName,
-            email,
+            username,
+            email: emailForCreate,
             passwordHash: await hashPassword(tempPassword),
             mustResetPassword: true,
             onboardingState: "complete",
@@ -219,6 +290,7 @@ export async function updateTeamMemberAction(
   const parsed = editMemberSchema.safeParse({
     membershipId: formData.get("membershipId"),
     fullName: formData.get("fullName"),
+    username: formData.get("username"),
     role: formData.get("role"),
     payType: formData.get("payType"),
     payRate: formData.get("payRate"),
@@ -234,6 +306,7 @@ export async function updateTeamMemberAction(
       membershipId: ranchMemberships.id,
       targetRole: ranchMemberships.role,
       userId: ranchMemberships.userId,
+      username: users.username,
       email: users.email,
     })
     .from(ranchMemberships)
@@ -258,6 +331,17 @@ export async function updateTeamMemberAction(
     return { error: "Managers cannot assign owner role." };
   }
 
+  if (parsed.data.username !== target.username) {
+    const [usernameTaken] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.username, parsed.data.username))
+      .limit(1);
+    if (usernameTaken) {
+      return { error: "That username is already in use." };
+    }
+  }
+
   const capabilityOverrides = resolveCapabilityOverridesFromFormData(
     formData,
     parsed.data.role,
@@ -268,6 +352,7 @@ export async function updateTeamMemberAction(
       .update(users)
       .set({
         fullName: parsed.data.fullName,
+        username: parsed.data.username,
         updatedAt: new Date(),
       })
       .where(eq(users.id, target.userId));

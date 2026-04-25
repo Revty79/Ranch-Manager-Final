@@ -16,6 +16,12 @@ export function SignupForm() {
       <FormFieldShell label="Full name">
         <Input name="fullName" placeholder="Casey Rivers" required />
       </FormFieldShell>
+      <FormFieldShell
+        label="Username"
+        hint="Use 3-40 letters, numbers, dots, dashes, or underscores."
+      >
+        <Input name="username" placeholder="casey-rivers" required />
+      </FormFieldShell>
       <FormFieldShell label="Email">
         <Input name="email" type="email" placeholder="casey@ranch.com" required />
       </FormFieldShell>

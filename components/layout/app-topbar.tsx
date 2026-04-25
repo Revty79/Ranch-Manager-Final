@@ -20,7 +20,7 @@ export function AppTopbar({ context }: AppTopbarProps) {
       </div>
       <div className="flex items-center gap-2">
         <span className="rounded-full border bg-surface px-3 py-1 text-xs font-semibold text-foreground-muted">
-          {context.user.email}
+          @{context.user.username}
         </span>
         <Link href="/app/settings" className={cn(buttonVariants({ variant: "secondary", size: "sm" }))}>
           Settings

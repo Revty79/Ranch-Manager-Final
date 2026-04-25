@@ -15,6 +15,11 @@ import {
 } from "@/lib/db/schema";
 import { getPostAuthRedirectPath, requireUser } from "./context";
 import { hashPassword, verifyPassword } from "./password";
+import {
+  isValidUsername,
+  normalizeUsername,
+  USERNAME_VALIDATION_MESSAGE,
+} from "./username";
 import { autoClockOutActiveTimeForUser } from "@/lib/time/maintenance";
 import { getPublicDemoConfig } from "@/lib/demo/public";
 import {
@@ -30,14 +35,23 @@ export interface AuthActionState {
   error?: string;
 }
 
+const usernameSchema = z
+  .string()
+  .trim()
+  .min(3, USERNAME_VALIDATION_MESSAGE)
+  .max(40, USERNAME_VALIDATION_MESSAGE)
+  .transform(normalizeUsername)
+  .refine((value) => isValidUsername(value), USERNAME_VALIDATION_MESSAGE);
+
 const signupSchema = z.object({
   fullName: z.string().trim().min(2, "Enter your full name."),
+  username: usernameSchema,
   email: z.string().trim().email("Enter a valid email."),
   password: z.string().min(8, "Password must be at least 8 characters."),
 });
 
 const loginSchema = z.object({
-  email: z.string().trim().email("Enter a valid email."),
+  username: usernameSchema,
   password: z.string().min(1, "Enter your password."),
 });
 
@@ -133,6 +147,7 @@ export async function signupAction(
 ): Promise<AuthActionState> {
   const parsed = signupSchema.safeParse({
     fullName: formData.get("fullName"),
+    username: formData.get("username"),
     email: formData.get("email"),
     password: formData.get("password"),
   });
@@ -141,14 +156,25 @@ export async function signupAction(
     return { error: parsed.error.issues[0]?.message ?? "Invalid signup details." };
   }
 
+  const username = parsed.data.username;
   const email = normalizeEmail(parsed.data.email);
-  const [existing] = await db
+  const [existingByUsername] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.username, username))
+    .limit(1);
+
+  if (existingByUsername) {
+    return { error: "That username is already in use." };
+  }
+
+  const [existingByEmail] = await db
     .select({ id: users.id })
     .from(users)
     .where(eq(users.email, email))
     .limit(1);
 
-  if (existing) {
+  if (existingByEmail) {
     return { error: "An account with this email already exists." };
   }
 
@@ -157,12 +183,14 @@ export async function signupAction(
     .insert(users)
     .values({
       fullName: parsed.data.fullName,
+      username,
       email,
       passwordHash,
       onboardingState: "needs_ranch",
     })
     .returning({
       id: users.id,
+      username: users.username,
       email: users.email,
       fullName: users.fullName,
       mustResetPassword: users.mustResetPassword,
@@ -183,7 +211,7 @@ export async function loginAction(
   formData: FormData,
 ): Promise<AuthActionState> {
   const parsed = loginSchema.safeParse({
-    email: formData.get("email"),
+    username: formData.get("username"),
     password: formData.get("password"),
   });
 
@@ -191,10 +219,11 @@ export async function loginAction(
     return { error: parsed.error.issues[0]?.message ?? "Invalid login details." };
   }
 
-  const email = normalizeEmail(parsed.data.email);
+  const username = parsed.data.username;
   const [user] = await db
     .select({
       id: users.id,
+      username: users.username,
       email: users.email,
       fullName: users.fullName,
       passwordHash: users.passwordHash,
@@ -204,16 +233,16 @@ export async function loginAction(
       timeZone: users.timeZone,
     })
     .from(users)
-    .where(eq(users.email, email))
+    .where(eq(users.username, username))
     .limit(1);
 
   if (!user) {
-    return { error: "Email or password is incorrect." };
+    return { error: "Username or password is incorrect." };
   }
 
   const isValidPassword = await verifyPassword(parsed.data.password, user.passwordHash);
   if (!isValidPassword) {
-    return { error: "Email or password is incorrect." };
+    return { error: "Username or password is incorrect." };
   }
 
   const { token, expiresAt } = await createSession(user.id);
@@ -221,6 +250,7 @@ export async function loginAction(
 
   const redirectPath = await getPostAuthRedirectPath({
     id: user.id,
+    username: user.username,
     email: user.email,
     fullName: user.fullName,
     mustResetPassword: user.mustResetPassword,

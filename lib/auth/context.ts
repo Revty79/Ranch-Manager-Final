@@ -26,6 +26,7 @@ import { getSessionTokenFromCookie, hashSessionToken } from "./session";
 
 export interface AuthUser {
   id: string;
+  username: string;
   email: string;
   fullName: string;
   mustResetPassword: boolean;
@@ -143,6 +144,7 @@ export const getCurrentUser = cache(async (): Promise<AuthUser | null> => {
   const [sessionRow] = await db
     .select({
       userId: users.id,
+      username: users.username,
       email: users.email,
       fullName: users.fullName,
       mustResetPassword: users.mustResetPassword,
@@ -166,6 +168,7 @@ export const getCurrentUser = cache(async (): Promise<AuthUser | null> => {
 
   return {
     id: sessionRow.userId,
+    username: sessionRow.username,
     email: sessionRow.email,
     fullName: sessionRow.fullName,
     mustResetPassword: sessionRow.mustResetPassword,

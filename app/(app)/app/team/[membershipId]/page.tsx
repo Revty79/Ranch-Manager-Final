@@ -45,7 +45,7 @@ export default async function TeamMemberDetailPage({
       <PageHeader
         eyebrow="Team Detail"
         title={member.fullName}
-        description="Update member role, pay, and active status."
+        description="Update username, role, pay, and active status."
         actions={
           <Link
             href="/app/team"
@@ -63,11 +63,12 @@ export default async function TeamMemberDetailPage({
               {member.isActive ? "Active" : "Inactive"}
             </Badge>
             <Badge>{formatRole(member.role)}</Badge>
-            <span className="text-sm text-foreground-muted">{member.email}</span>
+            <span className="text-sm text-foreground-muted">@{member.username}</span>
           </div>
           <EditMemberForm
             membershipId={member.membershipId}
             fullName={member.fullName}
+            username={member.username}
             role={member.role}
             sectionAccess={member.sectionAccess}
             payType={member.payType}

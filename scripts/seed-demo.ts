@@ -2,6 +2,7 @@ import "dotenv/config";
 import { and, eq } from "drizzle-orm";
 import { db } from "../lib/db/client";
 import { hashPassword } from "../lib/auth/password";
+import { normalizeUsername } from "../lib/auth/username";
 import {
   animalEvents,
   animalLocationAssignments,
@@ -33,29 +34,52 @@ function assertSafeToSeed() {
 }
 
 async function ensureUser({
+  username,
   email,
   fullName,
   password,
 }: {
+  username: string;
   email: string;
   fullName: string;
   password: string;
 }) {
+  const normalizedUsername = normalizeUsername(username);
   const normalizedEmail = email.toLowerCase();
-  const [existing] = await db
+  const [existingByUsername] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.username, normalizedUsername))
+    .limit(1);
+
+  if (existingByUsername) {
+    return existingByUsername.id;
+  }
+
+  const [existingByEmail] = await db
     .select({ id: users.id })
     .from(users)
     .where(eq(users.email, normalizedEmail))
     .limit(1);
 
-  if (existing) {
-    return existing.id;
+  if (existingByEmail) {
+    await db
+      .update(users)
+      .set({
+        username: normalizedUsername,
+        fullName,
+        onboardingState: "complete",
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, existingByEmail.id));
+    return existingByEmail.id;
   }
 
   const passwordHash = await hashPassword(password);
   const [created] = await db
     .insert(users)
     .values({
+      username: normalizedUsername,
       email: normalizedEmail,
       fullName,
       passwordHash,
@@ -669,16 +693,19 @@ async function main() {
 
   const demoPassword = process.env.DEMO_SEED_PASSWORD ?? "DemoRanch123!";
   const ownerUserId = await ensureUser({
+    username: "demo-owner",
     email: "owner@demoranch.local",
     fullName: "Demo Owner",
     password: demoPassword,
   });
   const managerUserId = await ensureUser({
+    username: "demo-manager",
     email: "manager@demoranch.local",
     fullName: "Demo Manager",
     password: demoPassword,
   });
   const workerUserId = await ensureUser({
+    username: "demo-worker",
     email: "worker@demoranch.local",
     fullName: "Demo Worker",
     password: demoPassword,
@@ -923,7 +950,7 @@ async function main() {
   });
 
   console.log("Demo seed complete.");
-  console.log("Owner login: owner@demoranch.local");
+  console.log("Owner login: demo-owner");
   console.log(`Password: ${demoPassword}`);
 }
 

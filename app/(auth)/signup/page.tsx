@@ -16,7 +16,7 @@ export default async function SignupPage() {
         <div>
           <CardTitle className="text-2xl">Create your account</CardTitle>
           <CardDescription className="mt-2">
-            Set up your owner account and start your ranch workspace.
+            Set up your owner account, choose a username, and start your ranch workspace.
           </CardDescription>
         </div>
         <SignupForm />

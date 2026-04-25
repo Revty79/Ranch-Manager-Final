@@ -19,8 +19,14 @@ export function AddMemberForm() {
       <FormFieldShell label="Full name">
         <Input name="fullName" placeholder="Jordan Wells" required />
       </FormFieldShell>
-      <FormFieldShell label="Email">
-        <Input name="email" type="email" placeholder="jordan@ranch.com" required />
+      <FormFieldShell
+        label="Username"
+        hint="Used for login. 3-40 letters, numbers, dots, dashes, or underscores."
+      >
+        <Input name="username" placeholder="jordan-wells" required />
+      </FormFieldShell>
+      <FormFieldShell label="Email (optional)">
+        <Input name="email" type="email" placeholder="jordan@ranch.com" />
       </FormFieldShell>
       <FormFieldShell
         label="Temporary password"

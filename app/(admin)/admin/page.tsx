@@ -59,7 +59,8 @@ export default async function AdminPage() {
             Access is restricted to emails in <code>PLATFORM_ADMIN_EMAILS</code>.
           </CardDescription>
           <p>
-            <span className="text-foreground-muted">Signed in as:</span> {adminUser.email}
+            <span className="text-foreground-muted">Signed in as:</span> @{adminUser.username} (
+            {adminUser.email})
           </p>
           <p>
             <span className="text-foreground-muted">Users:</span> {users.length}
@@ -249,7 +250,10 @@ export default async function AdminPage() {
               <div key={user.id} className="rounded-xl border bg-surface px-3 py-2 text-sm">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="font-semibold">
-                    {user.fullName} <span className="text-foreground-muted">({user.email})</span>
+                    {user.fullName}{" "}
+                    <span className="text-foreground-muted">
+                      (@{user.username} | {user.email})
+                    </span>
                   </p>
                   <Badge variant={user.onboardingState === "complete" ? "success" : "warning"}>
                     {user.onboardingState}

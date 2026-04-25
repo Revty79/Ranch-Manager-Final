@@ -165,6 +165,7 @@ export const users = pgTable(
   "users",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    username: text("username").notNull().unique(),
     email: text("email").notNull().unique(),
     fullName: text("full_name").notNull(),
     passwordHash: text("password_hash").notNull(),
@@ -181,7 +182,10 @@ export const users = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [index("users_email_idx").on(table.email)],
+  (table) => [
+    index("users_username_idx").on(table.username),
+    index("users_email_idx").on(table.email),
+  ],
 );
 
 export const ranches = pgTable(

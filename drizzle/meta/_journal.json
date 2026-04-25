@@ -225,6 +225,13 @@
       "when": 1777156875102,
       "tag": "0031_dark_namorita",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1777157816487,
+      "tag": "0032_rich_marten_broadcloak",
+      "breakpoints": true
     }
   ]
 }

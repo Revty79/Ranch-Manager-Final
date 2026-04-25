@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 interface EditMemberFormProps {
   membershipId: string;
   fullName: string;
+  username: string;
   role: "owner" | "manager" | "worker" | "seasonal_worker";
   sectionAccess: SectionAccessMap;
   payType: "hourly" | "salary" | "piece_work";
@@ -35,6 +36,7 @@ const initialState: TeamActionState = {};
 export function EditMemberForm({
   membershipId,
   fullName,
+  username,
   role,
   sectionAccess,
   payType,
@@ -73,6 +75,12 @@ export function EditMemberForm({
         <input type="hidden" name="membershipId" value={membershipId} />
         <FormFieldShell label="Full name">
           <Input name="fullName" defaultValue={fullName} required />
+        </FormFieldShell>
+        <FormFieldShell
+          label="Username"
+          hint="Used for login. 3-40 letters, numbers, dots, dashes, or underscores."
+        >
+          <Input name="username" defaultValue={username} required />
         </FormFieldShell>
         <FormFieldShell label="Role">
           <select

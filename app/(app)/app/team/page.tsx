@@ -72,8 +72,8 @@ export default async function TeamPage({
           <div>
             <CardTitle className="text-base">Add team member</CardTitle>
             <CardDescription>
-              Simple launch flow: create a member login and attach them to this ranch. Set pay
-              balances per member in their record.
+              Create a username-based login and attach the member to this ranch. Email is optional
+              for seasonal workers.
             </CardDescription>
           </div>
           <AddMemberForm />
@@ -111,7 +111,7 @@ export default async function TeamPage({
               <TableHead>
                 <TableRow>
                   <TableHeaderCell>Name</TableHeaderCell>
-                  <TableHeaderCell>Email</TableHeaderCell>
+                  <TableHeaderCell>Username</TableHeaderCell>
                   <TableHeaderCell>Role</TableHeaderCell>
                   <TableHeaderCell>Pay</TableHeaderCell>
                   <TableHeaderCell>Opening Advance</TableHeaderCell>
@@ -123,7 +123,7 @@ export default async function TeamPage({
                 {filteredMembers.map((member) => (
                   <TableRow key={member.membershipId}>
                     <TableCell>{member.fullName}</TableCell>
-                    <TableCell className="text-foreground-muted">{member.email}</TableCell>
+                    <TableCell className="text-foreground-muted">{member.username}</TableCell>
                     <TableCell>
                       <Badge variant="neutral">{formatRole(member.role)}</Badge>
                     </TableCell>

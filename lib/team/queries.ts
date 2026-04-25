@@ -12,6 +12,7 @@ export interface TeamMemberRow {
   membershipId: string;
   userId: string;
   fullName: string;
+  username: string;
   email: string;
   role: "owner" | "manager" | "worker" | "seasonal_worker";
   capabilityOverrides: MembershipCapabilityOverrides;
@@ -41,6 +42,7 @@ export async function getTeamMembersForRanch(
       membershipId: ranchMemberships.id,
       userId: users.id,
       fullName: users.fullName,
+      username: users.username,
       email: users.email,
       role: ranchMemberships.role,
       capabilityOverrides: ranchMemberships.capabilityOverrides,
@@ -75,6 +77,7 @@ export async function getTeamMemberByMembership(
       membershipId: ranchMemberships.id,
       userId: users.id,
       fullName: users.fullName,
+      username: users.username,
       email: users.email,
       role: ranchMemberships.role,
       capabilityOverrides: ranchMemberships.capabilityOverrides,
