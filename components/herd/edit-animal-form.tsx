@@ -106,6 +106,7 @@ export function EditAnimalForm({ animal, parentOptions }: EditAnimalFormProps) {
             defaultChecked={animal.isBirthDateEstimated}
           />
           <label htmlFor="isBirthDateEstimated">Birth date is estimated</label>
+          <input type="hidden" name="isBirthDateEstimated" value="false" />
         </div>
       </FormFieldShell>
 

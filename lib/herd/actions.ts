@@ -2,6 +2,7 @@
 
 import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
@@ -120,9 +121,18 @@ const createEventSchema = z.object({
   details: optionalTextSchema,
 });
 
+const deleteAnimalSchema = z.object({
+  animalId: z.string().uuid(),
+  confirmTagId: z.string().trim().min(1),
+});
+
 function normalizeText(value: string): string | null {
   const trimmed = value.trim();
   return trimmed.length ? trimmed : null;
+}
+
+function normalizeIdentifier(value: string): string {
+  return value.trim().toLowerCase();
 }
 
 interface NewbornPairPhotoUploadResult {
@@ -277,6 +287,9 @@ export async function createAnimalAction(
   if (newbornPairPhotoUpload.error) {
     return { error: newbornPairPhotoUpload.error };
   }
+  if (newbornPairPhotoUpload.isProvided && !newbornPairPhotoUpload.dataUrl) {
+    return { error: "Unable to read the uploaded photo. Please try again." };
+  }
   const newbornPairPhotoCapturedAt = newbornPairPhotoUpload.dataUrl ? new Date() : null;
 
   try {
@@ -327,6 +340,11 @@ export async function createAnimalAction(
         occurredAt: newbornPairPhotoCapturedAt,
         summary: "Calf + mom photo captured.",
         details: "Initial calf + mom tracking photo saved.",
+        eventData: {
+          photoDataUrl: newbornPairPhotoUpload.dataUrl,
+          photoLabel: "Calf + mom tracking photo",
+          photoKind: "newborn_pair_tracking",
+        },
         recordedByMembershipId: context.membership.id,
       });
     }
@@ -412,6 +430,9 @@ export async function updateAnimalAction(
   );
   if (newbornPairPhotoUpload.error) {
     return { error: newbornPairPhotoUpload.error };
+  }
+  if (newbornPairPhotoUpload.isProvided && !newbornPairPhotoUpload.dataUrl) {
+    return { error: "Unable to read the uploaded photo. Please try again." };
   }
 
   const removeNewbornPairPhoto = formData.get("removeNewbornPairPhoto") === "true";
@@ -504,6 +525,14 @@ export async function updateAnimalAction(
           details: hadExistingNewbornPairPhoto
             ? "Previous calf + mom tracking photo replaced with a new upload."
             : "Calf + mom tracking photo added.",
+          eventData: {
+            photoDataUrl: newbornPairPhotoUpload.dataUrl,
+            photoLabel: hadExistingNewbornPairPhoto
+              ? "Updated calf + mom tracking photo"
+              : "Calf + mom tracking photo",
+            photoKind: "newborn_pair_tracking",
+            replacedExistingPhoto: hadExistingNewbornPairPhoto,
+          },
           recordedByMembershipId: context.membership.id,
         });
       } else if (removeNewbornPairPhoto && hadExistingNewbornPairPhoto) {
@@ -572,6 +601,43 @@ export async function updateAnimalAction(
   revalidatePath("/app/herd");
   revalidatePath(`/app/herd/${parsed.data.animalId}`);
   return { success: "Animal updated." };
+}
+
+export async function deleteAnimalAction(formData: FormData): Promise<void> {
+  const context = await requireRole(["owner", "manager"]);
+  const parsed = deleteAnimalSchema.safeParse({
+    animalId: formData.get("animalId"),
+    confirmTagId: formData.get("confirmTagId"),
+  });
+
+  if (!parsed.success) {
+    return;
+  }
+
+  const [target] = await db
+    .select({
+      id: animals.id,
+      tagId: animals.tagId,
+    })
+    .from(animals)
+    .where(and(eq(animals.id, parsed.data.animalId), eq(animals.ranchId, context.ranch.id)))
+    .limit(1);
+
+  if (!target) {
+    return;
+  }
+
+  if (normalizeIdentifier(parsed.data.confirmTagId) !== normalizeIdentifier(target.tagId)) {
+    return;
+  }
+
+  await db.delete(animals).where(eq(animals.id, target.id));
+
+  revalidatePath("/app/herd");
+  revalidatePath("/app/herd/breeding");
+  revalidatePath("/app/land");
+  revalidatePath("/app/land/grazing");
+  redirect("/app/herd");
 }
 
 export async function createAnimalEventAction(

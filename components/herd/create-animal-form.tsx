@@ -117,8 +117,15 @@ export function CreateAnimalForm({ parentOptions }: CreateAnimalFormProps) {
       </FormFieldShell>
       <FormFieldShell label="Birth date confidence">
         <div className="flex h-10 items-center gap-2 rounded-xl border bg-surface px-3 text-sm">
-          <input id="isBirthDateEstimated" name="isBirthDateEstimated" type="checkbox" value="true" />
+          <input
+            id="isBirthDateEstimated"
+            name="isBirthDateEstimated"
+            type="checkbox"
+            value="true"
+            defaultChecked
+          />
           <label htmlFor="isBirthDateEstimated">Birth date is estimated</label>
+          <input type="hidden" name="isBirthDateEstimated" value="false" />
         </div>
       </FormFieldShell>
 

@@ -1,8 +1,12 @@
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Camera, Clock3, HeartPulse, MapPin, Milestone, UsersRound } from "lucide-react";
+import {
+  AnimalPhotoViewer,
+  type AnimalPhotoItem,
+} from "@/components/herd/animal-photo-viewer";
 import { BreedingRecordForm } from "@/components/herd/breeding-record-form";
+import { DeleteAnimalForm } from "@/components/herd/delete-animal-form";
 import { EditAnimalForm } from "@/components/herd/edit-animal-form";
 import { HealthRecordForm } from "@/components/herd/health-record-form";
 import { PregnancyCheckForm } from "@/components/herd/pregnancy-check-form";
@@ -99,6 +103,42 @@ export default async function AnimalDetailPage({
   const offspring = offspringId
     ? referenceOptions.find((option) => option.id === offspringId) ?? null
     : null;
+  const eventPhotos: AnimalPhotoItem[] = events.flatMap((event) => {
+    const photoDataUrl = readEventDataString(event.eventData, "photoDataUrl");
+    if (!photoDataUrl) return [];
+
+    const photoLabel =
+      readEventDataString(event.eventData, "photoLabel") ?? event.summary;
+
+    return [
+      {
+        id: `event-photo-${event.id}`,
+        src: photoDataUrl,
+        alt: `${animal.tagId} photo from ${formatAnimalEventType(event.eventType)} event`,
+        label: photoLabel,
+        sourceLabel: "Timeline event",
+        capturedAtLabel: formatDateTime(event.occurredAt),
+      },
+    ];
+  });
+  const currentPhoto: AnimalPhotoItem[] = animal.newbornPairPhotoDataUrl
+    ? [
+        {
+          id: "current-photo",
+          src: animal.newbornPairPhotoDataUrl,
+          alt: `${animal.tagId} calf and dam tracking photo`,
+          label: "Current calf + mom tracking photo",
+          sourceLabel: "Current record",
+          capturedAtLabel: animal.newbornPairPhotoCapturedAt
+            ? formatDateTime(animal.newbornPairPhotoCapturedAt)
+            : null,
+        },
+      ]
+    : [];
+  const photos = [...currentPhoto, ...eventPhotos].filter(
+    (photo, index, allPhotos) =>
+      allPhotos.findIndex((candidate) => candidate.src === photo.src) === index,
+  );
 
   const recentHealthEvents = events
     .filter(
@@ -237,30 +277,12 @@ export default async function AnimalDetailPage({
           <CardContent className="space-y-3 py-6">
             <div className="flex items-center gap-2">
               <Camera className="h-4 w-4 text-accent" />
-              <CardTitle className="text-base">Calf + mom tracking photo</CardTitle>
+              <CardTitle className="text-base">Animal photo viewer</CardTitle>
             </div>
-            {animal.newbornPairPhotoDataUrl ? (
-              <div className="space-y-2">
-                <Image
-                  src={animal.newbornPairPhotoDataUrl}
-                  alt={`${animal.tagId} calf and dam tracking photo`}
-                  width={1024}
-                  height={768}
-                  unoptimized
-                  className="h-52 w-full rounded-xl border object-cover"
-                />
-                <p className="text-xs text-foreground-muted">
-                  Captured{" "}
-                  {animal.newbornPairPhotoCapturedAt
-                    ? formatDateTime(animal.newbornPairPhotoCapturedAt)
-                    : "with record"}
-                </p>
-              </div>
-            ) : (
-              <p className="rounded-xl border bg-surface px-3 py-2 text-sm text-foreground-muted">
-                No calf + mom tracking photo uploaded yet.
-              </p>
-            )}
+            <CardDescription>
+              Browse the latest photo plus any photo snapshots captured in timeline events.
+            </CardDescription>
+            <AnimalPhotoViewer animalTagId={animal.tagId} photos={photos} />
           </CardContent>
         </Card>
       </section>
@@ -396,6 +418,26 @@ export default async function AnimalDetailPage({
           ) : (
             <p className="rounded-xl border bg-surface px-4 py-3 text-sm text-foreground-muted">
               Owners and managers can edit animal records. You can still review history.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="space-y-4 py-6">
+          <CardTitle className="text-base text-danger">Danger zone</CardTitle>
+          <CardDescription>
+            Permanently delete this animal record. Use only when the record should be fully removed.
+          </CardDescription>
+          {canManage ? (
+            <DeleteAnimalForm
+              animalId={animal.id}
+              tagId={animal.tagId}
+              displayName={animal.displayName}
+            />
+          ) : (
+            <p className="rounded-xl border bg-surface px-4 py-3 text-sm text-foreground-muted">
+              Owners and managers can delete animal records.
             </p>
           )}
         </CardContent>
