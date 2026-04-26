@@ -4,9 +4,15 @@ import { useActionState, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   createShiftEntryAction,
+  deleteShiftEntryAction,
+  deleteWorkEntryAction,
   updateShiftEntryAction,
   updateWorkEntryAction,
 } from "@/lib/time/admin-actions";
+import {
+  formatDateTimeInputForTimeZone,
+  parseDateTimeInputInTimeZone,
+} from "@/lib/date-time-local";
 import { Button } from "@/components/ui/button";
 
 interface ShiftAdjustmentRow {
@@ -43,57 +49,6 @@ function pad(value: number): string {
 const HOURS_24 = Array.from({ length: 24 }, (_, hour) => pad(hour));
 const MINUTES_60 = Array.from({ length: 60 }, (_, minute) => pad(minute));
 
-function toDateTimeLocalInputString(value: Date): string {
-  const year = value.getFullYear();
-  const month = pad(value.getMonth() + 1);
-  const day = pad(value.getDate());
-  const hours = pad(value.getHours());
-  const minutes = pad(value.getMinutes());
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-}
-
-function toDateInputString(value: Date): string {
-  const year = value.getFullYear();
-  const month = pad(value.getMonth() + 1);
-  const day = pad(value.getDate());
-  return `${year}-${month}-${day}`;
-}
-
-function parseDateTimeLocalInput(value: string): Date | null {
-  const trimmed = value.trim();
-  if (!trimmed) {
-    return null;
-  }
-
-  const match = trimmed.match(
-    /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?$/,
-  );
-  if (!match) {
-    return null;
-  }
-
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-  const hour = Number(match[4]);
-  const minute = Number(match[5]);
-  const second = Number(match[6] ?? "0");
-  const parsed = new Date(year, month - 1, day, hour, minute, second, 0);
-
-  if (
-    Number.isNaN(parsed.getTime()) ||
-    parsed.getFullYear() !== year ||
-    parsed.getMonth() !== month - 1 ||
-    parsed.getDate() !== day ||
-    parsed.getHours() !== hour ||
-    parsed.getMinutes() !== minute
-  ) {
-    return null;
-  }
-
-  return parsed;
-}
-
 interface DateTimeParts {
   date: string;
   hour: string;
@@ -119,19 +74,10 @@ function toDateTimeParts(value: string): DateTimeParts {
     };
   }
 
-  const parsed = parseDateTimeLocalInput(trimmed);
-  if (!parsed) {
-    return {
-      date: "",
-      hour: "00",
-      minute: "00",
-    };
-  }
-
   return {
-    date: toDateInputString(parsed),
-    hour: pad(parsed.getHours()),
-    minute: pad(parsed.getMinutes()),
+    date: "",
+    hour: "00",
+    minute: "00",
   };
 }
 
@@ -143,7 +89,7 @@ function toDateTimeLocalInputFromParts(parts: DateTimeParts): string {
   return `${parts.date}T${parts.hour}:${parts.minute}`;
 }
 
-function toDateTimeInputValue(isoValue: string | null): string {
+function toDateTimeInputValue(isoValue: string | null, timeZone: string): string {
   if (!isoValue) {
     return "";
   }
@@ -153,34 +99,26 @@ function toDateTimeInputValue(isoValue: string | null): string {
     return "";
   }
 
-  return toDateTimeLocalInputString(date);
+  return formatDateTimeInputForTimeZone(date, timeZone);
 }
 
-function nowLocalDateTimeInputValue(): string {
-  return toDateTimeLocalInputString(new Date());
+function nowDateTimeInputValue(timeZone: string): string {
+  return formatDateTimeInputForTimeZone(new Date(), timeZone);
 }
 
 function addMinutesToInputValue(
   inputValue: string,
   minutesToAdd: number,
+  timeZone: string,
 ): string {
-  const base = parseDateTimeLocalInput(inputValue) ?? new Date();
+  const base = parseDateTimeInputInTimeZone(inputValue, timeZone) ?? new Date();
   const shifted = new Date(base.getTime() + minutesToAdd * 60_000);
-  return toDateTimeLocalInputString(shifted);
+  return formatDateTimeInputForTimeZone(shifted, timeZone);
 }
 
-function todayAtHourInputValue(hour24: number): string {
-  const now = new Date();
-  const value = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    hour24,
-    0,
-    0,
-    0,
-  );
-  return toDateTimeLocalInputString(value);
+function todayAtHourInputValue(hour24: number, timeZone: string): string {
+  const date = formatDateTimeInputForTimeZone(new Date(), timeZone).slice(0, 10);
+  return `${date}T${pad(hour24)}:00`;
 }
 
 function formatDateTime(isoValue: string, timeZone: string): string {
@@ -286,191 +224,259 @@ function DateTime24Field({
 function ShiftRowForm({ row, timeZone }: { row: ShiftAdjustmentRow; timeZone: string }) {
   const router = useRouter();
   const [startedAtValue, setStartedAtValue] = useState(() =>
-    toDateTimeInputValue(row.startedAtIso),
+    toDateTimeInputValue(row.startedAtIso, timeZone),
   );
   const [endedAtValue, setEndedAtValue] = useState(() =>
-    toDateTimeInputValue(row.endedAtIso),
+    toDateTimeInputValue(row.endedAtIso, timeZone),
   );
   const [state, formAction] = useActionState(updateShiftEntryAction, initialState);
+  const [deleteState, deleteFormAction] = useActionState(
+    deleteShiftEntryAction,
+    initialState,
+  );
   const duration = useMemo(
     () => formatDuration(row.startedAtIso, row.endedAtIso),
     [row.endedAtIso, row.startedAtIso],
   );
 
   useEffect(() => {
-    if (state.success) {
+    if (state.success || deleteState.success) {
       router.refresh();
     }
-  }, [router, state.success]);
+  }, [deleteState.success, router, state.success]);
 
   return (
-    <form action={formAction} className="space-y-2 rounded-xl border bg-surface p-3">
-      <input type="hidden" name="entryId" value={row.id} />
-      <div className="text-xs text-foreground-muted">
-        <span>{formatDateTime(row.startedAtIso, timeZone)}</span>
-        <span> to </span>
-        <span>{row.endedAtIso ? formatDateTime(row.endedAtIso, timeZone) : "Active"}</span>
-        <span> ({duration})</span>
-      </div>
-      <div className="grid gap-2 md:grid-cols-2">
-        <DateTime24Field
-          name="startedAt"
-          label="Clock in"
-          value={startedAtValue}
-          onChange={setStartedAtValue}
-          required
-        />
-        <DateTime24Field
-          name="endedAt"
-          label="Clock out (blank = active)"
-          value={endedAtValue}
-          onChange={setEndedAtValue}
-        />
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
-          onClick={() => setStartedAtValue(nowLocalDateTimeInputValue())}
-        >
-          Clock in now
-        </button>
-        <button
-          type="button"
-          className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
-          onClick={() => setEndedAtValue(nowLocalDateTimeInputValue())}
-        >
-          Clock out now
-        </button>
-        <button
-          type="button"
-          className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
-          onClick={() => setEndedAtValue(addMinutesToInputValue(startedAtValue, 30))}
-        >
-          +30m from in
-        </button>
-        <button
-          type="button"
-          className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
-          onClick={() => setEndedAtValue(addMinutesToInputValue(startedAtValue, 60))}
-        >
-          +1h from in
-        </button>
-        <button
-          type="button"
-          className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
-          onClick={() => setEndedAtValue("")}
-        >
-          Clear out
-        </button>
-      </div>
-      {state.error ? <p className="text-xs font-medium text-danger">{state.error}</p> : null}
-      {state.success ? <p className="text-xs font-medium text-accent">{state.success}</p> : null}
-      <Button size="sm" variant="secondary" type="submit">
-        Save shift entry
-      </Button>
-    </form>
+    <div className="space-y-2 rounded-xl border bg-surface p-3">
+      <form action={formAction} className="space-y-2">
+        <input type="hidden" name="entryId" value={row.id} />
+        <div className="text-xs text-foreground-muted">
+          <span>{formatDateTime(row.startedAtIso, timeZone)}</span>
+          <span> to </span>
+          <span>{row.endedAtIso ? formatDateTime(row.endedAtIso, timeZone) : "Active"}</span>
+          <span> ({duration})</span>
+        </div>
+        <div className="grid gap-2 md:grid-cols-2">
+          <DateTime24Field
+            name="startedAt"
+            label="Clock in"
+            value={startedAtValue}
+            onChange={setStartedAtValue}
+            required
+          />
+          <DateTime24Field
+            name="endedAt"
+            label="Clock out (blank = active)"
+            value={endedAtValue}
+            onChange={setEndedAtValue}
+          />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
+            onClick={() => setStartedAtValue(nowDateTimeInputValue(timeZone))}
+          >
+            Clock in now
+          </button>
+          <button
+            type="button"
+            className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
+            onClick={() => setEndedAtValue(nowDateTimeInputValue(timeZone))}
+          >
+            Clock out now
+          </button>
+          <button
+            type="button"
+            className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
+            onClick={() =>
+              setEndedAtValue(addMinutesToInputValue(startedAtValue, 30, timeZone))
+            }
+          >
+            +30m from in
+          </button>
+          <button
+            type="button"
+            className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
+            onClick={() =>
+              setEndedAtValue(addMinutesToInputValue(startedAtValue, 60, timeZone))
+            }
+          >
+            +1h from in
+          </button>
+          <button
+            type="button"
+            className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
+            onClick={() => setEndedAtValue("")}
+          >
+            Clear out
+          </button>
+        </div>
+        {state.error ? <p className="text-xs font-medium text-danger">{state.error}</p> : null}
+        {state.success ? <p className="text-xs font-medium text-accent">{state.success}</p> : null}
+        <Button size="sm" variant="secondary" type="submit">
+          Save shift entry
+        </Button>
+      </form>
+
+      <form
+        action={deleteFormAction}
+        className="border-t border-border/60 pt-2"
+        onSubmit={(event) => {
+          const confirmed = window.confirm(
+            "Delete this shift entry permanently? This updates payroll totals and cannot be undone.",
+          );
+          if (!confirmed) {
+            event.preventDefault();
+          }
+        }}
+      >
+        <input type="hidden" name="entryId" value={row.id} />
+        {deleteState.error ? (
+          <p className="mb-2 text-xs font-medium text-danger">{deleteState.error}</p>
+        ) : null}
+        {deleteState.success ? (
+          <p className="mb-2 text-xs font-medium text-accent">{deleteState.success}</p>
+        ) : null}
+        <Button size="sm" variant="danger" type="submit">
+          Delete shift entry
+        </Button>
+      </form>
+    </div>
   );
 }
 
 function WorkRowForm({ row, timeZone }: { row: WorkAdjustmentRow; timeZone: string }) {
   const router = useRouter();
   const [startedAtValue, setStartedAtValue] = useState(() =>
-    toDateTimeInputValue(row.startedAtIso),
+    toDateTimeInputValue(row.startedAtIso, timeZone),
   );
   const [endedAtValue, setEndedAtValue] = useState(() =>
-    toDateTimeInputValue(row.endedAtIso),
+    toDateTimeInputValue(row.endedAtIso, timeZone),
   );
   const [state, formAction] = useActionState(updateWorkEntryAction, initialState);
+  const [deleteState, deleteFormAction] = useActionState(
+    deleteWorkEntryAction,
+    initialState,
+  );
   const duration = useMemo(
     () => formatDuration(row.startedAtIso, row.endedAtIso),
     [row.endedAtIso, row.startedAtIso],
   );
 
   useEffect(() => {
-    if (state.success) {
+    if (state.success || deleteState.success) {
       router.refresh();
     }
-  }, [router, state.success]);
+  }, [deleteState.success, router, state.success]);
 
   return (
-    <form action={formAction} className="space-y-2 rounded-xl border bg-surface p-3">
-      <input type="hidden" name="entryId" value={row.id} />
-      <div className="text-xs text-foreground-muted">
-        <span className="font-semibold text-foreground">{row.workOrderTitle}</span>
-        <span> </span>
-        <span>({duration})</span>
-      </div>
-      <div className="text-xs text-foreground-muted">
-        <span>{formatDateTime(row.startedAtIso, timeZone)}</span>
-        <span> to </span>
-        <span>{row.endedAtIso ? formatDateTime(row.endedAtIso, timeZone) : "Active"}</span>
-      </div>
-      <div className="grid gap-2 md:grid-cols-2">
-        <DateTime24Field
-          name="startedAt"
-          label="Start time"
-          value={startedAtValue}
-          onChange={setStartedAtValue}
-          required
-        />
-        <DateTime24Field
-          name="endedAt"
-          label="Stop time (blank = active)"
-          value={endedAtValue}
-          onChange={setEndedAtValue}
-        />
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
-          onClick={() => setStartedAtValue(nowLocalDateTimeInputValue())}
-        >
-          Start now
-        </button>
-        <button
-          type="button"
-          className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
-          onClick={() => setEndedAtValue(nowLocalDateTimeInputValue())}
-        >
-          Stop now
-        </button>
-        <button
-          type="button"
-          className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
-          onClick={() => setEndedAtValue(addMinutesToInputValue(startedAtValue, 30))}
-        >
-          +30m from start
-        </button>
-        <button
-          type="button"
-          className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
-          onClick={() => setEndedAtValue(addMinutesToInputValue(startedAtValue, 60))}
-        >
-          +1h from start
-        </button>
-        <button
-          type="button"
-          className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
-          onClick={() => setEndedAtValue("")}
-        >
-          Clear stop
-        </button>
-      </div>
-      {state.error ? <p className="text-xs font-medium text-danger">{state.error}</p> : null}
-      {state.success ? <p className="text-xs font-medium text-accent">{state.success}</p> : null}
-      <Button size="sm" variant="secondary" type="submit">
-        Save work entry
-      </Button>
-    </form>
+    <div className="space-y-2 rounded-xl border bg-surface p-3">
+      <form action={formAction} className="space-y-2">
+        <input type="hidden" name="entryId" value={row.id} />
+        <div className="text-xs text-foreground-muted">
+          <span className="font-semibold text-foreground">{row.workOrderTitle}</span>
+          <span> </span>
+          <span>({duration})</span>
+        </div>
+        <div className="text-xs text-foreground-muted">
+          <span>{formatDateTime(row.startedAtIso, timeZone)}</span>
+          <span> to </span>
+          <span>{row.endedAtIso ? formatDateTime(row.endedAtIso, timeZone) : "Active"}</span>
+        </div>
+        <div className="grid gap-2 md:grid-cols-2">
+          <DateTime24Field
+            name="startedAt"
+            label="Start time"
+            value={startedAtValue}
+            onChange={setStartedAtValue}
+            required
+          />
+          <DateTime24Field
+            name="endedAt"
+            label="Stop time (blank = active)"
+            value={endedAtValue}
+            onChange={setEndedAtValue}
+          />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
+            onClick={() => setStartedAtValue(nowDateTimeInputValue(timeZone))}
+          >
+            Start now
+          </button>
+          <button
+            type="button"
+            className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
+            onClick={() => setEndedAtValue(nowDateTimeInputValue(timeZone))}
+          >
+            Stop now
+          </button>
+          <button
+            type="button"
+            className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
+            onClick={() =>
+              setEndedAtValue(addMinutesToInputValue(startedAtValue, 30, timeZone))
+            }
+          >
+            +30m from start
+          </button>
+          <button
+            type="button"
+            className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
+            onClick={() =>
+              setEndedAtValue(addMinutesToInputValue(startedAtValue, 60, timeZone))
+            }
+          >
+            +1h from start
+          </button>
+          <button
+            type="button"
+            className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
+            onClick={() => setEndedAtValue("")}
+          >
+            Clear stop
+          </button>
+        </div>
+        {state.error ? <p className="text-xs font-medium text-danger">{state.error}</p> : null}
+        {state.success ? <p className="text-xs font-medium text-accent">{state.success}</p> : null}
+        <Button size="sm" variant="secondary" type="submit">
+          Save work entry
+        </Button>
+      </form>
+
+      <form
+        action={deleteFormAction}
+        className="border-t border-border/60 pt-2"
+        onSubmit={(event) => {
+          const confirmed = window.confirm(
+            "Delete this work timer entry permanently? This updates payroll totals and cannot be undone.",
+          );
+          if (!confirmed) {
+            event.preventDefault();
+          }
+        }}
+      >
+        <input type="hidden" name="entryId" value={row.id} />
+        {deleteState.error ? (
+          <p className="mb-2 text-xs font-medium text-danger">{deleteState.error}</p>
+        ) : null}
+        {deleteState.success ? (
+          <p className="mb-2 text-xs font-medium text-accent">{deleteState.success}</p>
+        ) : null}
+        <Button size="sm" variant="danger" type="submit">
+          Delete work entry
+        </Button>
+      </form>
+    </div>
   );
 }
 
-function CreateShiftForm({ membershipId }: { membershipId: string }) {
+function CreateShiftForm({ membershipId, timeZone }: { membershipId: string; timeZone: string }) {
   const router = useRouter();
   const [startedAtValue, setStartedAtValue] = useState(() =>
-    nowLocalDateTimeInputValue(),
+    nowDateTimeInputValue(timeZone),
   );
   const [endedAtValue, setEndedAtValue] = useState("");
   const [state, formAction] = useActionState(createShiftEntryAction, initialState);
@@ -504,35 +510,35 @@ function CreateShiftForm({ membershipId }: { membershipId: string }) {
         <button
           type="button"
           className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
-          onClick={() => setStartedAtValue(nowLocalDateTimeInputValue())}
+          onClick={() => setStartedAtValue(nowDateTimeInputValue(timeZone))}
         >
           Start now
         </button>
         <button
           type="button"
           className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
-          onClick={() => setStartedAtValue(todayAtHourInputValue(7))}
+          onClick={() => setStartedAtValue(todayAtHourInputValue(7, timeZone))}
         >
           Start 07:00
         </button>
         <button
           type="button"
           className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
-          onClick={() => setEndedAtValue(nowLocalDateTimeInputValue())}
+          onClick={() => setEndedAtValue(nowDateTimeInputValue(timeZone))}
         >
           End now
         </button>
         <button
           type="button"
           className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
-          onClick={() => setEndedAtValue(addMinutesToInputValue(startedAtValue, 60))}
+          onClick={() => setEndedAtValue(addMinutesToInputValue(startedAtValue, 60, timeZone))}
         >
           +1h from in
         </button>
         <button
           type="button"
           className="rounded-lg border px-2 py-1 text-xs text-foreground-muted hover:bg-accent-soft"
-          onClick={() => setEndedAtValue(addMinutesToInputValue(startedAtValue, 8 * 60))}
+          onClick={() => setEndedAtValue(addMinutesToInputValue(startedAtValue, 8 * 60, timeZone))}
         >
           +8h from in
         </button>
@@ -563,7 +569,7 @@ export function TimeEntryAdjustments({
     <div className="grid gap-4 xl:grid-cols-2">
       <div className="space-y-3">
         <p className="text-sm font-semibold">Shift entries</p>
-        <CreateShiftForm membershipId={membershipId} />
+        <CreateShiftForm membershipId={membershipId} timeZone={timeZone} />
         {shiftRows.length ? (
           <div className="space-y-2">
             {shiftRows.map((row) => (
