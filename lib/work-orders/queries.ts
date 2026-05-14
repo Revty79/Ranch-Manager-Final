@@ -34,12 +34,17 @@ export interface WorkOrderListItem {
   status: WorkOrderStatus;
   priority: WorkOrderPriority;
   dueAt: Date | null;
+  cancelledAt: Date | null;
+  cancelledByMembershipId: string | null;
+  cancellationReason: string | null;
   compensationType: WorkOrderCompensationType;
   flatPayCents: number;
   incentivePayCents: number;
   incentiveTimerType: WorkOrderIncentiveTimerType;
   incentiveDurationHours: number | null;
   incentiveEndsAt: Date | null;
+  templateId: string | null;
+  generatedForDate: string | null;
   completionReviewStatus: WorkOrderCompletionReviewStatus | null;
   completionReviewRequestedAt: Date | null;
   completionReviewReviewedAt: Date | null;
@@ -157,12 +162,17 @@ export async function getWorkOrdersForRanch(
       status: workOrders.status,
       priority: workOrders.priority,
       dueAt: workOrders.dueAt,
+      cancelledAt: workOrders.cancelledAt,
+      cancelledByMembershipId: workOrders.cancelledByMembershipId,
+      cancellationReason: workOrders.cancellationReason,
       compensationType: workOrders.compensationType,
       flatPayCents: workOrders.flatPayCents,
       incentivePayCents: workOrders.incentivePayCents,
       incentiveTimerType: workOrders.incentiveTimerType,
       incentiveDurationHours: workOrders.incentiveDurationHours,
       incentiveEndsAt: workOrders.incentiveEndsAt,
+      templateId: workOrders.templateId,
+      generatedForDate: workOrders.generatedForDate,
       completionReviewStatus: workOrderCompletionReviews.status,
       completionReviewRequestedAt: workOrderCompletionReviews.requestedAt,
       completionReviewReviewedAt: workOrderCompletionReviews.reviewedAt,
@@ -303,12 +313,17 @@ export async function getWorkOrderById(
       status: workOrders.status,
       priority: workOrders.priority,
       dueAt: workOrders.dueAt,
+      cancelledAt: workOrders.cancelledAt,
+      cancelledByMembershipId: workOrders.cancelledByMembershipId,
+      cancellationReason: workOrders.cancellationReason,
       compensationType: workOrders.compensationType,
       flatPayCents: workOrders.flatPayCents,
       incentivePayCents: workOrders.incentivePayCents,
       incentiveTimerType: workOrders.incentiveTimerType,
       incentiveDurationHours: workOrders.incentiveDurationHours,
       incentiveEndsAt: workOrders.incentiveEndsAt,
+      templateId: workOrders.templateId,
+      generatedForDate: workOrders.generatedForDate,
       completionReviewStatus: workOrderCompletionReviews.status,
       completionReviewRequestedAt: workOrderCompletionReviews.requestedAt,
       completionReviewReviewedAt: workOrderCompletionReviews.reviewedAt,
@@ -489,12 +504,17 @@ export async function getAssignedWorkForMembership(
       status: workOrders.status,
       priority: workOrders.priority,
       dueAt: workOrders.dueAt,
+      cancelledAt: workOrders.cancelledAt,
+      cancelledByMembershipId: workOrders.cancelledByMembershipId,
+      cancellationReason: workOrders.cancellationReason,
       compensationType: workOrders.compensationType,
       flatPayCents: workOrders.flatPayCents,
       incentivePayCents: workOrders.incentivePayCents,
       incentiveTimerType: workOrders.incentiveTimerType,
       incentiveDurationHours: workOrders.incentiveDurationHours,
       incentiveEndsAt: workOrders.incentiveEndsAt,
+      templateId: workOrders.templateId,
+      generatedForDate: workOrders.generatedForDate,
       completionReviewStatus: workOrderCompletionReviews.status,
       completionReviewRequestedAt: workOrderCompletionReviews.requestedAt,
       completionReviewReviewedAt: workOrderCompletionReviews.reviewedAt,

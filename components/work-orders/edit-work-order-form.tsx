@@ -6,6 +6,7 @@ import { SubmitButton } from "@/components/auth/submit-button";
 import { FormFieldShell } from "@/components/patterns/form-field-shell";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { formatDateTimeInputForTimeZone } from "@/lib/date-time-local";
 import type {
   WorkOrderCompensationType,
   WorkOrderIncentiveTimerType,
@@ -15,21 +16,22 @@ import type { AssignableMember, WorkOrderDetail } from "@/lib/work-orders/querie
 
 const initialState: WorkOrderActionState = {};
 
-function toDateTimeLocal(value: Date | null): string {
+function toDateTimeLocal(value: Date | null, timeZone: string): string {
   if (!value) {
     return "";
   }
 
-  const localDate = new Date(value.getTime() - value.getTimezoneOffset() * 60000);
-  return localDate.toISOString().slice(0, 16);
+  return formatDateTimeInputForTimeZone(value, timeZone);
 }
 
 export function EditWorkOrderForm({
   workOrder,
   members,
+  timeZone,
 }: {
   workOrder: WorkOrderDetail;
   members: AssignableMember[];
+  timeZone: string;
 }) {
   const router = useRouter();
   const [state, formAction] = useActionState(updateWorkOrderAction, initialState);
@@ -54,7 +56,11 @@ export function EditWorkOrderForm({
         <Input name="title" defaultValue={workOrder.title} required />
       </FormFieldShell>
       <FormFieldShell label="Due date (optional)">
-        <Input name="dueAt" type="datetime-local" defaultValue={toDateTimeLocal(workOrder.dueAt)} />
+        <Input
+          name="dueAt"
+          type="datetime-local"
+          defaultValue={toDateTimeLocal(workOrder.dueAt, timeZone)}
+        />
       </FormFieldShell>
       <FormFieldShell label="Status">
         <select
@@ -66,7 +72,6 @@ export function EditWorkOrderForm({
           <option value="open">Open</option>
           <option value="in_progress">In progress</option>
           <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
         </select>
       </FormFieldShell>
       <FormFieldShell label="Priority">
@@ -167,7 +172,7 @@ export function EditWorkOrderForm({
           <Input
             name="incentiveDeadlineAt"
             type="datetime-local"
-            defaultValue={toDateTimeLocal(workOrder.incentiveEndsAt)}
+            defaultValue={toDateTimeLocal(workOrder.incentiveEndsAt, timeZone)}
             required
           />
         </FormFieldShell>

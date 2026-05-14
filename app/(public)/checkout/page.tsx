@@ -17,7 +17,7 @@ export default async function CheckoutPage() {
   }
 
   if (ranchContext.membership.role !== "owner") {
-    redirect("/app/settings");
+    redirect("/app/access-denied");
   }
 
   if (hasBillingAccess(ranchContext.ranch)) {

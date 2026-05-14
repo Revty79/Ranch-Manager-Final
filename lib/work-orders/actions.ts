@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { requireSectionManage } from "@/lib/auth/context";
+import { parseDateTimeInputInTimeZone } from "@/lib/date-time-local";
 import { db } from "@/lib/db/client";
 import {
   ranchMemberships,
@@ -103,8 +104,10 @@ const workOrderSchema = z.object({
     }
 
     if (value.incentiveTimerType === "deadline") {
-      const deadline = parseDateTime(value.incentiveDeadlineAt);
-      if (!deadline) {
+      const deadline = typeof value.incentiveDeadlineAt === "string"
+        ? value.incentiveDeadlineAt.trim()
+        : "";
+      if (!deadline || Number.isNaN(new Date(deadline).getTime())) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["incentiveDeadlineAt"],
@@ -171,6 +174,17 @@ const createTemplateSchema = z
 const createFromTemplateSchema = z.object({
   templateId: z.string().uuid(),
 });
+const deleteDraftSchema = z.object({
+  workOrderId: z.string().uuid(),
+});
+const voidWorkOrderSchema = z.object({
+  workOrderId: z.string().uuid(),
+  reason: z
+    .string()
+    .trim()
+    .min(5, "Please add a short reason so this void is auditable.")
+    .max(500, "Void reason must be 500 characters or fewer."),
+});
 const updateTemplateRecurrenceSchema = z
   .object({
     templateId: z.string().uuid(),
@@ -229,13 +243,12 @@ const reviewChecklistSchema = z.object({
   managerNotes: z.string().trim().max(500, "Manager notes must be 500 characters or fewer.").optional(),
 });
 
-function parseDateTime(value?: string): Date | null {
+function parseDateTime(value: string | undefined, timeZone: string): Date | null {
   if (!value) {
     return null;
   }
 
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
+  return parseDateTimeInputInTimeZone(value, timeZone);
 }
 
 function toCents(value: number): number {
@@ -259,7 +272,10 @@ function resolveCompensationValues(data: z.infer<typeof workOrderSchema>): {
   };
 }
 
-function resolveIncentiveValues(data: z.infer<typeof workOrderSchema>): {
+function resolveIncentiveValues(
+  data: z.infer<typeof workOrderSchema>,
+  timeZone: string,
+): {
   incentivePayCents: number;
   incentiveTimerType: WorkOrderIncentiveTimerType;
   incentiveDurationHours: number | null;
@@ -289,7 +305,7 @@ function resolveIncentiveValues(data: z.infer<typeof workOrderSchema>): {
     incentivePayCents,
     incentiveTimerType: "deadline",
     incentiveDurationHours: null,
-    incentiveEndsAt: parseDateTime(data.incentiveDeadlineAt),
+    incentiveEndsAt: parseDateTime(data.incentiveDeadlineAt, timeZone),
   };
 }
 
@@ -408,7 +424,7 @@ export async function createWorkOrderAction(
   }
 
   const compensationValues = resolveCompensationValues(parsed.data);
-  const incentiveValues = resolveIncentiveValues(parsed.data);
+  const incentiveValues = resolveIncentiveValues(parsed.data, context.user.timeZone);
 
   const [newWorkOrder] = await db
     .insert(workOrders)
@@ -418,8 +434,13 @@ export async function createWorkOrderAction(
       description: parsed.data.description || null,
       status: parsed.data.status,
       priority: parsed.data.priority,
-      dueAt: parseDateTime(parsed.data.dueAt),
+      dueAt: parseDateTime(parsed.data.dueAt, context.user.timeZone),
       completedAt: parsed.data.status === "completed" ? new Date() : null,
+      cancelledAt: parsed.data.status === "cancelled" ? new Date() : null,
+      cancelledByMembershipId:
+        parsed.data.status === "cancelled" ? context.membership.id : null,
+      cancellationReason:
+        parsed.data.status === "cancelled" ? "Cancelled at creation." : null,
       compensationType: compensationValues.compensationType,
       flatPayCents: compensationValues.flatPayCents,
       incentivePayCents: incentiveValues.incentivePayCents,
@@ -466,6 +487,9 @@ export async function updateWorkOrderAction(
       id: workOrders.id,
       status: workOrders.status,
       completedAt: workOrders.completedAt,
+      cancelledAt: workOrders.cancelledAt,
+      cancelledByMembershipId: workOrders.cancelledByMembershipId,
+      cancellationReason: workOrders.cancellationReason,
     })
     .from(workOrders)
     .where(
@@ -491,12 +515,24 @@ export async function updateWorkOrderAction(
   }
 
   const compensationValues = resolveCompensationValues(parsed.data);
-  const incentiveValues = resolveIncentiveValues(parsed.data);
+  const incentiveValues = resolveIncentiveValues(parsed.data, context.user.timeZone);
   const completedAt =
     parsed.data.status === "completed"
       ? existing.status === "completed"
         ? existing.completedAt ?? new Date()
         : new Date()
+      : null;
+  const cancelledAt =
+    parsed.data.status === "cancelled"
+      ? existing.cancelledAt ?? new Date()
+      : null;
+  const cancelledByMembershipId =
+    parsed.data.status === "cancelled"
+      ? existing.cancelledByMembershipId ?? context.membership.id
+      : null;
+  const cancellationReason =
+    parsed.data.status === "cancelled"
+      ? existing.cancellationReason ?? "Cancelled from edit form."
       : null;
 
   await db
@@ -506,8 +542,11 @@ export async function updateWorkOrderAction(
       description: parsed.data.description || null,
       status: parsed.data.status,
       priority: parsed.data.priority,
-      dueAt: parseDateTime(parsed.data.dueAt),
+      dueAt: parseDateTime(parsed.data.dueAt, context.user.timeZone),
       completedAt,
+      cancelledAt,
+      cancelledByMembershipId,
+      cancellationReason,
       compensationType: compensationValues.compensationType,
       flatPayCents: compensationValues.flatPayCents,
       incentivePayCents: incentiveValues.incentivePayCents,
@@ -614,19 +653,23 @@ export async function createWorkOrderTemplateAction(
   return { success: "Template created." };
 }
 
-export async function createWorkOrderFromTemplateAction(formData: FormData): Promise<void> {
+export async function createWorkOrderFromTemplateAction(
+  _prevState: WorkOrderActionState,
+  formData: FormData,
+): Promise<WorkOrderActionState> {
   const context = await requireSectionManage("workOrders");
   const parsed = createFromTemplateSchema.safeParse({
     templateId: formData.get("templateId"),
   });
 
   if (!parsed.success) {
-    return;
+    return { error: "Invalid template selection." };
   }
 
   const [template] = await db
     .select({
       id: workOrderTemplates.id,
+      templateName: workOrderTemplates.templateName,
       title: workOrderTemplates.title,
       description: workOrderTemplates.description,
       priority: workOrderTemplates.priority,
@@ -647,7 +690,7 @@ export async function createWorkOrderFromTemplateAction(formData: FormData): Pro
     .limit(1);
 
   if (!template || !template.isActive) {
-    return;
+    return { error: "Template is missing or inactive." };
   }
 
   const templateAssignments = await db
@@ -674,7 +717,7 @@ export async function createWorkOrderFromTemplateAction(formData: FormData): Pro
     .map((assignment) => assignment.membershipId);
 
   if (template.compensationType === "flat_amount" && validAssigneeIds.length === 0) {
-    return;
+    return { error: "Template needs at least one active assignee for flat-amount payout." };
   }
 
   const incentiveEndsAt =
@@ -709,9 +752,13 @@ export async function createWorkOrderFromTemplateAction(formData: FormData): Pro
   revalidatePath("/app");
   revalidatePath("/app/work-orders");
   revalidatePath("/app/time");
+  return { success: `Created work order from template "${template.templateName}".` };
 }
 
-export async function updateWorkOrderTemplateRecurrenceAction(formData: FormData): Promise<void> {
+export async function updateWorkOrderTemplateRecurrenceAction(
+  _prevState: WorkOrderActionState,
+  formData: FormData,
+): Promise<WorkOrderActionState> {
   const context = await requireSectionManage("workOrders");
   const parsed = updateTemplateRecurrenceSchema.safeParse({
     templateId: formData.get("templateId"),
@@ -723,7 +770,7 @@ export async function updateWorkOrderTemplateRecurrenceAction(formData: FormData
   });
 
   if (!parsed.success) {
-    return;
+    return { error: parsed.error.issues[0]?.message ?? "Invalid recurrence settings." };
   }
 
   const [template] = await db
@@ -738,7 +785,7 @@ export async function updateWorkOrderTemplateRecurrenceAction(formData: FormData
     .limit(1);
 
   if (!template) {
-    return;
+    return { error: "Template not found for this ranch." };
   }
 
   const nextGenerationOn =
@@ -764,6 +811,131 @@ export async function updateWorkOrderTemplateRecurrenceAction(formData: FormData
     .where(eq(workOrderTemplates.id, parsed.data.templateId));
 
   revalidatePath("/app/work-orders");
+  return { success: "Recurring settings saved." };
+}
+
+export async function deleteDraftWorkOrderAction(
+  _prevState: WorkOrderActionState,
+  formData: FormData,
+): Promise<WorkOrderActionState> {
+  const context = await requireSectionManage("workOrders");
+  const parsed = deleteDraftSchema.safeParse({
+    workOrderId: formData.get("workOrderId"),
+  });
+
+  if (!parsed.success) {
+    return { error: "Invalid work order selection." };
+  }
+
+  const [order] = await db
+    .select({
+      id: workOrders.id,
+      title: workOrders.title,
+      status: workOrders.status,
+    })
+    .from(workOrders)
+    .where(
+      and(
+        eq(workOrders.id, parsed.data.workOrderId),
+        eq(workOrders.ranchId, context.ranch.id),
+      ),
+    )
+    .limit(1);
+
+  if (!order) {
+    return { error: "Work order not found for this ranch." };
+  }
+
+  if (order.status !== "draft") {
+    return {
+      error:
+        "Only draft work orders can be permanently deleted. Use void for dispatched work.",
+    };
+  }
+
+  await db.delete(workOrders).where(eq(workOrders.id, order.id));
+
+  revalidatePath("/app");
+  revalidatePath("/app/today");
+  revalidatePath("/app/time");
+  revalidatePath("/app/work-orders");
+  revalidatePath(`/app/work-orders/${order.id}`);
+
+  return { success: `Deleted draft work order "${order.title}".` };
+}
+
+export async function voidWorkOrderAction(
+  _prevState: WorkOrderActionState,
+  formData: FormData,
+): Promise<WorkOrderActionState> {
+  const context = await requireSectionManage("workOrders");
+  const parsed = voidWorkOrderSchema.safeParse({
+    workOrderId: formData.get("workOrderId"),
+    reason: formData.get("reason"),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid void request." };
+  }
+
+  const [order] = await db
+    .select({
+      id: workOrders.id,
+      title: workOrders.title,
+      status: workOrders.status,
+      completedAt: workOrders.completedAt,
+    })
+    .from(workOrders)
+    .where(
+      and(
+        eq(workOrders.id, parsed.data.workOrderId),
+        eq(workOrders.ranchId, context.ranch.id),
+      ),
+    )
+    .limit(1);
+
+  if (!order) {
+    return { error: "Work order not found for this ranch." };
+  }
+
+  if (order.status === "draft") {
+    return {
+      error:
+        "Draft work orders should be permanently deleted instead of voided.",
+    };
+  }
+
+  if (order.status === "completed" || order.completedAt) {
+    return {
+      error:
+        "Completed work orders stay as permanent records. Create a follow-up correction task instead.",
+    };
+  }
+
+  const now = new Date();
+  await db
+    .update(workOrders)
+    .set({
+      status: "cancelled",
+      cancelledAt: now,
+      cancelledByMembershipId: context.membership.id,
+      cancellationReason: parsed.data.reason,
+      completedAt: null,
+      updatedAt: now,
+    })
+    .where(eq(workOrders.id, order.id));
+
+  await db
+    .delete(workOrderCompletionReviews)
+    .where(eq(workOrderCompletionReviews.workOrderId, order.id));
+
+  revalidatePath("/app");
+  revalidatePath("/app/today");
+  revalidatePath("/app/time");
+  revalidatePath("/app/work-orders");
+  revalidatePath(`/app/work-orders/${order.id}`);
+
+  return { success: `Voided "${order.title}" with audit reason saved.` };
 }
 
 export async function reviewCompletedWorkOrderAction(

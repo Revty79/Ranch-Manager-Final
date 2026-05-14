@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/patterns/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth/context";
+import { formatDateTimeInputForTimeZone } from "@/lib/date-time-local";
 import { getTeamMemberByMembership } from "@/lib/team/queries";
 import {
   getRecentShiftsForMembership,
@@ -38,6 +39,16 @@ export default async function TeamMemberDetailPage({
 
   const canResetPassword = !(
     context.membership.role === "manager" && member.role === "owner"
+  );
+  const canEditMember = !(
+    context.membership.role === "manager" && member.role === "owner"
+  );
+  const canToggleMemberStatus = canEditMember;
+  const canDeleteMember = canEditMember;
+  const canAssignOwnerRole = context.membership.role === "owner";
+  const defaultShiftStartAt = formatDateTimeInputForTimeZone(
+    new Date(),
+    context.user.timeZone,
   );
 
   return (
@@ -75,6 +86,10 @@ export default async function TeamMemberDetailPage({
             payRateCents={member.payRateCents}
             payAdvanceCents={member.payAdvanceCents}
             isActive={member.isActive}
+            canEditMember={canEditMember}
+            canToggleMemberStatus={canToggleMemberStatus}
+            canDeleteMember={canDeleteMember}
+            canAssignOwnerRole={canAssignOwnerRole}
           />
         </CardContent>
       </Card>
@@ -117,6 +132,7 @@ export default async function TeamMemberDetailPage({
               endedAtIso: entry.endedAt ? entry.endedAt.toISOString() : null,
             }))}
             timeZone={context.user.timeZone}
+            defaultShiftStartAt={defaultShiftStartAt}
           />
         </CardContent>
       </Card>

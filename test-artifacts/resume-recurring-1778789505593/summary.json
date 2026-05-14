@@ -1,0 +1,27 @@
+{
+  "full": "Recurring Water Patrol 411116: Recurring Water Check 411116",
+  "steps": [
+    {
+      "type": "snap",
+      "name": "before-recurring",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\resume-recurring-1778789505593\\before-recurring.png"
+    },
+    {
+      "type": "recurring_saved",
+      "dateVal": "2026-05-13"
+    },
+    {
+      "type": "create_now_clicked"
+    },
+    {
+      "type": "snap",
+      "name": "after-create-now-search",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\resume-recurring-1778789505593\\after-create-now-search.png"
+    },
+    {
+      "type": "verify_work_order",
+      "found": true,
+      "rowText": "Recurring Water Check 411116 open normal Reed Dalton Reliable 162225, Milo Test Worker 783163 Not set Regular Not required No incentive pay configured Edit"
+    }
+  ]
+}

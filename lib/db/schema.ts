@@ -411,6 +411,12 @@ export const workOrders = pgTable(
     priority: workOrderPriorityEnum("priority").default("normal").notNull(),
     dueAt: timestamp("due_at", { withTimezone: true }),
     completedAt: timestamp("completed_at", { withTimezone: true }),
+    cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
+    cancelledByMembershipId: uuid("cancelled_by_membership_id").references(
+      () => ranchMemberships.id,
+      { onDelete: "set null" },
+    ),
+    cancellationReason: text("cancellation_reason"),
     compensationType: workOrderCompensationTypeEnum("compensation_type")
       .default("standard")
       .notNull(),
@@ -441,6 +447,7 @@ export const workOrders = pgTable(
     index("work_orders_status_idx").on(table.status),
     index("work_orders_due_idx").on(table.dueAt),
     index("work_orders_completed_idx").on(table.completedAt),
+    index("work_orders_cancelled_idx").on(table.cancelledAt),
     index("work_orders_incentive_ends_idx").on(table.incentiveEndsAt),
     index("work_orders_template_idx").on(table.templateId),
     uniqueIndex("work_orders_template_generated_uidx")

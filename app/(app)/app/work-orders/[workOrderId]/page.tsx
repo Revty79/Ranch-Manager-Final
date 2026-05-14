@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { CompletionReviewPanel } from "@/components/work-orders/completion-review-panel";
 import { EditWorkOrderForm } from "@/components/work-orders/edit-work-order-form";
 import { IncentiveCountdown } from "@/components/work-orders/incentive-countdown";
+import { WorkOrderCleanupPanel } from "@/components/work-orders/work-order-cleanup-panel";
 import { PageHeader } from "@/components/patterns/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,6 +27,21 @@ function formatReviewStatus(status: "pending" | "approved" | "changes_requested"
   }
 
   return `Review ${status}`;
+}
+
+function formatDateTime(value: Date | null, timeZone: string): string {
+  if (!value) {
+    return "Not recorded";
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone,
+  }).format(value);
 }
 
 export default async function WorkOrderDetailPage({
@@ -84,7 +100,32 @@ export default async function WorkOrderDetailPage({
               incentiveEndsAt={workOrder.incentiveEndsAt}
             />
           </div>
-          <EditWorkOrderForm workOrder={workOrder} members={members} />
+          <EditWorkOrderForm
+            workOrder={workOrder}
+            members={members}
+            timeZone={context.user.timeZone}
+          />
+          {workOrder.status === "cancelled" ? (
+            <div className="rounded-xl border bg-warning/10 p-4 text-sm text-warning">
+              <p className="font-semibold">This work order is voided/cancelled.</p>
+              <p className="mt-1">
+                Reason: {workOrder.cancellationReason ?? "No reason saved."}
+              </p>
+              <p className="mt-1 text-xs">
+                Cancelled at: {formatDateTime(workOrder.cancelledAt, context.user.timeZone)}
+              </p>
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="space-y-4 py-6">
+          <WorkOrderCleanupPanel
+            workOrderId={workOrder.id}
+            workOrderTitle={workOrder.title}
+            workOrderStatus={workOrder.status}
+          />
         </CardContent>
       </Card>
 

@@ -1,0 +1,180 @@
+{
+  "runId": "411116",
+  "actions": [
+    {
+      "type": "assignee_selection",
+      "assignees": [
+        "Assign toCody Codex (owner)Aubrey Jensen Manager 162225 (manager)Reed Dalton Reliable 162225 (worker)Milo Test Worker 783163 (worker)Lane Morris Forgetful 170111 (worker)Ty Brooks Badtech 170111 (worker)Choose one or more active members.",
+        "Assign toCody Codex (owner)Aubrey Jensen Manager 162225 (manager)Reed Dalton Reliable 162225 (worker)Milo Test Worker 783163 (worker)Lane Morris Forgetful 170111 (worker)Ty Brooks Badtech 170111 (worker)Choose one or more active members.",
+        "Reed Dalton Reliable 162225 (worker)",
+        "Milo Test Worker 783163 (worker)"
+      ],
+      "allAssignees": [
+        "Assign toCody Codex (owner)Aubrey Jensen Manager 162225 (manager)Reed Dalton Reliable 162225 (worker)Milo Test Worker 783163 (worker)Lane Morris Forgetful 170111 (worker)Ty Brooks Badtech 170111 (worker)Choose one or more active members.",
+        "Cody Codex (owner)",
+        "Aubrey Jensen Manager 162225 (manager)",
+        "Reed Dalton Reliable 162225 (worker)",
+        "Milo Test Worker 783163 (worker)",
+        "Lane Morris Forgetful 170111 (worker)",
+        "Ty Brooks Badtech 170111 (worker)"
+      ]
+    },
+    {
+      "type": "create",
+      "title": "Water Check - North Trough 411116",
+      "found": true
+    },
+    {
+      "type": "create",
+      "title": "Feed Check - Winter Lot 411116",
+      "found": true
+    },
+    {
+      "type": "create",
+      "title": "Fence Repair - Creek Lot 411116",
+      "found": true
+    },
+    {
+      "type": "create",
+      "title": "Animal Health Check - Calves 411116",
+      "found": true
+    },
+    {
+      "type": "create",
+      "title": "Move and Check Cattle - Lower Field 411116",
+      "found": true
+    },
+    {
+      "type": "create",
+      "title": "MISTAKE Duplicate Feed Entry 411116",
+      "found": true
+    },
+    {
+      "type": "template_create",
+      "templateName": "Recurring Water Patrol 411116",
+      "exists": false
+    },
+    {
+      "type": "delete_control_present",
+      "count": 0
+    },
+    {
+      "type": "edit_mistake_verify",
+      "correctedTitle": "Corrected Feed Entry 411116",
+      "found": true
+    }
+  ],
+  "bugs": [
+    {
+      "area": "/app/work-orders templates",
+      "title": "Template not visible after create",
+      "observed": "Recurring Water Patrol 411116"
+    }
+  ],
+  "ux": [
+    "No delete/remove control found on work order detail page for mistaken entries."
+  ],
+  "snapshots": [
+    {
+      "name": "after-login",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\resume-workorders-1778789411116\\after-login.png"
+    },
+    {
+      "name": "final-workorders-all",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\resume-workorders-1778789411116\\final-workorders-all.png"
+    },
+    {
+      "name": "final-workorders-cancelled",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\resume-workorders-1778789411116\\final-workorders-cancelled.png"
+    }
+  ],
+  "final": {
+    "items": [
+      {
+        "title": "Corrected Feed Entry 411116",
+        "status": "cancelled",
+        "priority": "low",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 17, 2026"
+      },
+      {
+        "title": "Move and Check Cattle - Lower Field 411116",
+        "status": "open",
+        "priority": "high",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 12, 2026"
+      },
+      {
+        "title": "Animal Health Check - Calves 411116",
+        "status": "open",
+        "priority": "normal",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 16, 2026"
+      },
+      {
+        "title": "Fence Repair - Creek Lot 411116",
+        "status": "open",
+        "priority": "high",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 15, 2026"
+      },
+      {
+        "title": "Feed Check - Winter Lot 411116",
+        "status": "open",
+        "priority": "normal",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 15, 2026"
+      },
+      {
+        "title": "Water Check - North Trough 411116",
+        "status": "open",
+        "priority": "normal",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 14, 2026"
+      },
+      {
+        "title": "Feed Check - Winter Lot 269336",
+        "status": "open",
+        "priority": "normal",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 15, 2026"
+      },
+      {
+        "title": "Water Check - North Trough 269336",
+        "status": "open",
+        "priority": "normal",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 14, 2026"
+      },
+      {
+        "title": "Fence line check",
+        "status": "open",
+        "priority": "normal",
+        "assignees": "Cody Codex",
+        "due": "May 14, 2026"
+      },
+      {
+        "title": "Water points inspection",
+        "status": "open",
+        "priority": "high",
+        "assignees": "Cody Codex",
+        "due": "May 14, 2026"
+      },
+      {
+        "title": "Morning livestock check",
+        "status": "open",
+        "priority": "high",
+        "assignees": "Cody Codex",
+        "due": "May 14, 2026"
+      }
+    ],
+    "tabs": [
+      "all",
+      "draft",
+      "open",
+      "in progress",
+      "completed",
+      "cancelled"
+    ]
+  }
+}

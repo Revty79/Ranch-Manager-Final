@@ -42,7 +42,10 @@ export function CompleteWorkOrderForm({
 
   useEffect(() => {
     if (state.success) {
-      router.refresh();
+      const refreshTimer = window.setTimeout(() => {
+        router.refresh();
+      }, 1400);
+      return () => window.clearTimeout(refreshTimer);
     }
   }, [router, state.success]);
 
@@ -137,7 +140,11 @@ export function CompleteWorkOrderForm({
       </details>
 
       {state.error ? <p className="text-sm font-medium text-danger">{state.error}</p> : null}
-      {state.success ? <p className="text-sm font-medium text-accent">{state.success}</p> : null}
+      {state.success ? (
+        <p className="rounded-xl border border-accent/40 bg-accent-soft px-3 py-2 text-sm font-semibold text-accent">
+          {state.success} Status updated. Refreshing your queue...
+        </p>
+      ) : null}
 
       <Button variant={buttonVariant} type="submit">
         {submitLabel}
@@ -145,4 +152,3 @@ export function CompleteWorkOrderForm({
     </form>
   );
 }
-

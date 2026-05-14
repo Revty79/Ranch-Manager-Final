@@ -33,6 +33,7 @@ interface TimeEntryAdjustmentsProps {
   shiftRows: ShiftAdjustmentRow[];
   workRows: WorkAdjustmentRow[];
   timeZone: string;
+  defaultShiftStartAt: string;
 }
 
 interface EditState {
@@ -139,8 +140,12 @@ function formatDateTime(isoValue: string, timeZone: string): string {
 }
 
 function formatDuration(startedAtIso: string, endedAtIso: string | null): string {
+  if (!endedAtIso) {
+    return "Active";
+  }
+
   const startedAt = new Date(startedAtIso);
-  const endedAt = endedAtIso ? new Date(endedAtIso) : new Date();
+  const endedAt = new Date(endedAtIso);
   if (Number.isNaN(startedAt.getTime()) || Number.isNaN(endedAt.getTime())) {
     return "Invalid duration";
   }
@@ -473,11 +478,17 @@ function WorkRowForm({ row, timeZone }: { row: WorkAdjustmentRow; timeZone: stri
   );
 }
 
-function CreateShiftForm({ membershipId, timeZone }: { membershipId: string; timeZone: string }) {
+function CreateShiftForm({
+  membershipId,
+  timeZone,
+  defaultShiftStartAt,
+}: {
+  membershipId: string;
+  timeZone: string;
+  defaultShiftStartAt: string;
+}) {
   const router = useRouter();
-  const [startedAtValue, setStartedAtValue] = useState(() =>
-    nowDateTimeInputValue(timeZone),
-  );
+  const [startedAtValue, setStartedAtValue] = useState(defaultShiftStartAt);
   const [endedAtValue, setEndedAtValue] = useState("");
   const [state, formAction] = useActionState(createShiftEntryAction, initialState);
 
@@ -564,12 +575,17 @@ export function TimeEntryAdjustments({
   shiftRows,
   workRows,
   timeZone,
+  defaultShiftStartAt,
 }: TimeEntryAdjustmentsProps) {
   return (
     <div className="grid gap-4 xl:grid-cols-2">
       <div className="space-y-3">
         <p className="text-sm font-semibold">Shift entries</p>
-        <CreateShiftForm membershipId={membershipId} timeZone={timeZone} />
+        <CreateShiftForm
+          membershipId={membershipId}
+          timeZone={timeZone}
+          defaultShiftStartAt={defaultShiftStartAt}
+        />
         {shiftRows.length ? (
           <div className="space-y-2">
             {shiftRows.map((row) => (

@@ -149,6 +149,12 @@ export default async function WorkerTodayPage() {
   );
   const urgentThreads = threads.filter((thread) => thread.priority === "urgent").slice(0, 6);
   const isPieceWork = context.membership.payType === "piece_work";
+  const isManagerLike =
+    context.membership.role === "owner" || context.membership.role === "manager";
+  const todayEyebrow = isManagerLike ? "Manager Today" : "Worker Today";
+  const todayDescription = isManagerLike
+    ? "Your shift state plus high-priority assignments and communication alerts."
+    : "Your shift state, current work, and next action in one place.";
   const nextAction = resolveNextAction({
     activeWorkTitle: activeWork?.workOrderTitle ?? null,
     hasActiveShift: Boolean(activeShift),
@@ -161,9 +167,9 @@ export default async function WorkerTodayPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Worker Today"
+        eyebrow={todayEyebrow}
         title="Today"
-        description="Your shift state, current work, and next action in one place."
+        description={todayDescription}
         actions={
           <div className="flex flex-wrap gap-2">
             {canViewCommunication ? (

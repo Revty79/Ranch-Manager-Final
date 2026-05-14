@@ -53,6 +53,9 @@ export default async function SettingsPage({
   }
 
   const isOwner = context.membership.role === "owner";
+  const isWorkerRole =
+    context.membership.role === "worker" || context.membership.role === "seasonal_worker";
+  const canViewBillingMetadata = !isWorkerRole;
   const billingAccess = hasBillingAccess(context.ranch);
   const trialConfig = resolveTrialConfig();
   const trialEligible =
@@ -120,41 +123,49 @@ export default async function SettingsPage({
                 <span className="text-foreground-muted">Role:</span>{" "}
                 <Badge variant="success">{context.membership.role}</Badge>
               </p>
-              <p>
-                <span className="text-foreground-muted">Platform admin access:</span>{" "}
-                <Badge
-                  variant={context.ranch.allowPlatformAdminAccess ? "success" : "warning"}
-                >
-                  {context.ranch.allowPlatformAdminAccess ? "Allowed" : "Blocked"}
-                </Badge>
-              </p>
-            </div>
-            <div className="rounded-xl border bg-surface p-3 text-sm">
-              <p className="font-semibold text-foreground">Admin Access Failsafe</p>
-              <p className="mt-1 text-foreground-muted">
-                This switch controls whether platform admins can enter this ranch workspace from
-                the admin control center. Default is blocked.
-              </p>
-              {isOwner ? (
-                <form action={setRanchAdminAccessAction} className="mt-3">
-                  <input
-                    type="hidden"
-                    name="enabled"
-                    value={context.ranch.allowPlatformAdminAccess ? "false" : "true"}
-                  />
-                  <button
-                    type="submit"
-                    className="rounded-xl border bg-surface-strong px-3 py-2 text-xs font-semibold hover:bg-accent-soft"
+              {canViewBillingMetadata ? (
+                <p>
+                  <span className="text-foreground-muted">Platform admin access:</span>{" "}
+                  <Badge
+                    variant={context.ranch.allowPlatformAdminAccess ? "success" : "warning"}
                   >
-                    {context.ranch.allowPlatformAdminAccess
-                      ? "Block admin access"
-                      : "Allow admin access"}
-                  </button>
-                </form>
-              ) : (
-                <p className="mt-3 text-foreground-muted">Only ranch owners can change this setting.</p>
-              )}
+                    {context.ranch.allowPlatformAdminAccess ? "Allowed" : "Blocked"}
+                  </Badge>
+                </p>
+              ) : null}
             </div>
+            {canViewBillingMetadata ? (
+              <div className="rounded-xl border bg-surface p-3 text-sm">
+                <p className="font-semibold text-foreground">Admin Access Failsafe</p>
+                <p className="mt-1 text-foreground-muted">
+                  This switch controls whether platform admins can enter this ranch workspace from
+                  the admin control center. Default is blocked.
+                </p>
+                {isOwner ? (
+                  <form action={setRanchAdminAccessAction} className="mt-3">
+                    <input
+                      type="hidden"
+                      name="enabled"
+                      value={context.ranch.allowPlatformAdminAccess ? "false" : "true"}
+                    />
+                    <button
+                      type="submit"
+                      className="rounded-xl border bg-surface-strong px-3 py-2 text-xs font-semibold hover:bg-accent-soft"
+                    >
+                      {context.ranch.allowPlatformAdminAccess
+                        ? "Block admin access"
+                        : "Allow admin access"}
+                    </button>
+                  </form>
+                ) : (
+                  <p className="mt-3 text-foreground-muted">Only ranch owners can change this setting.</p>
+                )}
+              </div>
+            ) : (
+              <p className="rounded-xl border bg-surface px-3 py-2 text-sm text-foreground-muted">
+                Admin and billing settings are managed by ranch owners.
+              </p>
+            )}
           </CardContent>
         </Card>
 
@@ -172,39 +183,48 @@ export default async function SettingsPage({
                   {billingAccess ? "Access enabled" : "Billing required"}
                 </Badge>
               </p>
-              <p>
-                <span className="text-foreground-muted">Subscription status:</span>{" "}
-                {context.ranch.subscriptionStatus}
-              </p>
-              <p>
-                <span className="text-foreground-muted">Access source:</span> {accessSource}
-              </p>
-              <p>
-                <span className="text-foreground-muted">Plan:</span>{" "}
-                {context.ranch.subscriptionPlanKey ?? "Bundled Base Plan"}
-              </p>
-              <p>
-                <span className="text-foreground-muted">Stripe customer:</span>{" "}
-                {context.ranch.stripeCustomerId ?? "Not created yet"}
-              </p>
-              <p>
-                <span className="text-foreground-muted">Stripe subscription:</span>{" "}
-                {context.ranch.stripeSubscriptionId ?? "Not active yet"}
-              </p>
-              <p>
-                <span className="text-foreground-muted">Current period end:</span>{" "}
-                {formatDate(context.ranch.subscriptionCurrentPeriodEnd, context.user.timeZone)}
-              </p>
-              <p>
-                <span className="text-foreground-muted">Beta lifetime access:</span>{" "}
-                {context.ranch.betaLifetimeAccess ? "Enabled" : "Not enabled"}
-              </p>
-              {trialEligible ? (
-                <p>
-                  <span className="text-foreground-muted">Trial offer:</span>{" "}
-                  {trialConfig.trialDays}-day trial available for first checkout
+              {canViewBillingMetadata ? (
+                <>
+                  <p>
+                    <span className="text-foreground-muted">Subscription status:</span>{" "}
+                    {context.ranch.subscriptionStatus}
+                  </p>
+                  <p>
+                    <span className="text-foreground-muted">Access source:</span> {accessSource}
+                  </p>
+                  <p>
+                    <span className="text-foreground-muted">Plan:</span>{" "}
+                    {context.ranch.subscriptionPlanKey ?? "Bundled Base Plan"}
+                  </p>
+                  <p>
+                    <span className="text-foreground-muted">Stripe customer:</span>{" "}
+                    {context.ranch.stripeCustomerId ?? "Not created yet"}
+                  </p>
+                  <p>
+                    <span className="text-foreground-muted">Stripe subscription:</span>{" "}
+                    {context.ranch.stripeSubscriptionId ?? "Not active yet"}
+                  </p>
+                  <p>
+                    <span className="text-foreground-muted">Current period end:</span>{" "}
+                    {formatDate(context.ranch.subscriptionCurrentPeriodEnd, context.user.timeZone)}
+                  </p>
+                  <p>
+                    <span className="text-foreground-muted">Beta lifetime access:</span>{" "}
+                    {context.ranch.betaLifetimeAccess ? "Enabled" : "Not enabled"}
+                  </p>
+                  {trialEligible ? (
+                    <p>
+                      <span className="text-foreground-muted">Trial offer:</span>{" "}
+                      {trialConfig.trialDays}-day trial available for first checkout
+                    </p>
+                  ) : null}
+                </>
+              ) : (
+                <p className="text-foreground-muted">
+                  Billing details are visible to managers and owners. Contact your manager/owner
+                  if billing access questions come up.
                 </p>
-              ) : null}
+              )}
             </div>
             {isOwner ? (
               <div className="space-y-3 pt-2">

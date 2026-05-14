@@ -42,23 +42,32 @@ export function IncentiveCountdown({
   incentiveEndsAt,
   className,
 }: IncentiveCountdownProps) {
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState<number | null>(null);
   const incentiveEndTimestamp = useMemo(
     () => toEndTimestamp(incentiveEndsAt),
     [incentiveEndsAt],
   );
+  const isActiveCountdown = Boolean(incentiveEndTimestamp && incentivePayCents > 0);
 
   useEffect(() => {
-    if (!incentiveEndTimestamp || incentivePayCents <= 0) {
+    if (!isActiveCountdown) {
       return;
     }
 
-    const intervalId = window.setInterval(() => {
+    const updateNow = () => {
       setNow(Date.now());
+    };
+
+    const initialUpdateId = window.setTimeout(updateNow, 0);
+    const intervalId = window.setInterval(() => {
+      updateNow();
     }, 1000);
 
-    return () => window.clearInterval(intervalId);
-  }, [incentiveEndTimestamp, incentivePayCents]);
+    return () => {
+      window.clearTimeout(initialUpdateId);
+      window.clearInterval(intervalId);
+    };
+  }, [isActiveCountdown, incentiveEndTimestamp]);
 
   if (incentivePayCents <= 0) {
     return (
@@ -72,6 +81,14 @@ export function IncentiveCountdown({
     return (
       <p className={cn("text-xs text-foreground-muted", className)}>
         Incentive {formatMoney(incentivePayCents)} has no countdown set
+      </p>
+    );
+  }
+
+  if (now === null) {
+    return (
+      <p className={cn("text-xs font-medium text-accent", className)}>
+        Incentive {formatMoney(incentivePayCents)} active
       </p>
     );
   }
@@ -91,4 +108,3 @@ export function IncentiveCountdown({
     </p>
   );
 }
-

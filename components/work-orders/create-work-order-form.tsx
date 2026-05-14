@@ -44,7 +44,6 @@ export function CreateWorkOrderForm({
           <option value="open">Open</option>
           <option value="in_progress">In progress</option>
           <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
         </select>
       </FormFieldShell>
       <FormFieldShell label="Priority">

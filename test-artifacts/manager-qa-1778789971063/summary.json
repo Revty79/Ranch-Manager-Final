@@ -1,0 +1,24 @@
+{
+  "runId": "971063",
+  "startedAt": "2026-05-14T20:19:31.063Z",
+  "manager": {
+    "username": "aubrey-mgr-162225"
+  },
+  "login": {},
+  "visibility": {},
+  "workflow": {
+    "reviewedTasks": [],
+    "createdTasks": [],
+    "reassignedTasks": [],
+    "statusUpdates": [],
+    "mistakesCorrected": []
+  },
+  "blockers": [],
+  "bugs": [],
+  "permissionChecks": [],
+  "uxFriction": [],
+  "cleanupObservations": [],
+  "mobile": {},
+  "artifacts": [],
+  "fatalError": "locator.fill: Error: strict mode violation: getByLabel('New password') resolved to 2 elements:\n    1) <input required=\"\" minlength=\"8\" type=\"password\" name=\"newPassword\" placeholder=\"Create a new password\" class=\"h-10 w-full rounded-xl border bg-surface px-3 text-sm text-foreground placeholder:text-foreground-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring\"/> aka getByRole('textbox', { name: 'New password Use at least 8' })\n    2) <input required=\"\" minlength=\"8\" type=\"password\" name=\"confirmPassword\" placeholder=\"Re-enter your new password\" class=\"h-10 w-full rounded-xl border bg-surface px-3 text-sm text-foreground placeholder:text-foreground-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring\"/> aka getByRole('textbox', { name: 'Confirm new password' })\n\nCall log:\n\u001b[2m  - waiting for getByLabel('New password')\u001b[22m\n"
+}

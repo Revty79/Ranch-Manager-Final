@@ -3,6 +3,7 @@ import { ClipboardList } from "lucide-react";
 import { CreateWorkOrderForm } from "@/components/work-orders/create-work-order-form";
 import { CreateWorkOrderTemplateForm } from "@/components/work-orders/create-work-order-template-form";
 import { IncentiveCountdown } from "@/components/work-orders/incentive-countdown";
+import { TemplateRowActions } from "@/components/work-orders/template-row-actions";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { PageHeader } from "@/components/patterns/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -18,20 +19,19 @@ import {
 } from "@/components/ui/table";
 import { hasSectionAccess } from "@/lib/auth/capabilities";
 import { requireSectionAccess } from "@/lib/auth/context";
-import {
-  createWorkOrderFromTemplateAction,
-  updateWorkOrderTemplateRecurrenceAction,
-} from "@/lib/work-orders/actions";
 import { materializeDueRecurringWorkOrdersForRanch } from "@/lib/work-orders/maintenance";
 import {
   getAssignedWorkForMembership,
   getAssignableMembersForRanch,
   getWorkOrderTemplatesForRanch,
   getWorkOrdersForRanch,
+  type WorkOrderListItem,
 } from "@/lib/work-orders/queries";
 import { cn } from "@/lib/utils";
 
 const statusTabs = ["all", "draft", "open", "in_progress", "completed", "cancelled"] as const;
+const workerQueueTabs = ["active", "in_progress", "completed", "cancelled", "all"] as const;
+
 function statusVariant(status: string) {
   if (status === "completed") {
     return "success";
@@ -57,6 +57,14 @@ function formatDate(value: Date | null, timeZone: string): string {
     year: "numeric",
     timeZone,
   }).format(value);
+}
+
+function formatDateKey(value: string | null, timeZone: string): string {
+  if (!value) {
+    return "Not set";
+  }
+
+  return formatDate(new Date(`${value}T00:00:00Z`), timeZone);
 }
 
 function formatStatus(status: string): string {
@@ -116,16 +124,97 @@ function formatRecurrenceLabel(template: {
 
   if (template.recurrenceCadence === "custom") {
     const interval = template.recurrenceIntervalDays ?? 1;
-    return `Every ${interval} day${interval === 1 ? "" : "s"} · next ${template.nextGenerationOn ?? "not set"}`;
+    return `Every ${interval} day${interval === 1 ? "" : "s"} - next ${template.nextGenerationOn ?? "not set"}`;
   }
 
-  return `${template.recurrenceCadence ?? "unknown cadence"} · next ${template.nextGenerationOn ?? "not set"}`;
+  return `${template.recurrenceCadence ?? "unknown cadence"} - next ${template.nextGenerationOn ?? "not set"}`;
+}
+
+function isOpenStatus(status: WorkOrderListItem["status"]): boolean {
+  return status === "draft" || status === "open" || status === "in_progress";
+}
+
+function isOverdue(order: WorkOrderListItem, now: Date): boolean {
+  return isOpenStatus(order.status) && Boolean(order.dueAt) && order.dueAt!.getTime() < now.getTime();
+}
+
+function isDueSoon(order: WorkOrderListItem, now: Date): boolean {
+  if (!isOpenStatus(order.status) || !order.dueAt) {
+    return false;
+  }
+
+  const diff = order.dueAt.getTime() - now.getTime();
+  return diff >= 0 && diff <= 24 * 60 * 60 * 1000;
+}
+
+function isUrgent(order: WorkOrderListItem, now: Date): boolean {
+  return order.priority === "high" || isOverdue(order, now);
+}
+
+function dueSortWeight(order: WorkOrderListItem): number {
+  if (!order.dueAt) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  return order.dueAt.getTime();
+}
+
+function compareByAttention(left: WorkOrderListItem, right: WorkOrderListItem, now: Date): number {
+  const leftOverdue = isOverdue(left, now);
+  const rightOverdue = isOverdue(right, now);
+  if (leftOverdue !== rightOverdue) {
+    return leftOverdue ? -1 : 1;
+  }
+
+  const leftUrgent = isUrgent(left, now);
+  const rightUrgent = isUrgent(right, now);
+  if (leftUrgent !== rightUrgent) {
+    return leftUrgent ? -1 : 1;
+  }
+
+  const leftInProgress = left.status === "in_progress";
+  const rightInProgress = right.status === "in_progress";
+  if (leftInProgress !== rightInProgress) {
+    return leftInProgress ? -1 : 1;
+  }
+
+  const leftDue = dueSortWeight(left);
+  const rightDue = dueSortWeight(right);
+  if (leftDue !== rightDue) {
+    return leftDue - rightDue;
+  }
+
+  return right.createdAt.getTime() - left.createdAt.getTime();
+}
+
+function formatQueueLabel(tab: (typeof workerQueueTabs)[number]): string {
+  if (tab === "in_progress") {
+    return "in progress";
+  }
+
+  return tab;
+}
+
+function formatDueState(order: WorkOrderListItem, timeZone: string, now: Date): string {
+  if (!order.dueAt) {
+    return "Not set";
+  }
+
+  if (isOverdue(order, now)) {
+    return `${formatDate(order.dueAt, timeZone)} (overdue)`;
+  }
+
+  if (isDueSoon(order, now)) {
+    return `${formatDate(order.dueAt, timeZone)} (due soon)`;
+  }
+
+  return formatDate(order.dueAt, timeZone);
 }
 
 export default async function WorkOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; queue?: string }>;
 }) {
   const context = await requireSectionAccess("workOrders");
   const canManageWorkOrders = hasSectionAccess(
@@ -135,48 +224,128 @@ export default async function WorkOrdersPage({
   );
   await materializeDueRecurringWorkOrdersForRanch(context.ranch.id);
   const params = await searchParams;
+  const now = new Date();
 
   if (!canManageWorkOrders) {
     const assignedOrders = await getAssignedWorkForMembership(
       context.ranch.id,
       context.membership.id,
     );
+    const queueFilter = workerQueueTabs.find((tab) => tab === params.queue) ?? "active";
+
+    const sortedAssignedOrders = [...assignedOrders].sort((left, right) =>
+      compareByAttention(left, right, now),
+    );
+
+    const queueCounts = {
+      active: sortedAssignedOrders.filter((order) => isOpenStatus(order.status)).length,
+      in_progress: sortedAssignedOrders.filter((order) => order.status === "in_progress").length,
+      completed: sortedAssignedOrders.filter((order) => order.status === "completed").length,
+      cancelled: sortedAssignedOrders.filter((order) => order.status === "cancelled").length,
+      all: sortedAssignedOrders.length,
+    };
+
+    const filteredOrders = sortedAssignedOrders.filter((order) => {
+      if (queueFilter === "active") {
+        return isOpenStatus(order.status);
+      }
+      if (queueFilter === "in_progress") {
+        return order.status === "in_progress";
+      }
+      if (queueFilter === "completed") {
+        return order.status === "completed";
+      }
+      if (queueFilter === "cancelled") {
+        return order.status === "cancelled";
+      }
+
+      return true;
+    });
+
+    const nextPriorityOrder = sortedAssignedOrders.find((order) => isOpenStatus(order.status));
 
     return (
       <div className="space-y-6">
         <PageHeader
           eyebrow="Work Orders"
           title="Assigned Work"
-          description="Your active and recent assigned work orders."
+          description="Prioritized queue for today, with overdue and urgent work surfaced first."
         />
-        {assignedOrders.length ? (
+
+        {nextPriorityOrder ? (
+          <Card>
+            <CardContent className="space-y-2 py-5">
+              <p className="text-xs uppercase tracking-[0.08em] text-foreground-muted">Do next</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <CardTitle className="text-base">{nextPriorityOrder.title}</CardTitle>
+                {isOverdue(nextPriorityOrder, now) ? <Badge variant="danger">Overdue</Badge> : null}
+                {!isOverdue(nextPriorityOrder, now) && isUrgent(nextPriorityOrder, now) ? (
+                  <Badge variant="warning">Urgent</Badge>
+                ) : null}
+              </div>
+              <p className="text-sm text-foreground-muted">
+                Due: {formatDueState(nextPriorityOrder, context.user.timeZone, now)}
+              </p>
+            </CardContent>
+          </Card>
+        ) : null}
+
+        <div className="flex flex-wrap gap-2 text-sm">
+          {workerQueueTabs.map((tab) => (
+            <Link
+              key={tab}
+              href={`/app/work-orders?queue=${tab}`}
+              className={cn(
+                "rounded-full border px-3 py-1.5",
+                queueFilter === tab
+                  ? "bg-accent text-white"
+                  : "bg-surface-strong text-foreground-muted hover:bg-accent-soft",
+              )}
+            >
+              {formatQueueLabel(tab)} ({queueCounts[tab]})
+            </Link>
+          ))}
+        </div>
+
+        {filteredOrders.length ? (
           <div className="grid gap-4">
-            {assignedOrders.map((order) => (
+            {filteredOrders.map((order) => (
               <Card key={order.id}>
                 <CardContent className="space-y-2 py-5">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <CardTitle className="text-base">{order.title}</CardTitle>
                     <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant={statusVariant(order.status)}>
-                        {formatStatus(order.status)}
-                      </Badge>
+                      <Badge variant={statusVariant(order.status)}>{formatStatus(order.status)}</Badge>
                       <Badge variant={reviewVariant(order.completionReviewStatus)}>
                         {formatReviewStatus(order.completionReviewStatus)}
                       </Badge>
+                      {isOverdue(order, now) ? <Badge variant="danger">Overdue</Badge> : null}
+                      {!isOverdue(order, now) && isDueSoon(order, now) ? (
+                        <Badge variant="warning">Due soon</Badge>
+                      ) : null}
+                      {!isOverdue(order, now) && isUrgent(order, now) ? (
+                        <Badge variant="warning">Urgent</Badge>
+                      ) : null}
+                      {order.templateId ? <Badge variant="neutral">Recurring</Badge> : null}
                     </div>
                   </div>
                   <CardDescription>{order.description ?? "No details provided yet."}</CardDescription>
                   <div className="flex flex-wrap items-center gap-3 text-xs text-foreground-muted">
                     <span>Priority: {order.priority}</span>
-                    <span>Due: {formatDate(order.dueAt, context.user.timeZone)}</span>
+                    <span>Due: {formatDueState(order, context.user.timeZone, now)}</span>
                     <span>Pay: {formatCompensation(order)}</span>
                     <span>
-                      Incentive:{" "}
-                      {order.incentivePayCents > 0
-                        ? formatMoney(order.incentivePayCents)
-                        : "Not set"}
+                      Incentive: {order.incentivePayCents > 0 ? formatMoney(order.incentivePayCents) : "Not set"}
                     </span>
+                    {order.generatedForDate ? (
+                      <span>Generated for: {formatDateKey(order.generatedForDate, context.user.timeZone)}</span>
+                    ) : null}
                   </div>
+                  {order.status === "cancelled" && order.cancellationReason ? (
+                    <p className="rounded-xl border bg-warning/10 px-3 py-2 text-xs text-warning">
+                      Void reason: {order.cancellationReason}
+                    </p>
+                  ) : null}
                   <IncentiveCountdown
                     incentivePayCents={order.incentivePayCents}
                     incentiveEndsAt={order.incentiveEndsAt}
@@ -187,8 +356,8 @@ export default async function WorkOrdersPage({
           </div>
         ) : (
           <EmptyState
-            title="No assigned work yet"
-            description="Once a manager assigns work orders to you, they will appear here."
+            title="No work orders in this queue"
+            description="Switch queue tabs to see in-progress, completed, or cancelled assignments."
             icon={<ClipboardList className="h-5 w-5 text-accent" />}
           />
         )}
@@ -196,8 +365,7 @@ export default async function WorkOrdersPage({
     );
   }
 
-  const statusFilter =
-    statusTabs.find((status) => status === params.status) ?? "all";
+  const statusFilter = statusTabs.find((status) => status === params.status) ?? "all";
   const search = params.q?.trim() ?? "";
 
   const [workOrders, members, templates] = await Promise.all([
@@ -211,6 +379,11 @@ export default async function WorkOrdersPage({
   const pendingReviewOrders = workOrders.filter(
     (order) => order.completionReviewStatus === "pending",
   );
+  const overdueCount = workOrders.filter((order) => isOverdue(order, now)).length;
+  const urgentCount = workOrders.filter((order) => isUrgent(order, now)).length;
+  const prioritizedWorkOrders = [...workOrders].sort((left, right) =>
+    compareByAttention(left, right, now),
+  );
 
   return (
     <div className="space-y-6">
@@ -220,12 +393,42 @@ export default async function WorkOrdersPage({
         description="Create, assign, and track work with clear status ownership."
       />
 
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Card>
+          <CardContent className="space-y-1 py-5">
+            <p className="text-xs uppercase tracking-[0.08em] text-foreground-muted">Open Queue</p>
+            <p className="text-2xl font-semibold">
+              {workOrders.filter((order) => isOpenStatus(order.status)).length}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="space-y-1 py-5">
+            <p className="text-xs uppercase tracking-[0.08em] text-foreground-muted">Overdue</p>
+            <p className="text-2xl font-semibold text-danger">{overdueCount}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="space-y-1 py-5">
+            <p className="text-xs uppercase tracking-[0.08em] text-foreground-muted">Urgent</p>
+            <p className="text-2xl font-semibold text-warning">{urgentCount}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="space-y-1 py-5">
+            <p className="text-xs uppercase tracking-[0.08em] text-foreground-muted">Pending Review</p>
+            <p className="text-2xl font-semibold">{pendingReviewOrders.length}</p>
+          </CardContent>
+        </Card>
+      </section>
+
       <Card>
         <CardContent className="space-y-4 py-6">
           <div>
             <CardTitle className="text-base">Create work order</CardTitle>
             <CardDescription>
-              Use a focused status model: draft, open, in progress, completed, cancelled.
+              Use a focused status model: draft, open, in progress, completed. Use &quot;Void
+              mistaken work order&quot; from detail pages when cleanup is needed.
             </CardDescription>
           </div>
           <CreateWorkOrderForm members={members} />
@@ -277,73 +480,7 @@ export default async function WorkOrdersPage({
                       : "none"}
                   </p>
 
-                  <div className="mt-3 grid gap-3 lg:grid-cols-[auto_1fr]">
-                    <form action={createWorkOrderFromTemplateAction}>
-                      <input type="hidden" name="templateId" value={template.id} />
-                      <button
-                        type="submit"
-                        className="h-9 rounded-xl border bg-surface-strong px-3 text-xs font-semibold hover:bg-accent-soft"
-                      >
-                        Create now
-                      </button>
-                    </form>
-
-                    <form
-                      action={updateWorkOrderTemplateRecurrenceAction}
-                      className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5"
-                    >
-                      <input type="hidden" name="templateId" value={template.id} />
-                      <label className="flex items-center gap-2 rounded-xl border bg-surface-strong px-3 py-2 text-xs">
-                        <input
-                          type="checkbox"
-                          name="isActive"
-                          defaultChecked={template.isActive}
-                        />
-                        Active
-                      </label>
-                      <label className="flex items-center gap-2 rounded-xl border bg-surface-strong px-3 py-2 text-xs">
-                        <input
-                          type="checkbox"
-                          name="recurringEnabled"
-                          defaultChecked={template.recurringEnabled}
-                        />
-                        Recurring
-                      </label>
-                      <select
-                        name="recurrenceCadence"
-                        defaultValue={template.recurrenceCadence ?? ""}
-                        className="h-9 rounded-xl border bg-surface-strong px-3 text-xs"
-                      >
-                        <option value="">Cadence</option>
-                        <option value="daily">Daily</option>
-                        <option value="weekly">Weekly</option>
-                        <option value="monthly">Monthly</option>
-                        <option value="custom">Custom</option>
-                      </select>
-                      <input
-                        name="recurrenceIntervalDays"
-                        type="number"
-                        min="1"
-                        defaultValue={template.recurrenceIntervalDays ?? ""}
-                        placeholder="Custom days"
-                        className="h-9 rounded-xl border bg-surface-strong px-3 text-xs"
-                      />
-                      <div className="flex gap-2">
-                        <input
-                          name="nextGenerationOn"
-                          type="date"
-                          defaultValue={template.nextGenerationOn ?? ""}
-                          className="h-9 w-full rounded-xl border bg-surface-strong px-3 text-xs"
-                        />
-                        <button
-                          type="submit"
-                          className="h-9 rounded-xl border bg-surface-strong px-3 text-xs font-semibold hover:bg-accent-soft"
-                        >
-                          Save
-                        </button>
-                      </div>
-                    </form>
-                  </div>
+                  <TemplateRowActions template={template} />
                 </div>
               ))}
             </div>
@@ -422,7 +559,7 @@ export default async function WorkOrdersPage({
           </form>
         </div>
 
-        {workOrders.length ? (
+        {prioritizedWorkOrders.length ? (
           <TableContainer>
             <Table>
               <TableHead>
@@ -439,21 +576,42 @@ export default async function WorkOrdersPage({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {workOrders.map((order) => (
+                {prioritizedWorkOrders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell>{order.title}</TableCell>
                     <TableCell>
-                      <Badge variant={statusVariant(order.status)}>
-                        {formatStatus(order.status)}
-                      </Badge>
+                      <div className="space-y-1">
+                        <p>{order.title}</p>
+                        <div className="flex flex-wrap gap-1">
+                          {order.templateId ? <Badge variant="neutral">Recurring</Badge> : null}
+                          {order.generatedForDate ? (
+                            <Badge variant="neutral">
+                              Generated {formatDateKey(order.generatedForDate, context.user.timeZone)}
+                            </Badge>
+                          ) : null}
+                        </div>
+                      </div>
                     </TableCell>
-                    <TableCell>{order.priority}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        <Badge variant={statusVariant(order.status)}>{formatStatus(order.status)}</Badge>
+                        {isOverdue(order, now) ? <Badge variant="danger">Overdue</Badge> : null}
+                        {!isOverdue(order, now) && isDueSoon(order, now) ? (
+                          <Badge variant="warning">Due soon</Badge>
+                        ) : null}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap items-center gap-1">
+                        <span>{order.priority}</span>
+                        {isUrgent(order, now) ? <Badge variant="warning">Urgent</Badge> : null}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       {order.assignees.length
                         ? order.assignees.map((assignee) => assignee.fullName).join(", ")
                         : "Unassigned"}
                     </TableCell>
-                    <TableCell>{formatDate(order.dueAt, context.user.timeZone)}</TableCell>
+                    <TableCell>{formatDueState(order, context.user.timeZone, now)}</TableCell>
                     <TableCell>{formatCompensation(order)}</TableCell>
                     <TableCell>
                       <Badge variant={reviewVariant(order.completionReviewStatus)}>

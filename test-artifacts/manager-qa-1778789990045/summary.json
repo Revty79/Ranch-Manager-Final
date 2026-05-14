@@ -1,0 +1,657 @@
+{
+  "runId": "990045",
+  "startedAt": "2026-05-14T20:19:50.045Z",
+  "manager": {
+    "username": "aubrey-mgr-162225"
+  },
+  "login": {
+    "passwordResetTriggered": true,
+    "passwordSetTo": "RanchMgr#2026!",
+    "success": true,
+    "passwordUsed": "RanchPass123!",
+    "finalUrl": "http://208.88.9.175:3002/app"
+  },
+  "visibility": {
+    "/app": {
+      "url": "http://208.88.9.175:3002/app",
+      "hasAccessDenied": false,
+      "hasSectionError": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out A"
+    },
+    "/app/work-orders?status=all": {
+      "url": "http://208.88.9.175:3002/app/work-orders?status=all",
+      "hasAccessDenied": false,
+      "hasSectionError": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out W"
+    },
+    "/app/today": {
+      "url": "http://208.88.9.175:3002/app/today",
+      "hasAccessDenied": false,
+      "hasSectionError": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out W"
+    },
+    "/app/needs-attention": {
+      "url": "http://208.88.9.175:3002/app/needs-attention",
+      "hasAccessDenied": false,
+      "hasSectionError": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out M"
+    },
+    "/app/team?status=all": {
+      "url": "http://208.88.9.175:3002/app/team?status=all",
+      "hasAccessDenied": false,
+      "hasSectionError": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out T"
+    },
+    "/app/herd": {
+      "url": "http://208.88.9.175:3002/app/herd",
+      "hasAccessDenied": false,
+      "hasSectionError": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out H"
+    },
+    "/app/land": {
+      "url": "http://208.88.9.175:3002/app/land",
+      "hasAccessDenied": false,
+      "hasSectionError": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out L"
+    },
+    "/app/payroll": {
+      "url": "http://208.88.9.175:3002/app/payroll",
+      "hasAccessDenied": false,
+      "hasSectionError": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out P"
+    },
+    "/app/settings": {
+      "url": "http://208.88.9.175:3002/app/settings",
+      "hasAccessDenied": false,
+      "hasSectionError": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out S"
+    }
+  },
+  "workflow": {
+    "reviewedTasks": [
+      {
+        "title": "Manager Assignment Check 548376",
+        "status": "open",
+        "priority": "high",
+        "assignees": "Aubrey Jensen Manager 162225, Reed Dalton Reliable 162225",
+        "due": "May 15, 2026"
+      },
+      {
+        "title": "Recurring Water Check 411116",
+        "status": "open",
+        "priority": "normal",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "Not set"
+      },
+      {
+        "title": "Recurring Water Check 411116",
+        "status": "open",
+        "priority": "normal",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 14, 2026"
+      },
+      {
+        "title": "Recurring Water Check 411116",
+        "status": "open",
+        "priority": "normal",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 13, 2026"
+      },
+      {
+        "title": "Corrected Feed Entry 411116",
+        "status": "cancelled",
+        "priority": "low",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 17, 2026"
+      },
+      {
+        "title": "Move and Check Cattle - Lower Field 411116",
+        "status": "open",
+        "priority": "high",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 12, 2026"
+      },
+      {
+        "title": "Animal Health Check - Calves 411116",
+        "status": "open",
+        "priority": "normal",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 16, 2026"
+      },
+      {
+        "title": "Fence Repair - Creek Lot 411116",
+        "status": "open",
+        "priority": "high",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 15, 2026"
+      },
+      {
+        "title": "Feed Check - Winter Lot 411116",
+        "status": "open",
+        "priority": "normal",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 15, 2026"
+      },
+      {
+        "title": "Water Check - North Trough 411116",
+        "status": "open",
+        "priority": "normal",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 14, 2026"
+      },
+      {
+        "title": "Feed Check - Winter Lot 269336",
+        "status": "open",
+        "priority": "normal",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 15, 2026"
+      },
+      {
+        "title": "Water Check - North Trough 269336",
+        "status": "open",
+        "priority": "normal",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 14, 2026"
+      },
+      {
+        "title": "Fence line check",
+        "status": "open",
+        "priority": "normal",
+        "assignees": "Cody Codex",
+        "due": "May 14, 2026"
+      },
+      {
+        "title": "Water points inspection",
+        "status": "open",
+        "priority": "high",
+        "assignees": "Cody Codex",
+        "due": "May 14, 2026"
+      },
+      {
+        "title": "Morning livestock check",
+        "status": "open",
+        "priority": "high",
+        "assignees": "Cody Codex",
+        "due": "May 14, 2026"
+      }
+    ],
+    "createdTasks": [
+      {
+        "title": "Urgent Fence Repair Manager 990045",
+        "row": "Urgent Fence Repair Manager 990045 open high Ty Brooks Badtech 170111 May 14, 2026 Regular Not required No incentive pay configured Edit"
+      },
+      {
+        "title": "Water Line Audit Manager 990045",
+        "row": "Water Line Audit Manager 990045 open normal Reed Dalton Reliable 162225 May 15, 2026 Regular Not required No incentive pay configured Edit"
+      }
+    ],
+    "reassignedTasks": [
+      {
+        "title": "Feed Check - Winter Lot 411116",
+        "row": "Feed Check - Winter Lot 411116 open normal Milo Test Worker 783163, Lane Morris Forgetful 170111 May 15, 2026 Regular Not required No incentive pay configured Edit"
+      }
+    ],
+    "statusUpdates": [
+      {
+        "task": "Urgent Fence Repair Manager 990045",
+        "status": "in_progress"
+      },
+      {
+        "task": "Urgent Fence Repair Manager 990045",
+        "status": "completed"
+      }
+    ],
+    "mistakesCorrected": [
+      {
+        "task": "Water Line Audit Manager 990045",
+        "action": "Corrected mistaken assignment from Reed to Lane"
+      },
+      {
+        "task": "Corrected Feed Entry 411116",
+        "action": "Manager could edit corrected/cancelled mistaken task and add confirmation note"
+      }
+    ],
+    "cancelledViewCount": 1,
+    "cancelledSample": [
+      "Corrected Feed Entry 411116"
+    ],
+    "completedViewCountBefore": 0,
+    "recurringRowsCount": 3,
+    "recurringRows": [
+      {
+        "title": "Recurring Water Check 411116",
+        "status": "open",
+        "due": "Not set",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163"
+      },
+      {
+        "title": "Recurring Water Check 411116",
+        "status": "open",
+        "due": "May 14, 2026",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163"
+      },
+      {
+        "title": "Recurring Water Check 411116",
+        "status": "open",
+        "due": "May 13, 2026",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163"
+      }
+    ],
+    "overdueRows": [
+      {
+        "title": "Move and Check Cattle - Lower Field 411116",
+        "status": "open",
+        "due": "May 12, 2026"
+      }
+    ],
+    "completedViewAfter": [
+      {
+        "title": "Urgent Fence Repair Manager 990045",
+        "status": "completed",
+        "assignees": "Ty Brooks Badtech 170111",
+        "due": "May 14, 2026"
+      }
+    ]
+  },
+  "blockers": [],
+  "bugs": [
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Cannot read properties of null (reading 'parentNode')",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    },
+    {
+      "page": "browser runtime",
+      "steps": "Normal manager navigation",
+      "expected": "No unhandled page errors",
+      "actual": "Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "severity": "medium",
+      "likelyCodeArea": "unknown (client runtime)"
+    }
+  ],
+  "permissionChecks": [
+    {
+      "check": "manager_access_admin",
+      "route": "/admin",
+      "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+      "allowed": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-16222"
+    },
+    {
+      "check": "manager_owner_controls_visibility",
+      "route": "/app/settings",
+      "hasOwnerControlsVisible": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out SETTINGS Account & Billing Ranch identity"
+    },
+    {
+      "check": "manager_direct_checkout_route",
+      "route": "/checkout",
+      "finalUrl": "http://208.88.9.175:3002/app/settings",
+      "blocked": true,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-16222"
+    }
+  ],
+  "uxFriction": [
+    "Overdue work is not explicitly labeled as overdue in the list row; managers must infer urgency from date alone."
+  ],
+  "cleanupObservations": [
+    "Manager-facing work-order flow still lacks obvious delete/archive/void control for mistaken records; cancellation/edit is the only visible recovery path."
+  ],
+  "mobile": {
+    "workOrdersHasActionsLabel": true,
+    "workOrdersEditLinkCount": 17,
+    "workOrdersBodySample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out WORK ORDERS Work Order Queue Create, assi",
+    "todayBodySample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out WORKER TODAY Today Your shift state, curr",
+    "finalUrlToday": "http://208.88.9.175:3002/app/today"
+  },
+  "artifacts": [
+    {
+      "type": "screenshot",
+      "name": "00-after-manager-login",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778789990045\\00-after-manager-login.png"
+    },
+    {
+      "type": "screenshot",
+      "name": "01-settings-manager",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778789990045\\01-settings-manager.png"
+    },
+    {
+      "type": "screenshot",
+      "name": "02-admin-access-check",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778789990045\\02-admin-access-check.png"
+    },
+    {
+      "type": "screenshot",
+      "name": "03-checkout-access-check",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778789990045\\03-checkout-access-check.png"
+    },
+    {
+      "type": "screenshot",
+      "name": "04-workorders-all-initial",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778789990045\\04-workorders-all-initial.png"
+    },
+    {
+      "type": "screenshot",
+      "name": "05-workorders-cancelled",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778789990045\\05-workorders-cancelled.png"
+    },
+    {
+      "type": "screenshot",
+      "name": "06-workorders-completed-before",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778789990045\\06-workorders-completed-before.png"
+    },
+    {
+      "type": "screenshot",
+      "name": "07-recurring-search",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778789990045\\07-recurring-search.png"
+    },
+    {
+      "type": "screenshot",
+      "name": "08-overdue-search",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778789990045\\08-overdue-search.png"
+    },
+    {
+      "type": "screenshot",
+      "name": "09-workorders-completed-after",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778789990045\\09-workorders-completed-after.png"
+    },
+    {
+      "type": "screenshot",
+      "name": "10-workorders-all-after-manager-actions",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778789990045\\10-workorders-all-after-manager-actions.png"
+    },
+    {
+      "type": "screenshot",
+      "name": "11-mobile-workorders",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778789990045\\11-mobile-workorders.png"
+    },
+    {
+      "type": "screenshot",
+      "name": "12-mobile-today",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778789990045\\12-mobile-today.png"
+    }
+  ]
+}
