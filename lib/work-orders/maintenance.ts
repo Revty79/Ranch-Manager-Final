@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNotNull, lte } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, lte, sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
   ranchMemberships,
@@ -119,6 +119,9 @@ export async function materializeDueRecurringWorkOrdersForRanch(
         })
         .onConflictDoNothing({
           target: [workOrders.templateId, workOrders.generatedForDate],
+          // This conflict target maps to a partial unique index in schema/migrations.
+          // PostgreSQL needs the same predicate in ON CONFLICT to infer that index.
+          where: sql`${workOrders.templateId} is not null and ${workOrders.generatedForDate} is not null`,
         })
         .returning({ id: workOrders.id });
 

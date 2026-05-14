@@ -1,0 +1,1494 @@
+[
+  {
+    "ts": "2026-05-14T16:39:43.554Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/signup?_rsc=17yrj",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:43.555Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/demo?_rsc=17yrj",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:43.556Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/login?_rsc=17yrj",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.069Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/demo?_rsc=to9i9",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.069Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/signup?_rsc=to9i9",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.070Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/login?_rsc=to9i9",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.449Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd?_rsc=1odgr",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.450Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/settings?_rsc=1odgr",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.450Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land?_rsc=1odgr",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.451Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/payroll?_rsc=1odgr",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.471Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/work-orders?_rsc=1odgr",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.472Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/time?_rsc=1odgr",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.472Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/communication?_rsc=1odgr",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.473Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?_rsc=1odgr",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.497Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/today?_rsc=1odgr",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.497Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/needs-attention?_rsc=1odgr",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.498Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app?_rsc=1odgr",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.499Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/settings?_rsc=1atze",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.522Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd/breeding?_rsc=1odgr",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.526Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/needs-attention?_rsc=seere",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.545Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/work-orders?_rsc=193li",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.546Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land?_rsc=1poe0",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.548Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd?_rsc=g02la",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.577Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd/breeding?_rsc=ekn2l",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.602Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/payroll?_rsc=4xx6y",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.603Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/time?_rsc=lbqa5",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.603Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/communication?_rsc=1hhi6",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.617Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/today?_rsc=seere",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:44.617Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app?_rsc=seere",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.045Z",
+    "name": "login",
+    "url": "http://208.88.9.175:3002/app"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.169Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?status=all&_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.169Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team/8cbabec7-e8f4-44f3-986d-29ccd97d9cf8?_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.170Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?status=inactive&_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.170Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?status=active&_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.189Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/settings?_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.189Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land?_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.191Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd?_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.191Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/payroll?_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.208Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/work-orders?_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.210Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/communication?_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.210Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/time?_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.210Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.227Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/needs-attention?_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.228Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app?_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.228Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/today?_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.229Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team/8cbabec7-e8f4-44f3-986d-29ccd97d9cf8?_rsc=mx2dv",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.253Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?status=all&_rsc=mx2dv",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.253Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?status=inactive&_rsc=mx2dv",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.253Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?status=active&_rsc=mx2dv",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.283Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd?_rsc=1kzzy",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.284Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land?_rsc=pkl4n",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.284Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/time?_rsc=14v4z",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.285Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/payroll?_rsc=j9bo4",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.311Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/needs-attention?_rsc=mx2dv",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.312Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?_rsc=mx2dv",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.312Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/work-orders?_rsc=1q7ip",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.313Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/communication?_rsc=ynjdf",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.326Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/today?_rsc=mx2dv",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:45.326Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app?_rsc=mx2dv",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:46.500Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team",
+    "method": "POST",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:46.751Z",
+    "name": "team_add_result",
+    "teamDone": {
+      "state": "success",
+      "text": "Full name Username Used for login. 3-40 letters, numbers, dots, dashes, or underscores. Email (optional) Temporary password Required for a new login. Member will be prompted to set a new password at first login. Role Regular Worker Seasonal"
+    },
+    "workerVisible": true
+  },
+  {
+    "ts": "2026-05-14T16:39:46.870Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team/8cbabec7-e8f4-44f3-986d-29ccd97d9cf8?_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:46.870Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?status=all&_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:46.870Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?status=inactive&_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:46.870Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?status=active&_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:46.874Z",
+    "name": "team-after-single-add",
+    "file": "D:\\Ranch Manager Final\\test-artifacts\\targeted-1778776783163\\team-after-single-add.png"
+  },
+  {
+    "ts": "2026-05-14T16:39:46.900Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/communication?_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:46.901Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:46.901Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/work-orders?_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:46.902Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/time?_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:46.928Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/needs-attention?_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:46.929Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app?_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:46.930Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/today?_rsc=1yda1",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:46.954Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team/8cbabec7-e8f4-44f3-986d-29ccd97d9cf8?_rsc=mx2dv",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:46.977Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?status=all&_rsc=mx2dv",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:46.980Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?status=inactive&_rsc=mx2dv",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:46.980Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?status=active&_rsc=mx2dv",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:46.983Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land?_rsc=pkl4n",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:46.983Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/payroll?_rsc=j9bo4",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:46.983Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/settings?_rsc=wkh3m",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:46.983Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd?_rsc=1kzzy",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.057Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/settings?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.058Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.059Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.059Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/payroll?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.068Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd/breeding?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.080Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/time?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.081Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/work-orders?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.093Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.093Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/communication?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.115Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/needs-attention?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.117Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/today?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.120Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.151Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd/breeding?_rsc=10h7a",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.152Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/settings?_rsc=wk7va",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.153Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd?_rsc=mwt5k",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.183Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/payroll?_rsc=j92fs",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.184Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/work-orders?_rsc=1q79h",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.185Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/communication?_rsc=yna54",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.185Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/time?_rsc=14uvq",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.207Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/needs-attention?_rsc=mwt5k",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.208Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?_rsc=10mlr",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.209Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/today?_rsc=mwt5k",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:47.209Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app?_rsc=mwt5k",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.228Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd/export?type=inventory&_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.228Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd/export?type=due&_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.228Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd/export?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.273Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/settings?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.274Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.274Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.275Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/payroll?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.294Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/communication?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.295Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/time?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.295Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.295Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/work-orders?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.312Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/needs-attention?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.312Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.312Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/today?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.313Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/settings?_rsc=wk7va",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.338Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd?_rsc=mwt5k",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.340Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land?_rsc=pkbwc",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.341Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/payroll?_rsc=j92fs",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.341Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/time?_rsc=14uvq",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.369Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/needs-attention?_rsc=mwt5k",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.373Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/work-orders?_rsc=1q79h",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.373Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/communication?_rsc=yna54",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.374Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?_rsc=10mlr",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.396Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/today?_rsc=mwt5k",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.402Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app?_rsc=mwt5k",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.599Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd/breeding?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:48.620Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd/breeding?_rsc=10h7a",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.241Z",
+    "name": "herd_add_result",
+    "herdDone": {
+      "state": "success",
+      "text": "Tag / visual ID Internal ID Ranch-only operational ID (ear tag, lot ID, or office ledger ID). Display name (optional) Alternate / official ID (optional) Species Cattle Horse Bison Sheep Goat Swine Donkey Mule Llama Alpaca Poultry Other live"
+    },
+    "tagVisible": false
+  },
+  {
+    "ts": "2026-05-14T16:39:49.452Z",
+    "name": "herd-after-single-add",
+    "file": "D:\\Ranch Manager Final\\test-artifacts\\targeted-1778776783163\\herd-after-single-add.png"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.525Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd/export?type=due&_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.525Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd/export?type=inventory&_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.526Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd/export?_rsc=1yd0s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.571Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/settings?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.572Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.572Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/payroll?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.572Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.586Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/time?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.586Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/communication?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.587Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/work-orders?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.587Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.604Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/needs-attention?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.604Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/today?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.605Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.605Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/settings?_rsc=wkauq",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.627Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land?_rsc=mww50",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.628Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd?_rsc=1kztp",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.628Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/time?_rsc=14uyq",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.653Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/needs-attention?_rsc=mww50",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.653Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/communication?_rsc=ynd4k",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.654Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?_rsc=10mor",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.667Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/today?_rsc=mww50",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:49.668Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app?_rsc=mww50",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.482Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land/grazing?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.505Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land/grazing?_rsc=870w2",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.535Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land",
+    "method": "POST",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.703Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land/export?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.703Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land/export?type=movement&_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.704Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land/export?type=occupancy&_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.754Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/payroll?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.754Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.754Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/settings?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.755Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.775Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/communication?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.776Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/time?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.776Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/work-orders?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.776Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.796Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/needs-attention?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.797Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/today?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.797Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.798Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/settings?_rsc=wkauq",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.823Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land?_rsc=mww50",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.824Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/payroll?_rsc=j95f8",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.825Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/time?_rsc=14uyq",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.825Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd?_rsc=1kztp",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.865Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/needs-attention?_rsc=mww50",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.867Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/communication?_rsc=ynd4k",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.867Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/work-orders?_rsc=1q7cg",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.868Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?_rsc=10mor",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.887Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/today?_rsc=mww50",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:50.888Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app?_rsc=mww50",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:51.732Z",
+    "name": "land_add_result",
+    "landDone": {
+      "state": "success",
+      "text": "Name Code (optional) Unit type Pasture Field Trap Lot Corral Pen Stall Barn area Holding area Other Status Active Inactive Acreage (optional) Grazeable acreage (optional) Estimated forage lbs/acre (optional) Planning input only. Use your ra"
+    },
+    "codeVisible": true
+  },
+  {
+    "ts": "2026-05-14T16:39:51.875Z",
+    "name": "land-after-single-add",
+    "file": "D:\\Ranch Manager Final\\test-artifacts\\targeted-1778776783163\\land-after-single-add.png"
+  },
+  {
+    "ts": "2026-05-14T16:39:51.945Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land/export?type=movement&_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:51.945Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land/export?_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:51.945Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land/export?type=occupancy&_rsc=1yd3s",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:51.994Z",
+    "name": "console_error",
+    "text": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error."
+  },
+  {
+    "ts": "2026-05-14T16:39:52.012Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/settings?_rsc=1mj5f",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.012Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land?_rsc=1mj5f",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.013Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd?_rsc=1mj5f",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.013Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/payroll?_rsc=1mj5f",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.028Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/work-orders?_rsc=1mj5f",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.029Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/communication?_rsc=1mj5f",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.029Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?_rsc=1mj5f",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.029Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/time?_rsc=1mj5f",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.046Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/needs-attention?_rsc=1mj5f",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.047Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app?_rsc=1mj5f",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.047Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/today?_rsc=1mj5f",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.048Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/settings?_rsc=14js4",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.072Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/land?_rsc=fe4g8",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.073Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/time?_rsc=125xm",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.073Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/payroll?_rsc=i2pzg",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.074Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/herd?_rsc=db5po",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.097Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/work-orders?_rsc=2jh3d",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.098Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/team?_rsc=1imr6",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.099Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/needs-attention?_rsc=2jh3d",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.099Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/communication?_rsc=1plft",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.115Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app?_rsc=2jh3d",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.115Z",
+    "name": "request_failed",
+    "url": "http://208.88.9.175:3002/app/today?_rsc=2jh3d",
+    "method": "GET",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "ts": "2026-05-14T16:39:52.991Z",
+    "name": "work_orders_state",
+    "url": "http://208.88.9.175:3002/app/work-orders",
+    "hasErrorState": true,
+    "sample": "RANCH the test ranch owner access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @cody Settings Log out Unable to load this app section Please try again. If the"
+  },
+  {
+    "ts": "2026-05-14T16:39:53.099Z",
+    "name": "work-orders-state",
+    "file": "D:\\Ranch Manager Final\\test-artifacts\\targeted-1778776783163\\work-orders-state.png"
+  }
+]
