@@ -42,6 +42,7 @@ export const appSectionByHref: Readonly<Record<string, AppSection>> = {
   "/app/payroll": "payroll",
   "/app/herd": "herd",
   "/app/land": "land",
+  "/app/equipment": "land",
   "/app/settings": "settings",
 };
 

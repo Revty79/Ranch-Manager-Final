@@ -160,6 +160,46 @@ export const grazingPeriodStatusEnum = pgEnum("grazing_period_status", [
   "completed",
   "cancelled",
 ]);
+export const equipmentTypeEnum = pgEnum("equipment_type", [
+  "truck",
+  "tractor",
+  "trailer",
+  "atv",
+  "utv",
+  "implement",
+  "pump",
+  "tool",
+  "other",
+]);
+export const equipmentStatusEnum = pgEnum("equipment_status", [
+  "active",
+  "needs_maintenance",
+  "down",
+  "retired",
+]);
+export const maintenanceTypeEnum = pgEnum("maintenance_type", [
+  "routine",
+  "repair",
+  "inspection",
+  "oil_change",
+  "tire",
+  "fluids",
+  "service",
+  "other",
+]);
+export const maintenanceStatusEnum = pgEnum("maintenance_status", [
+  "scheduled",
+  "due",
+  "overdue",
+  "in_progress",
+  "completed",
+  "cancelled",
+]);
+export const maintenancePriorityEnum = pgEnum("maintenance_priority", [
+  "low",
+  "normal",
+  "high",
+]);
 
 export const users = pgTable(
   "users",
@@ -1212,6 +1252,85 @@ export const grazingPeriodAnimals = pgTable(
   ],
 );
 
+export const equipmentRecords = pgTable(
+  "equipment_records",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ranchId: uuid("ranch_id")
+      .references(() => ranches.id, { onDelete: "cascade" })
+      .notNull(),
+    name: text("name").notNull(),
+    equipmentType: equipmentTypeEnum("equipment_type").default("other").notNull(),
+    status: equipmentStatusEnum("status").default("active").notNull(),
+    identifier: text("identifier"),
+    make: text("make"),
+    model: text("model"),
+    year: integer("year"),
+    serialNumber: text("serial_number"),
+    plateVin: text("plate_vin"),
+    currentLocation: text("current_location"),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("equipment_records_ranch_idx").on(table.ranchId),
+    index("equipment_records_status_idx").on(table.status),
+    index("equipment_records_type_idx").on(table.equipmentType),
+    index("equipment_records_identifier_idx").on(table.identifier),
+    index("equipment_records_updated_idx").on(table.updatedAt),
+  ],
+);
+
+export const equipmentMaintenanceRecords = pgTable(
+  "equipment_maintenance_records",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ranchId: uuid("ranch_id")
+      .references(() => ranches.id, { onDelete: "cascade" })
+      .notNull(),
+    equipmentId: uuid("equipment_id")
+      .references(() => equipmentRecords.id, { onDelete: "cascade" })
+      .notNull(),
+    title: text("title").notNull(),
+    maintenanceType: maintenanceTypeEnum("maintenance_type").default("routine").notNull(),
+    status: maintenanceStatusEnum("status").default("scheduled").notNull(),
+    priority: maintenancePriorityEnum("priority").default("normal").notNull(),
+    dueOn: date("due_on", { mode: "string" }),
+    completedOn: date("completed_on", { mode: "string" }),
+    assignedMembershipId: uuid("assigned_membership_id").references(() => ranchMemberships.id, {
+      onDelete: "set null",
+    }),
+    relatedWorkOrderId: uuid("related_work_order_id").references(() => workOrders.id, {
+      onDelete: "set null",
+    }),
+    costCents: integer("cost_cents"),
+    notes: text("notes"),
+    createdByMembershipId: uuid("created_by_membership_id").references(() => ranchMemberships.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("equipment_maintenance_records_ranch_idx").on(table.ranchId),
+    index("equipment_maintenance_records_equipment_idx").on(table.equipmentId),
+    index("equipment_maintenance_records_status_idx").on(table.status),
+    index("equipment_maintenance_records_due_on_idx").on(table.dueOn),
+    index("equipment_maintenance_records_related_work_order_idx").on(table.relatedWorkOrderId),
+    index("equipment_maintenance_records_assigned_idx").on(table.assignedMembershipId),
+    index("equipment_maintenance_records_updated_idx").on(table.updatedAt),
+  ],
+);
+
 export type RanchRole = (typeof ranchRoleEnum.enumValues)[number];
 export type OnboardingState = (typeof onboardingStateEnum.enumValues)[number];
 export type SubscriptionStatus = (typeof subscriptionStatusEnum.enumValues)[number];
@@ -1240,3 +1359,8 @@ export type LandUnitType = (typeof landUnitTypeEnum.enumValues)[number];
 export type MovementReason = (typeof movementReasonEnum.enumValues)[number];
 export type HerdProtocolType = (typeof herdProtocolTypeEnum.enumValues)[number];
 export type GrazingPeriodStatus = (typeof grazingPeriodStatusEnum.enumValues)[number];
+export type EquipmentType = (typeof equipmentTypeEnum.enumValues)[number];
+export type EquipmentStatus = (typeof equipmentStatusEnum.enumValues)[number];
+export type MaintenanceType = (typeof maintenanceTypeEnum.enumValues)[number];
+export type MaintenanceStatus = (typeof maintenanceStatusEnum.enumValues)[number];
+export type MaintenancePriority = (typeof maintenancePriorityEnum.enumValues)[number];

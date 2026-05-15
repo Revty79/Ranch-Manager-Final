@@ -16,5 +16,6 @@ export const appNav = [
   { label: "Payroll", href: "/app/payroll" },
   { label: "Herd", href: "/app/herd" },
   { label: "Land", href: "/app/land" },
+  { label: "Equipment", href: "/app/equipment" },
   { label: "Settings", href: "/app/settings" },
 ];
