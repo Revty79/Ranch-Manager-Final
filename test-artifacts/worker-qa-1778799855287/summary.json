@@ -1,0 +1,634 @@
+{
+  "startedAt": "2026-05-14T23:04:15.287Z",
+  "outDir": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778799855287",
+  "workers": {
+    "reed": {
+      "persona": "reliable",
+      "username": "reed-reliable-162225",
+      "loginWorked": true,
+      "passwordUsed": "WorkerPass#2026!",
+      "finalUrlAfterLogin": "http://208.88.9.175:3002/app",
+      "screenshots": [
+        {
+          "name": "after-login",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778799855287\\reed-after-login.png"
+        },
+        {
+          "name": "visibility-last-route",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778799855287\\reed-visibility-last-route.png"
+        },
+        {
+          "name": "today",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778799855287\\reed-today.png"
+        },
+        {
+          "name": "workorders",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778799855287\\reed-workorders.png"
+        },
+        {
+          "name": "reliable-after-complete",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778799855287\\reed-reliable-after-complete.png"
+        },
+        {
+          "name": "general-permission-attempts",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778799855287\\reed-general-permission-attempts.png"
+        }
+      ],
+      "visibility": {
+        "/app": {
+          "route": "/app",
+          "finalUrl": "http://208.88.9.175:3002/app",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out APP HOME Operations Dashboar"
+        },
+        "/app/today": {
+          "route": "/app/today",
+          "finalUrl": "http://208.88.9.175:3002/app/today",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out WORKER TODAY Today Your shif"
+        },
+        "/app/work-orders": {
+          "route": "/app/work-orders",
+          "finalUrl": "http://208.88.9.175:3002/app/work-orders",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out WORK ORDERS Assigned Work Pr"
+        },
+        "/app/time": {
+          "route": "/app/time",
+          "finalUrl": "http://208.88.9.175:3002/app/time",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out TIME Shift & Task Time Start"
+        },
+        "/app/team": {
+          "route": "/app/team",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out ACCESS You do not have acces"
+        },
+        "/app/payroll": {
+          "route": "/app/payroll",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out ACCESS You do not have acces"
+        },
+        "/app/settings": {
+          "route": "/app/settings",
+          "finalUrl": "http://208.88.9.175:3002/app/settings",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out SETTINGS Account & Billing R"
+        },
+        "/app/herd": {
+          "route": "/app/herd",
+          "finalUrl": "http://208.88.9.175:3002/app/herd",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out HERD Animal Registry Track c"
+        },
+        "/app/land": {
+          "route": "/app/land",
+          "finalUrl": "http://208.88.9.175:3002/app/land",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out LAND Land Units One shared m"
+        },
+        "/app/needs-attention": {
+          "route": "/app/needs-attention",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out ACCESS You do not have acces"
+        },
+        "/admin": {
+          "route": "/admin",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out ACCESS You do not have acces"
+        },
+        "/checkout": {
+          "route": "/checkout",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out ACCESS You do not have acces"
+        }
+      },
+      "todaySummary": {
+        "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out WORKER TODAY Today Your shift state, current work, and next action in one place. Open Communication Open Work Orders SHIFT Active Since May 14, 08:28 PM ACTIVE WORK TIMER Feed Check - Winter Lot 269336 Started May 14, 08:29 PM ASSIGNED OPEN WORK 9 URGENT/UNREAD ALERTS 0 0 urgent threads, 0 unread private Next best action Finish or stop the active timer on \"Feed Check - Winter Lot 269336\". Shift status Clocked in at 8:28 PM For lunch or breaks, clock out and clock back in when you return. Clock out Work timer Tracking Feed Check - Winter Lot 269336 since 8:29 PM Stop work timer Add completion proof (re",
+        "hasShiftControls": true,
+        "hasWorkTimerControls": true
+      },
+      "workOrdersSummary": {
+        "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out WORK ORDERS Assigned Work Prioritized queue for today, with overdue and urgent work surfaced first. DO NEXT Move and Check Cattle - Lower Field 411116 Overdue Due: May 12, 2026 (overdue) active (9) in progress (1) completed (1) cancelled (1) all (11) Move and Check Cattle - Lower Field 411116 open Not required Overdue Move herd group and verify final headcount against sheet. Priority: high Due: May 12, 2026 (overdue) Pay: Regular Incentive: Not set No incentive pay configured Recurring Water Check 411116 open Not required Overdue Recurring Recurring daily template for water check. Priority: normal Due",
+        "hasCreateForm": false,
+        "hasEditLinks": false,
+        "assignedCards": []
+      },
+      "actions": [
+        "Added long/messy completion note.",
+        "Submitted completion proof for one assigned task.",
+        "Attempted to access manager/owner pages and to edit/reassign work as worker."
+      ],
+      "completeFeedback": "Add completion proof (recommended) COMPLETION NOTE I completed the assigned scope. I checked work quality before submitting. I cleaned the area, tools, and materials. I documented any follow-up that is still needed. EVIDENCE 1 EVIDENCE 2 EVIDENCE 3 Evidence links are optional. Photo/file uploads can be added cleanly in a future step using the same evidence m",
+      "assignedAfterCompletion": [],
+      "restrictedAttempts": [
+        {
+          "route": "/app/team",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out ACCESS You do not have acces"
+        },
+        {
+          "route": "/app/payroll",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out ACCESS You do not have acces"
+        },
+        {
+          "route": "/app/settings",
+          "finalUrl": "http://208.88.9.175:3002/app/settings",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out SETTINGS Account & Billing R"
+        },
+        {
+          "route": "/app/herd",
+          "finalUrl": "http://208.88.9.175:3002/app/herd",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out HERD Animal Registry Track c"
+        },
+        {
+          "route": "/app/land",
+          "finalUrl": "http://208.88.9.175:3002/app/land",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out LAND Land Units One shared m"
+        },
+        {
+          "route": "/app/needs-attention",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out ACCESS You do not have acces"
+        },
+        {
+          "route": "/admin",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out ACCESS You do not have acces"
+        },
+        {
+          "route": "/checkout",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out ACCESS You do not have acces"
+        }
+      ],
+      "reassignAttempt": {
+        "hasEditLink": false,
+        "hasAssigneeCheckboxes": false,
+        "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-162225 Settings Log out WORK ORDERS Assigned Work Prioritized queue for today, with overdue and urgent work surfaced first. DO NEXT "
+      }
+    },
+    "lane": {
+      "persona": "forgetful",
+      "username": "lane-forgetful-170111",
+      "loginWorked": true,
+      "passwordUsed": "WorkerPass#2026!",
+      "finalUrlAfterLogin": "http://208.88.9.175:3002/app",
+      "screenshots": [
+        {
+          "name": "after-login",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778799855287\\lane-after-login.png"
+        },
+        {
+          "name": "visibility-last-route",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778799855287\\lane-visibility-last-route.png"
+        },
+        {
+          "name": "today",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778799855287\\lane-today.png"
+        },
+        {
+          "name": "workorders",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778799855287\\lane-workorders.png"
+        },
+        {
+          "name": "forgetful-returned",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778799855287\\lane-forgetful-returned.png"
+        },
+        {
+          "name": "general-permission-attempts",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778799855287\\lane-general-permission-attempts.png"
+        }
+      ],
+      "visibility": {
+        "/app": {
+          "route": "/app",
+          "finalUrl": "http://208.88.9.175:3002/app",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out APP HOME Operations Dashboa"
+        },
+        "/app/today": {
+          "route": "/app/today",
+          "finalUrl": "http://208.88.9.175:3002/app/today",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out WORKER TODAY Today Your shi"
+        },
+        "/app/work-orders": {
+          "route": "/app/work-orders",
+          "finalUrl": "http://208.88.9.175:3002/app/work-orders",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out WORK ORDERS Assigned Work P"
+        },
+        "/app/time": {
+          "route": "/app/time",
+          "finalUrl": "http://208.88.9.175:3002/app/time",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out TIME Shift & Task Time Star"
+        },
+        "/app/team": {
+          "route": "/app/team",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out ACCESS You do not have acce"
+        },
+        "/app/payroll": {
+          "route": "/app/payroll",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out ACCESS You do not have acce"
+        },
+        "/app/settings": {
+          "route": "/app/settings",
+          "finalUrl": "http://208.88.9.175:3002/app/settings",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out SETTINGS Account & Billing "
+        },
+        "/app/herd": {
+          "route": "/app/herd",
+          "finalUrl": "http://208.88.9.175:3002/app/herd",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out HERD Animal Registry Track "
+        },
+        "/app/land": {
+          "route": "/app/land",
+          "finalUrl": "http://208.88.9.175:3002/app/land",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out LAND Land Units One shared "
+        },
+        "/app/needs-attention": {
+          "route": "/app/needs-attention",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out ACCESS You do not have acce"
+        },
+        "/admin": {
+          "route": "/admin",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out ACCESS You do not have acce"
+        },
+        "/checkout": {
+          "route": "/checkout",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out ACCESS You do not have acce"
+        }
+      },
+      "todaySummary": {
+        "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out WORKER TODAY Today Your shift state, current work, and next action in one place. Open Communication Open Work Orders SHIFT Active Since May 14, 08:30 PM ACTIVE WORK TIMER None ASSIGNED OPEN WORK 3 URGENT/UNREAD ALERTS 0 0 urgent threads, 0 unread private Next best action Start your next assigned work timer from the control panel below. Shift status Clocked in at 8:30 PM For lunch or breaks, clock out and clock back in when you return. Clock out Work timer No active work timer Select work order Water Line Audit Manager 990045 Feed Check - Winter Lot 411116 Water Line Audit Manager 772487 Start work ti",
+        "hasShiftControls": true,
+        "hasWorkTimerControls": true
+      },
+      "workOrdersSummary": {
+        "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out WORK ORDERS Assigned Work Prioritized queue for today, with overdue and urgent work surfaced first. DO NEXT Feed Check - Winter Lot 411116 Due: May 15, 2026 (due soon) active (3) in progress (1) completed (0) cancelled (0) all (3) Feed Check - Winter Lot 411116 in progress Not required Due soon Confirm hay quantity and feed bunks are full. Priority: normal Due: May 15, 2026 (due soon) Pay: Regular Incentive: Not set No incentive pay configured Water Line Audit Manager 990045 open Not required Due soon Inspect water line pressure and check all trough valves. Priority: normal Due: May 15, 2026 (due soo",
+        "hasCreateForm": false,
+        "hasEditLinks": false,
+        "assignedCards": []
+      },
+      "actions": [
+        "Started task but did not finish (forgetful scenario).",
+        "Left Today screen without completing task.",
+        "Stopped timer later without marking completion.",
+        "Attempted to access manager/owner pages and to edit/reassign work as worker."
+      ],
+      "returnedTodayState": {
+        "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out WORKER TODAY Today Your shift state, current work, and next action in one place. Open Communication Open Work Orders SHIFT Active Since May 14, 08:30 PM ACTIVE WORK TIMER Water Line Audit Manager 990045 Started May 14, 11:05 PM",
+        "hasActiveTimerMessage": true,
+        "hasReminderLikeText": true
+      },
+      "restrictedAttempts": [
+        {
+          "route": "/app/team",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out ACCESS You do not have acce"
+        },
+        {
+          "route": "/app/payroll",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out ACCESS You do not have acce"
+        },
+        {
+          "route": "/app/settings",
+          "finalUrl": "http://208.88.9.175:3002/app/settings",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out SETTINGS Account & Billing "
+        },
+        {
+          "route": "/app/herd",
+          "finalUrl": "http://208.88.9.175:3002/app/herd",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out HERD Animal Registry Track "
+        },
+        {
+          "route": "/app/land",
+          "finalUrl": "http://208.88.9.175:3002/app/land",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out LAND Land Units One shared "
+        },
+        {
+          "route": "/app/needs-attention",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out ACCESS You do not have acce"
+        },
+        {
+          "route": "/admin",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out ACCESS You do not have acce"
+        },
+        {
+          "route": "/checkout",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out ACCESS You do not have acce"
+        }
+      ],
+      "reassignAttempt": {
+        "hasEditLink": false,
+        "hasAssigneeCheckboxes": false,
+        "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-170111 Settings Log out WORK ORDERS Assigned Work Prioritized queue for today, with overdue and urgent work surfaced first. DO NEXT"
+      }
+    },
+    "milo": {
+      "persona": "general",
+      "username": "milo-worker-783163",
+      "loginWorked": true,
+      "passwordUsed": "WorkerPass#2026!",
+      "finalUrlAfterLogin": "http://208.88.9.175:3002/app",
+      "screenshots": [
+        {
+          "name": "after-login",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778799855287\\milo-after-login.png"
+        },
+        {
+          "name": "visibility-last-route",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778799855287\\milo-visibility-last-route.png"
+        },
+        {
+          "name": "today",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778799855287\\milo-today.png"
+        },
+        {
+          "name": "workorders",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778799855287\\milo-workorders.png"
+        },
+        {
+          "name": "general-permission-attempts",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778799855287\\milo-general-permission-attempts.png"
+        }
+      ],
+      "visibility": {
+        "/app": {
+          "route": "/app",
+          "finalUrl": "http://208.88.9.175:3002/app",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out APP HOME Operations Dashboard "
+        },
+        "/app/today": {
+          "route": "/app/today",
+          "finalUrl": "http://208.88.9.175:3002/app/today",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out WORKER TODAY Today Your shift "
+        },
+        "/app/work-orders": {
+          "route": "/app/work-orders",
+          "finalUrl": "http://208.88.9.175:3002/app/work-orders",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out WORK ORDERS Assigned Work Prio"
+        },
+        "/app/time": {
+          "route": "/app/time",
+          "finalUrl": "http://208.88.9.175:3002/app/time",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out TIME Shift & Task Time Start a"
+        },
+        "/app/team": {
+          "route": "/app/team",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out ACCESS You do not have access "
+        },
+        "/app/payroll": {
+          "route": "/app/payroll",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out ACCESS You do not have access "
+        },
+        "/app/settings": {
+          "route": "/app/settings",
+          "finalUrl": "http://208.88.9.175:3002/app/settings",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out SETTINGS Account & Billing Ran"
+        },
+        "/app/herd": {
+          "route": "/app/herd",
+          "finalUrl": "http://208.88.9.175:3002/app/herd",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out HERD Animal Registry Track cat"
+        },
+        "/app/land": {
+          "route": "/app/land",
+          "finalUrl": "http://208.88.9.175:3002/app/land",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out LAND Land Units One shared mod"
+        },
+        "/app/needs-attention": {
+          "route": "/app/needs-attention",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out ACCESS You do not have access "
+        },
+        "/admin": {
+          "route": "/admin",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out ACCESS You do not have access "
+        },
+        "/checkout": {
+          "route": "/checkout",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out ACCESS You do not have access "
+        }
+      },
+      "todaySummary": {
+        "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out WORKER TODAY Today Your shift state, current work, and next action in one place. Open Communication Open Work Orders SHIFT Not started ACTIVE WORK TIMER None ASSIGNED OPEN WORK 8 URGENT/UNREAD ALERTS 0 0 urgent threads, 0 unread private Next best action Clock in to start your shift, then start your first work timer. Shift status No active shift For lunch or breaks, clock out and clock back in when you return. Clock in Work timer No active work timer Select work order Water Check - North Trough 411116 Fence Repair - Creek Lot 411116 Animal Health Check - Calves 411116 Move and Check Cattle - Lower Field ",
+        "hasShiftControls": true,
+        "hasWorkTimerControls": true
+      },
+      "workOrdersSummary": {
+        "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out WORK ORDERS Assigned Work Prioritized queue for today, with overdue and urgent work surfaced first. DO NEXT Move and Check Cattle - Lower Field 411116 Overdue Due: May 12, 2026 (overdue) active (8) in progress (1) completed (2) cancelled (1) all (11) Move and Check Cattle - Lower Field 411116 open Not required Overdue Move herd group and verify final headcount against sheet. Priority: high Due: May 12, 2026 (overdue) Pay: Regular Incentive: Not set No incentive pay configured Recurring Water Check 411116 open Not required Overdue Recurring Recurring daily template for water check. Priority: normal Due: ",
+        "hasCreateForm": false,
+        "hasEditLinks": false,
+        "assignedCards": []
+      },
+      "actions": [
+        "Attempted to access manager/owner pages and to edit/reassign work as worker."
+      ],
+      "restrictedAttempts": [
+        {
+          "route": "/app/team",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out ACCESS You do not have access "
+        },
+        {
+          "route": "/app/payroll",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out ACCESS You do not have access "
+        },
+        {
+          "route": "/app/settings",
+          "finalUrl": "http://208.88.9.175:3002/app/settings",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out SETTINGS Account & Billing Ran"
+        },
+        {
+          "route": "/app/herd",
+          "finalUrl": "http://208.88.9.175:3002/app/herd",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out HERD Animal Registry Track cat"
+        },
+        {
+          "route": "/app/land",
+          "finalUrl": "http://208.88.9.175:3002/app/land",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out LAND Land Units One shared mod"
+        },
+        {
+          "route": "/app/needs-attention",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out ACCESS You do not have access "
+        },
+        {
+          "route": "/admin",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out ACCESS You do not have access "
+        },
+        {
+          "route": "/checkout",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out ACCESS You do not have access "
+        }
+      ],
+      "reassignAttempt": {
+        "hasEditLink": false,
+        "hasAssigneeCheckboxes": false,
+        "sample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @milo-worker-783163 Settings Log out WORK ORDERS Assigned Work Prioritized queue for today, with overdue and urgent work surfaced first. DO NEXT Mo"
+      }
+    },
+    "ty": {
+      "persona": "bad_at_tech",
+      "username": "ty-badtech-170111",
+      "loginWorked": true,
+      "passwordUsed": "WorkerPass#2026!",
+      "screenshots": [
+        {
+          "name": "mobile-today",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778799855287\\ty-mobile-today.png"
+        },
+        {
+          "name": "mobile-workorders",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778799855287\\ty-mobile-workorders.png"
+        }
+      ],
+      "mobileFlow": {
+        "todaySample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-badtech-170111 Settings Log out WORKER TODAY Today Your shift state, current work, and next action in one place. Open Communication Open Work Orders SHIFT Not started ACTIVE WORK TIMER None ASSIGNED OPEN WORK 1 URGENT/UNREAD ALERTS 0 0 urgent threads, 0 unread private Next best action Clock in to start your shift, then start your first work ",
+        "workOrdersSample": "RANCH the test ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-badtech-170111 Settings Log out WORK ORDERS Assigned Work Prioritized queue for today, with overdue and urgent work surfaced first. DO NEXT Urgent Fence Repair Manager 772487 Overdue Due: May 14, 2026 (overdue) active (1) in progress (1) completed (1) cancelled (0) all (2) Urgent Fence Repair Manager 772487 in progress Not required Overdue U",
+        "priorityMentionsCount": 1,
+        "hasUrgentLabel": true,
+        "highPriorityCardsFound": 0,
+        "assignedCardsCount": 0
+      },
+      "actions": [
+        "On phone viewport, tried to identify highest-priority task from Today/Work Orders."
+      ]
+    }
+  },
+  "blockers": [],
+  "bugs": [],
+  "permissionFindings": [],
+  "ux": [],
+  "mobile": {}
+}

@@ -1,7 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { SubmitButton } from "@/components/auth/submit-button";
+import { useState } from "react";
 import { FormFieldShell } from "@/components/patterns/form-field-shell";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,17 +8,14 @@ import type {
   WorkOrderCompensationType,
   WorkOrderIncentiveTimerType,
 } from "@/lib/db/schema";
-import { createWorkOrderAction, type WorkOrderActionState } from "@/lib/work-orders/actions";
+import { createWorkOrderFormAction } from "@/lib/work-orders/actions";
 import type { AssignableMember } from "@/lib/work-orders/queries";
-
-const initialState: WorkOrderActionState = {};
 
 export function CreateWorkOrderForm({
   members,
 }: {
   members: AssignableMember[];
 }) {
-  const [state, formAction] = useActionState(createWorkOrderAction, initialState);
   const [compensationType, setCompensationType] =
     useState<WorkOrderCompensationType>("standard");
   const [incentiveTimerType, setIncentiveTimerType] =
@@ -27,7 +23,7 @@ export function CreateWorkOrderForm({
   const activeMembers = members.filter((member) => member.isActive);
 
   return (
-    <form action={formAction} className="grid gap-3 md:grid-cols-2">
+    <form action={createWorkOrderFormAction} className="grid gap-3 md:grid-cols-2">
       <FormFieldShell label="Title">
         <Input name="title" placeholder="North fence repair" required />
       </FormFieldShell>
@@ -124,11 +120,8 @@ export function CreateWorkOrderForm({
           <Input name="incentiveDeadlineAt" type="datetime-local" required />
         </FormFieldShell>
       ) : null}
-      <FormFieldShell
-        label="Assign to"
-        hint={activeMembers.length ? "Choose one or more active members." : "No active members yet."}
-        className="md:col-span-2"
-      >
+      <div className="space-y-2 md:col-span-2">
+        <p className="text-sm font-semibold text-foreground">Assign to</p>
         <div className="grid gap-2 sm:grid-cols-2">
           {activeMembers.map((member) => (
             <label
@@ -142,17 +135,17 @@ export function CreateWorkOrderForm({
             </label>
           ))}
         </div>
-      </FormFieldShell>
+        <p className="text-xs text-foreground-muted">
+          {activeMembers.length ? "Choose one or more active members." : "No active members yet."}
+        </p>
+      </div>
       <div className="md:col-span-2 flex flex-col gap-2">
-        {state.error ? <p className="text-sm font-medium text-danger">{state.error}</p> : null}
-        {state.success ? (
-          <p className="text-sm font-medium text-accent">{state.success}</p>
-        ) : null}
-        <SubmitButton
-          label="Create work order"
-          pendingLabel="Creating work order..."
-          className="w-full md:w-fit"
-        />
+        <button
+          type="submit"
+          className="h-10 w-full rounded-xl bg-accent px-4 text-sm font-semibold text-white hover:bg-accent-hover md:w-fit"
+        >
+          Create work order
+        </button>
       </div>
     </form>
   );

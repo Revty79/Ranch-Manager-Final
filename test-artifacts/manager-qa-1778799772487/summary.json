@@ -1,0 +1,334 @@
+{
+  "runId": "772487",
+  "startedAt": "2026-05-14T23:02:52.487Z",
+  "manager": {
+    "username": "aubrey-mgr-162225"
+  },
+  "login": {
+    "success": true,
+    "passwordUsed": "RanchMgr#2026!",
+    "finalUrl": "http://208.88.9.175:3002/app"
+  },
+  "visibility": {
+    "/app": {
+      "url": "http://208.88.9.175:3002/app",
+      "hasAccessDenied": false,
+      "hasSectionError": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out A"
+    },
+    "/app/work-orders?status=all": {
+      "url": "http://208.88.9.175:3002/app/work-orders?status=all",
+      "hasAccessDenied": false,
+      "hasSectionError": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out W"
+    },
+    "/app/today": {
+      "url": "http://208.88.9.175:3002/app/today",
+      "hasAccessDenied": false,
+      "hasSectionError": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out M"
+    },
+    "/app/needs-attention": {
+      "url": "http://208.88.9.175:3002/app/needs-attention",
+      "hasAccessDenied": false,
+      "hasSectionError": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out M"
+    },
+    "/app/team?status=all": {
+      "url": "http://208.88.9.175:3002/app/team?status=all",
+      "hasAccessDenied": false,
+      "hasSectionError": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out T"
+    },
+    "/app/herd": {
+      "url": "http://208.88.9.175:3002/app/herd",
+      "hasAccessDenied": false,
+      "hasSectionError": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out H"
+    },
+    "/app/land": {
+      "url": "http://208.88.9.175:3002/app/land",
+      "hasAccessDenied": false,
+      "hasSectionError": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out L"
+    },
+    "/app/payroll": {
+      "url": "http://208.88.9.175:3002/app/payroll",
+      "hasAccessDenied": false,
+      "hasSectionError": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out P"
+    },
+    "/app/settings": {
+      "url": "http://208.88.9.175:3002/app/settings",
+      "hasAccessDenied": false,
+      "hasSectionError": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out S"
+    }
+  },
+  "workflow": {
+    "reviewedTasks": [
+      {
+        "title": "Move and Check Cattle - Lower Field 411116",
+        "status": "openOverdue",
+        "priority": "highUrgent",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 12, 2026 (overdue)"
+      },
+      {
+        "title": "Recurring Water Check 411116RecurringGenerated May 13, 2026",
+        "status": "openOverdue",
+        "priority": "normalUrgent",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 13, 2026 (overdue)"
+      },
+      {
+        "title": "Water Check - North Trough 411116",
+        "status": "openOverdue",
+        "priority": "normalUrgent",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 14, 2026 (overdue)"
+      },
+      {
+        "title": "Urgent Fence Repair Manager 990045",
+        "status": "completed",
+        "priority": "highUrgent",
+        "assignees": "Ty Brooks Badtech 170111",
+        "due": "May 14, 2026"
+      },
+      {
+        "title": "Water points inspectionRecurringGenerated May 14, 2026",
+        "status": "openDue soon",
+        "priority": "highUrgent",
+        "assignees": "Cody Codex",
+        "due": "May 14, 2026 (due soon)"
+      },
+      {
+        "title": "Morning livestock checkRecurringGenerated May 14, 2026",
+        "status": "openDue soon",
+        "priority": "highUrgent",
+        "assignees": "Cody Codex",
+        "due": "May 14, 2026 (due soon)"
+      },
+      {
+        "title": "Manager Assignment Check 548376",
+        "status": "openDue soon",
+        "priority": "highUrgent",
+        "assignees": "Aubrey Jensen Manager 162225, Reed Dalton Reliable 162225",
+        "due": "May 15, 2026 (due soon)"
+      },
+      {
+        "title": "Fence Repair - Creek Lot 411116",
+        "status": "openDue soon",
+        "priority": "highUrgent",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 15, 2026 (due soon)"
+      },
+      {
+        "title": "Feed Check - Winter Lot 411116",
+        "status": "in progressDue soon",
+        "priority": "normal",
+        "assignees": "Milo Test Worker 783163, Lane Morris Forgetful 170111",
+        "due": "May 15, 2026 (due soon)"
+      },
+      {
+        "title": "Feed Check - Winter Lot 269336",
+        "status": "in progressDue soon",
+        "priority": "normal",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 15, 2026 (due soon)"
+      },
+      {
+        "title": "Water Check - North Trough 269336",
+        "status": "completed",
+        "priority": "normal",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 14, 2026"
+      },
+      {
+        "title": "Recurring Water Check 411116RecurringGenerated May 14, 2026",
+        "status": "openDue soon",
+        "priority": "normal",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 14, 2026 (due soon)"
+      },
+      {
+        "title": "Fence line checkRecurringGenerated May 14, 2026",
+        "status": "openDue soon",
+        "priority": "normal",
+        "assignees": "Cody Codex",
+        "due": "May 14, 2026 (due soon)"
+      },
+      {
+        "title": "Water Line Audit Manager 990045",
+        "status": "openDue soon",
+        "priority": "normal",
+        "assignees": "Lane Morris Forgetful 170111",
+        "due": "May 15, 2026 (due soon)"
+      },
+      {
+        "title": "Animal Health Check - Calves 411116",
+        "status": "open",
+        "priority": "normal",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 16, 2026"
+      },
+      {
+        "title": "Corrected Feed Entry 411116",
+        "status": "cancelled",
+        "priority": "low",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "May 16, 2026"
+      },
+      {
+        "title": "REG Draft 601835",
+        "status": "draft",
+        "priority": "low",
+        "assignees": "Cody Codex",
+        "due": "Not set"
+      },
+      {
+        "title": "Recurring Water Check 411116Recurring",
+        "status": "open",
+        "priority": "normal",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+        "due": "Not set"
+      }
+    ],
+    "createdTasks": [
+      {
+        "title": "Urgent Fence Repair Manager 772487",
+        "row": "Urgent Fence Repair Manager 772487 open Overdue high Urgent Ty Brooks Badtech 170111 May 14, 2026 (overdue) Regular Not required No incentive pay configured Edit"
+      },
+      {
+        "title": "Water Line Audit Manager 772487",
+        "row": "Water Line Audit Manager 772487 open Due soon normal Reed Dalton Reliable 162225 May 15, 2026 (due soon) Regular Not required No incentive pay configured Edit"
+      }
+    ],
+    "reassignedTasks": [
+      {
+        "title": "Feed Check - Winter Lot 411116",
+        "row": "Feed Check - Winter Lot 411116 in progress Due soon normal Milo Test Worker 783163, Lane Morris Forgetful 170111 May 15, 2026 (due soon) Regular Not required No incentive pay configured Edit"
+      }
+    ],
+    "statusUpdates": [
+      {
+        "task": "Urgent Fence Repair Manager 772487",
+        "status": "in_progress"
+      }
+    ],
+    "mistakesCorrected": [
+      {
+        "task": "Water Line Audit Manager 772487",
+        "action": "Corrected mistaken assignment from Reed to Lane"
+      }
+    ],
+    "cancelledViewCount": 1,
+    "cancelledSample": [
+      "Corrected Feed Entry 411116"
+    ],
+    "completedViewCountBefore": 2,
+    "recurringRowsCount": 3,
+    "recurringRows": [
+      {
+        "title": "Recurring Water Check 411116RecurringGenerated May 13, 2026",
+        "status": "openOverdue",
+        "due": "May 13, 2026 (overdue)",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163"
+      },
+      {
+        "title": "Recurring Water Check 411116RecurringGenerated May 14, 2026",
+        "status": "openDue soon",
+        "due": "May 14, 2026 (due soon)",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163"
+      },
+      {
+        "title": "Recurring Water Check 411116Recurring",
+        "status": "open",
+        "due": "Not set",
+        "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163"
+      }
+    ],
+    "overdueRows": [
+      {
+        "title": "Move and Check Cattle - Lower Field 411116",
+        "status": "openOverdue",
+        "due": "May 12, 2026 (overdue)"
+      }
+    ]
+  },
+  "blockers": [],
+  "bugs": [],
+  "permissionChecks": [
+    {
+      "check": "manager_access_admin",
+      "route": "/admin",
+      "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+      "allowed": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-16222"
+    },
+    {
+      "check": "manager_owner_controls_visibility",
+      "route": "/app/settings",
+      "hasOwnerControlsVisible": false,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-162225 Settings Log out SETTINGS Account & Billing Ranch identity"
+    },
+    {
+      "check": "manager_direct_checkout_route",
+      "route": "/checkout",
+      "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+      "blocked": true,
+      "sample": "RANCH the test ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-16222"
+    }
+  ],
+  "uxFriction": [],
+  "cleanupObservations": [],
+  "mobile": {},
+  "artifacts": [
+    {
+      "type": "screenshot",
+      "name": "00-after-manager-login",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778799772487\\00-after-manager-login.png"
+    },
+    {
+      "type": "screenshot",
+      "name": "01-settings-manager",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778799772487\\01-settings-manager.png"
+    },
+    {
+      "type": "screenshot",
+      "name": "02-admin-access-check",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778799772487\\02-admin-access-check.png"
+    },
+    {
+      "type": "screenshot",
+      "name": "03-checkout-access-check",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778799772487\\03-checkout-access-check.png"
+    },
+    {
+      "type": "screenshot",
+      "name": "04-workorders-all-initial",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778799772487\\04-workorders-all-initial.png"
+    },
+    {
+      "type": "screenshot",
+      "name": "05-workorders-cancelled",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778799772487\\05-workorders-cancelled.png"
+    },
+    {
+      "type": "screenshot",
+      "name": "06-workorders-completed-before",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778799772487\\06-workorders-completed-before.png"
+    },
+    {
+      "type": "screenshot",
+      "name": "07-recurring-search",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778799772487\\07-recurring-search.png"
+    },
+    {
+      "type": "screenshot",
+      "name": "08-overdue-search",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778799772487\\08-overdue-search.png"
+    }
+  ],
+  "fatalError": "locator.selectOption: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('form').filter({ has: getByRole('button', { name: 'Save work order' }) }).first().getByLabel('Status')\u001b[22m\n"
+}

@@ -67,8 +67,15 @@ function isWorkerRole(role: "owner" | "manager" | "worker" | "seasonal_worker"):
   return role === "worker" || role === "seasonal_worker";
 }
 
-export default async function TimePage() {
+export default async function TimePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ completionResult?: string; completionMessage?: string }>;
+}) {
   const context = await requireSectionAccess("time");
+  const query = await searchParams;
+  const completionResult = query.completionResult;
+  const completionMessage = query.completionMessage?.trim() ?? "";
   const canManageTime = hasSectionAccess(context.membership.sectionAccess, "time", "manage");
   const isPieceWorkMember = context.membership.payType === "piece_work";
   const [activeShift, activeWork, recentShifts, recentWorkSessions, workOrderOptions] =
@@ -96,6 +103,17 @@ export default async function TimePage() {
         title="Shift & Task Time"
         description="Start and stop shift/work timers with clear state and clean history."
       />
+      {completionMessage ? (
+        <p
+          className={
+            completionResult === "error"
+              ? "rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger"
+              : "rounded-xl border border-accent/40 bg-accent-soft px-4 py-3 text-sm text-accent"
+          }
+        >
+          {completionMessage}
+        </p>
+      ) : null}
 
       <section className="grid gap-4 md:grid-cols-3">
         <StatCard

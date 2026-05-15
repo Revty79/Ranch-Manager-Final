@@ -46,11 +46,16 @@ function formatDateTime(value: Date | null, timeZone: string): string {
 
 export default async function WorkOrderDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ workOrderId: string }>;
+  searchParams: Promise<{ workOrderResult?: string; workOrderMessage?: string }>;
 }) {
   const context = await requireSectionManage("workOrders");
   const { workOrderId } = await params;
+  const query = await searchParams;
+  const workOrderResult = query.workOrderResult;
+  const workOrderMessage = query.workOrderMessage?.trim() ?? "";
 
   const [workOrder, members] = await Promise.all([
     getWorkOrderById(context.ranch.id, workOrderId),
@@ -76,6 +81,17 @@ export default async function WorkOrderDetailPage({
           </Link>
         }
       />
+      {workOrderMessage ? (
+        <p
+          className={
+            workOrderResult === "error"
+              ? "rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger"
+              : "rounded-xl border border-accent/40 bg-accent-soft px-4 py-3 text-sm text-accent"
+          }
+        >
+          {workOrderMessage}
+        </p>
+      ) : null}
 
       <Card>
         <CardContent className="space-y-5 py-6">

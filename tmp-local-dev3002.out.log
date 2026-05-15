@@ -1,0 +1,39 @@
+
+> ranch-manager-final@0.1.0 dev
+> next dev --webpack --port 3002 --hostname 0.0.0.0
+
+▲ Next.js 16.1.6 (webpack)
+- Local:         http://localhost:3002
+- Network:       http://0.0.0.0:3002
+- Environments: .env
+- Experiments (use with caution):
+  · serverActions
+
+✓ Starting...
+✓ Ready in 12.7s
+○ Compiling /login ...
+ GET /login 200 in 15.6s (compile: 15.2s, render: 395ms)
+ POST /login 303 in 584ms (compile: 10ms, render: 574ms)
+ GET /app 200 in 4.0s (compile: 3.7s, render: 267ms)
+ GET /login 200 in 327ms (compile: 27ms, render: 299ms)
+ GET /app 200 in 254ms (compile: 7ms, render: 247ms)
+ GET /app 200 in 2.4s (compile: 1813ms, render: 545ms)
+ GET /app/work-orders?status=all 200 in 3.7s (compile: 2.2s, render: 1488ms)
+ GET /app/settings 200 in 2.3s (compile: 1847ms, render: 452ms)
+ GET /login 307 in 195ms (compile: 17ms, render: 178ms)
+ GET /app 200 in 287ms (compile: 16ms, render: 271ms)
+ GET /login 200 in 87ms (compile: 6ms, render: 81ms)
+ GET /login 200 in 66ms (compile: 5ms, render: 61ms)
+ POST /login 303 in 455ms (compile: 5ms, render: 451ms)
+ GET /app 200 in 260ms (compile: 4ms, render: 256ms)
+ GET /app/work-orders?status=all 200 in 579ms (compile: 17ms, render: 562ms)
+ GET /app/settings 200 in 236ms (compile: 5ms, render: 231ms)
+ GET /login 200 in 65ms (compile: 4ms, render: 61ms)
+ POST /login 303 in 348ms (compile: 4ms, render: 343ms)
+ GET /app 200 in 241ms (compile: 4ms, render: 237ms)
+ GET /app/settings 200 in 127ms (compile: 4ms, render: 123ms)
+ GET /login 200 in 66ms (compile: 4ms, render: 62ms)
+ POST /login 303 in 306ms (compile: 4ms, render: 302ms)
+ GET /app 200 in 266ms (compile: 7ms, render: 260ms)
+ GET /app/work-orders?status=all 200 in 555ms (compile: 4ms, render: 551ms)
+ POST /app/work-orders?status=all 200 in 388ms (compile: 8ms, render: 380ms)

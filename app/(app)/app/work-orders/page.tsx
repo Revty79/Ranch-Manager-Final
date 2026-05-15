@@ -3,7 +3,6 @@ import { ClipboardList } from "lucide-react";
 import { CreateWorkOrderForm } from "@/components/work-orders/create-work-order-form";
 import { CreateWorkOrderTemplateForm } from "@/components/work-orders/create-work-order-template-form";
 import { IncentiveCountdown } from "@/components/work-orders/incentive-countdown";
-import { TemplateRowActions } from "@/components/work-orders/template-row-actions";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { PageHeader } from "@/components/patterns/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +18,10 @@ import {
 } from "@/components/ui/table";
 import { hasSectionAccess } from "@/lib/auth/capabilities";
 import { requireSectionAccess } from "@/lib/auth/context";
+import {
+  createWorkOrderFromTemplateFormAction,
+  updateWorkOrderTemplateRecurrenceFormAction,
+} from "@/lib/work-orders/actions";
 import { materializeDueRecurringWorkOrdersForRanch } from "@/lib/work-orders/maintenance";
 import {
   getAssignedWorkForMembership,
@@ -214,7 +217,15 @@ function formatDueState(order: WorkOrderListItem, timeZone: string, now: Date): 
 export default async function WorkOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string; queue?: string }>;
+  searchParams: Promise<{
+    status?: string;
+    q?: string;
+    queue?: string;
+    workOrderResult?: string;
+    workOrderMessage?: string;
+    templateResult?: string;
+    templateMessage?: string;
+  }>;
 }) {
   const context = await requireSectionAccess("workOrders");
   const canManageWorkOrders = hasSectionAccess(
@@ -367,6 +378,10 @@ export default async function WorkOrdersPage({
 
   const statusFilter = statusTabs.find((status) => status === params.status) ?? "all";
   const search = params.q?.trim() ?? "";
+  const workOrderResult = params.workOrderResult;
+  const workOrderMessage = params.workOrderMessage?.trim() ?? "";
+  const templateResult = params.templateResult;
+  const templateMessage = params.templateMessage?.trim() ?? "";
 
   const [workOrders, members, templates] = await Promise.all([
     getWorkOrdersForRanch(context.ranch.id, {
@@ -392,6 +407,30 @@ export default async function WorkOrdersPage({
         title="Work Order Queue"
         description="Create, assign, and track work with clear status ownership."
       />
+      {workOrderMessage ? (
+        <p
+          className={cn(
+            "rounded-xl border px-4 py-3 text-sm",
+            workOrderResult === "error"
+              ? "border-danger/40 bg-danger/10 text-danger"
+              : "border-accent/40 bg-accent-soft text-accent",
+          )}
+        >
+          {workOrderMessage}
+        </p>
+      ) : null}
+      {templateMessage ? (
+        <p
+          className={cn(
+            "rounded-xl border px-4 py-3 text-sm",
+            templateResult === "error"
+              ? "border-danger/40 bg-danger/10 text-danger"
+              : "border-accent/40 bg-accent-soft text-accent",
+          )}
+        >
+          {templateMessage}
+        </p>
+      ) : null}
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card>
@@ -480,7 +519,73 @@ export default async function WorkOrdersPage({
                       : "none"}
                   </p>
 
-                  <TemplateRowActions template={template} />
+                  <div className="mt-3 grid gap-3 lg:grid-cols-[auto_1fr]">
+                    <form action={createWorkOrderFromTemplateFormAction}>
+                      <input type="hidden" name="templateId" value={template.id} />
+                      <button
+                        type="submit"
+                        className="h-9 rounded-xl border bg-surface-strong px-3 text-xs font-semibold hover:bg-accent-soft"
+                      >
+                        Create now
+                      </button>
+                    </form>
+
+                    <form
+                      action={updateWorkOrderTemplateRecurrenceFormAction}
+                      className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5"
+                    >
+                      <input type="hidden" name="templateId" value={template.id} />
+                      <label className="flex items-center gap-2 rounded-xl border bg-surface-strong px-3 py-2 text-xs">
+                        <input
+                          type="checkbox"
+                          name="isActive"
+                          defaultChecked={template.isActive}
+                        />
+                        Active
+                      </label>
+                      <label className="flex items-center gap-2 rounded-xl border bg-surface-strong px-3 py-2 text-xs">
+                        <input
+                          type="checkbox"
+                          name="recurringEnabled"
+                          defaultChecked={template.recurringEnabled}
+                        />
+                        Recurring
+                      </label>
+                      <select
+                        name="recurrenceCadence"
+                        defaultValue={template.recurrenceCadence ?? ""}
+                        className="h-9 rounded-xl border bg-surface-strong px-3 text-xs"
+                      >
+                        <option value="">Cadence</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="custom">Custom</option>
+                      </select>
+                      <input
+                        name="recurrenceIntervalDays"
+                        type="number"
+                        min="1"
+                        defaultValue={template.recurrenceIntervalDays ?? ""}
+                        placeholder="Custom days"
+                        className="h-9 rounded-xl border bg-surface-strong px-3 text-xs"
+                      />
+                      <div className="flex gap-2">
+                        <input
+                          name="nextGenerationOn"
+                          type="date"
+                          defaultValue={template.nextGenerationOn ?? ""}
+                          className="h-9 w-full rounded-xl border bg-surface-strong px-3 text-xs"
+                        />
+                        <button
+                          type="submit"
+                          className="h-9 rounded-xl border bg-surface-strong px-3 text-xs font-semibold hover:bg-accent-soft"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </form>
+                  </div>
                 </div>
               ))}
             </div>

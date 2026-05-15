@@ -1,8 +1,7 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { completeWorkOrderAction, type TimeActionState } from "@/lib/time/actions";
+import { usePathname } from "next/navigation";
+import { completeWorkOrderFormAction } from "@/lib/time/actions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -17,8 +16,6 @@ interface CompleteWorkOrderFormProps {
   submitLabel?: string;
   buttonVariant?: "primary" | "secondary";
 }
-
-const initialState: TimeActionState = {};
 
 function hasSelectableOptions(
   workOrderId: string | undefined,
@@ -37,25 +34,16 @@ export function CompleteWorkOrderForm({
   submitLabel = "Complete work order",
   buttonVariant = "primary",
 }: CompleteWorkOrderFormProps) {
-  const router = useRouter();
-  const [state, formAction] = useActionState(completeWorkOrderAction, initialState);
-
-  useEffect(() => {
-    if (state.success) {
-      const refreshTimer = window.setTimeout(() => {
-        router.refresh();
-      }, 1400);
-      return () => window.clearTimeout(refreshTimer);
-    }
-  }, [router, state.success]);
+  const pathname = usePathname();
 
   if (!hasSelectableOptions(workOrderId, workOrderOptions)) {
     return null;
   }
 
   return (
-    <form action={formAction} className="space-y-3 rounded-xl border bg-surface p-3">
+    <form action={completeWorkOrderFormAction} className="space-y-3 rounded-xl border bg-surface p-3">
       {workOrderId ? <input type="hidden" name="workOrderId" value={workOrderId} /> : null}
+      <input type="hidden" name="redirectPath" value={pathname ?? "/app/time"} />
 
       {!workOrderId ? (
         <select
@@ -138,13 +126,6 @@ export function CompleteWorkOrderForm({
           </p>
         </div>
       </details>
-
-      {state.error ? <p className="text-sm font-medium text-danger">{state.error}</p> : null}
-      {state.success ? (
-        <p className="rounded-xl border border-accent/40 bg-accent-soft px-3 py-2 text-sm font-semibold text-accent">
-          {state.success} Status updated. Refreshing your queue...
-        </p>
-      ) : null}
 
       <Button variant={buttonVariant} type="submit">
         {submitLabel}

@@ -114,8 +114,15 @@ function resolveNextAction(params: {
   return "Check communication for urgent updates while waiting on new assignments.";
 }
 
-export default async function WorkerTodayPage() {
+export default async function WorkerTodayPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ completionResult?: string; completionMessage?: string }>;
+}) {
   const context = await requireSectionAccess("today");
+  const query = await searchParams;
+  const completionResult = query.completionResult;
+  const completionMessage = query.completionMessage?.trim() ?? "";
   const canManageTime = hasSectionAccess(context.membership.sectionAccess, "time", "manage");
   const canViewCommunication = hasSectionAccess(
     context.membership.sectionAccess,
@@ -191,6 +198,17 @@ export default async function WorkerTodayPage() {
           </div>
         }
       />
+      {completionMessage ? (
+        <p
+          className={
+            completionResult === "error"
+              ? "rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger"
+              : "rounded-xl border border-accent/40 bg-accent-soft px-4 py-3 text-sm text-accent"
+          }
+        >
+          {completionMessage}
+        </p>
+      ) : null}
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard

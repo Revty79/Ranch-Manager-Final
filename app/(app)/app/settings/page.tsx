@@ -177,14 +177,14 @@ export default async function SettingsPage({
               unless beta lifetime access is enabled.
             </CardDescription>
             <div className="space-y-2 text-sm">
-              <p>
-                <span className="text-foreground-muted">Access state:</span>{" "}
-                <Badge variant={billingAccess ? "success" : "warning"}>
-                  {billingAccess ? "Access enabled" : "Billing required"}
-                </Badge>
-              </p>
               {canViewBillingMetadata ? (
                 <>
+                  <p>
+                    <span className="text-foreground-muted">Access state:</span>{" "}
+                    <Badge variant={billingAccess ? "success" : "warning"}>
+                      {billingAccess ? "Access enabled" : "Billing required"}
+                    </Badge>
+                  </p>
                   <p>
                     <span className="text-foreground-muted">Subscription status:</span>{" "}
                     {context.ranch.subscriptionStatus}
@@ -220,10 +220,14 @@ export default async function SettingsPage({
                   ) : null}
                 </>
               ) : (
-                <p className="text-foreground-muted">
-                  Billing details are visible to managers and owners. Contact your manager/owner
-                  if billing access questions come up.
-                </p>
+                <>
+                  <p className="text-foreground-muted">
+                    Billing details are visible to managers and owners.
+                  </p>
+                  <p className="text-foreground-muted">
+                    If billing questions come up, contact your ranch manager or owner.
+                  </p>
+                </>
               )}
             </div>
             {isOwner ? (

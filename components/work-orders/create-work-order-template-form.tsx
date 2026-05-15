@@ -1,22 +1,18 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { SubmitButton } from "@/components/auth/submit-button";
+import { useState } from "react";
 import { FormFieldShell } from "@/components/patterns/form-field-shell";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { WorkOrderCompensationType, WorkOrderIncentiveTimerType } from "@/lib/db/schema";
-import { createWorkOrderTemplateAction, type WorkOrderActionState } from "@/lib/work-orders/actions";
+import { createWorkOrderTemplateFormAction } from "@/lib/work-orders/actions";
 import type { AssignableMember } from "@/lib/work-orders/queries";
-
-const initialState: WorkOrderActionState = {};
 
 export function CreateWorkOrderTemplateForm({
   members,
 }: {
   members: AssignableMember[];
 }) {
-  const [state, formAction] = useActionState(createWorkOrderTemplateAction, initialState);
   const [compensationType, setCompensationType] =
     useState<WorkOrderCompensationType>("standard");
   const [incentiveTimerType, setIncentiveTimerType] =
@@ -24,7 +20,7 @@ export function CreateWorkOrderTemplateForm({
   const activeMembers = members.filter((member) => member.isActive);
 
   return (
-    <form action={formAction} className="grid gap-3 md:grid-cols-2">
+    <form action={createWorkOrderTemplateFormAction} className="grid gap-3 md:grid-cols-2">
       <FormFieldShell label="Template name">
         <Input name="templateName" placeholder="Morning feed run" required />
       </FormFieldShell>
@@ -89,11 +85,8 @@ export function CreateWorkOrderTemplateForm({
           <Input name="incentiveHours" type="number" min="1" step="1" defaultValue="24" required />
         </FormFieldShell>
       ) : null}
-      <FormFieldShell
-        label="Default assignees"
-        hint={activeMembers.length ? "Optional: pre-assign when generated." : "No active members yet."}
-        className="md:col-span-2"
-      >
+      <div className="space-y-2 md:col-span-2">
+        <p className="text-sm font-semibold text-foreground">Default assignees</p>
         <div className="grid gap-2 sm:grid-cols-2">
           {activeMembers.map((member) => (
             <label
@@ -107,17 +100,17 @@ export function CreateWorkOrderTemplateForm({
             </label>
           ))}
         </div>
-      </FormFieldShell>
+        <p className="text-xs text-foreground-muted">
+          {activeMembers.length ? "Optional: pre-assign when generated." : "No active members yet."}
+        </p>
+      </div>
       <div className="md:col-span-2 flex flex-col gap-2">
-        {state.error ? <p className="text-sm font-medium text-danger">{state.error}</p> : null}
-        {state.success ? (
-          <p className="text-sm font-medium text-accent">{state.success}</p>
-        ) : null}
-        <SubmitButton
-          label="Save template"
-          pendingLabel="Saving template..."
-          className="w-full md:w-fit"
-        />
+        <button
+          type="submit"
+          className="h-10 w-full rounded-xl bg-accent px-4 text-sm font-semibold text-white hover:bg-accent-hover md:w-fit"
+        >
+          Save template
+        </button>
       </div>
     </form>
   );

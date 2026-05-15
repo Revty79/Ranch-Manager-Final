@@ -2,6 +2,7 @@
 
 import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { isPlatformAdminEmail } from "@/lib/auth/platform-admin";
 import { requireSectionManage } from "@/lib/auth/context";
@@ -23,6 +24,49 @@ import { isDateKey, parseDateKey, toDateKey } from "./recurrence";
 export interface WorkOrderActionState {
   error?: string;
   success?: string;
+}
+
+function buildTemplateActionRedirectPath(
+  result: WorkOrderActionState,
+  successResult: "created" | "saved",
+): string {
+  const params = new URLSearchParams();
+  if (result.error) {
+    params.set("templateResult", "error");
+    params.set("templateMessage", result.error);
+  } else {
+    params.set("templateResult", successResult);
+    params.set(
+      "templateMessage",
+      result.success ??
+        (successResult === "created"
+          ? "Work order created from template."
+          : "Recurring settings saved."),
+    );
+  }
+
+  return `/app/work-orders?${params.toString()}`;
+}
+
+function buildWorkOrderActionRedirectPath(
+  result: WorkOrderActionState,
+  successResult: "created" | "updated",
+  basePath: string,
+): string {
+  const params = new URLSearchParams();
+  if (result.error) {
+    params.set("workOrderResult", "error");
+    params.set("workOrderMessage", result.error);
+  } else {
+    params.set("workOrderResult", successResult);
+    params.set(
+      "workOrderMessage",
+      result.success ??
+        (successResult === "created" ? "Work order created." : "Work order updated."),
+    );
+  }
+
+  return `${basePath}?${params.toString()}`;
 }
 
 const statusSchema = z.enum([
@@ -458,6 +502,11 @@ export async function createWorkOrderAction(
   return { success: "Work order created." };
 }
 
+export async function createWorkOrderFormAction(formData: FormData): Promise<void> {
+  const result = await createWorkOrderAction({}, formData);
+  redirect(buildWorkOrderActionRedirectPath(result, "created", "/app/work-orders"));
+}
+
 export async function updateWorkOrderAction(
   _prevState: WorkOrderActionState,
   formData: FormData,
@@ -572,6 +621,15 @@ export async function updateWorkOrderAction(
   return { success: "Work order updated." };
 }
 
+export async function updateWorkOrderFormAction(formData: FormData): Promise<void> {
+  const parsedId = z.string().uuid().safeParse(formData.get("workOrderId"));
+  const detailPath = parsedId.success
+    ? `/app/work-orders/${parsedId.data}`
+    : "/app/work-orders";
+  const result = await updateWorkOrderAction({}, formData);
+  redirect(buildWorkOrderActionRedirectPath(result, "updated", detailPath));
+}
+
 export async function createWorkOrderTemplateAction(
   _prevState: WorkOrderActionState,
   formData: FormData,
@@ -651,6 +709,11 @@ export async function createWorkOrderTemplateAction(
 
   revalidatePath("/app/work-orders");
   return { success: "Template created." };
+}
+
+export async function createWorkOrderTemplateFormAction(formData: FormData): Promise<void> {
+  const result = await createWorkOrderTemplateAction({}, formData);
+  redirect(buildTemplateActionRedirectPath(result, "saved"));
 }
 
 export async function createWorkOrderFromTemplateAction(
@@ -812,6 +875,20 @@ export async function updateWorkOrderTemplateRecurrenceAction(
 
   revalidatePath("/app/work-orders");
   return { success: "Recurring settings saved." };
+}
+
+export async function createWorkOrderFromTemplateFormAction(
+  formData: FormData,
+): Promise<void> {
+  const result = await createWorkOrderFromTemplateAction({}, formData);
+  redirect(buildTemplateActionRedirectPath(result, "created"));
+}
+
+export async function updateWorkOrderTemplateRecurrenceFormAction(
+  formData: FormData,
+): Promise<void> {
+  const result = await updateWorkOrderTemplateRecurrenceAction({}, formData);
+  redirect(buildTemplateActionRedirectPath(result, "saved"));
 }
 
 export async function deleteDraftWorkOrderAction(

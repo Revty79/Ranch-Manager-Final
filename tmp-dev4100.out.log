@@ -1,0 +1,17 @@
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:4100
+- Network:       http://10.0.0.109:4100
+- Environments: .env
+- Experiments (use with caution):
+  · serverActions
+
+✓ Starting...
+Creating turbopack project { dir: 'd:\\Ranch Manager Final', testMode: true }
+✓ Ready in 712ms
+○ Compiling /login ...
+✓ Finished writing to filesystem cache in 19.6s
+✓ Finished writing to filesystem cache in 54s
+✓ Finished writing to filesystem cache in 64s
+✓ Finished writing to filesystem cache in 86s
+✓ Finished writing to filesystem cache in 2.0min
+✓ Finished writing to filesystem cache in 73s

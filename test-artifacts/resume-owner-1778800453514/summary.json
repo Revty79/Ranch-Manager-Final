@@ -1,0 +1,521 @@
+{
+  "startedAt": "2026-05-14T23:14:13.515Z",
+  "runId": "453515",
+  "urls": {
+    "afterLogin": "http://208.88.9.175:3002/app",
+    "settings": "http://208.88.9.175:3002/app/settings",
+    "team": "http://208.88.9.175:3002/app/team?status=all",
+    "herd": "http://208.88.9.175:3002/app/herd",
+    "land": "http://208.88.9.175:3002/app/land",
+    "workOrders": "http://208.88.9.175:3002/app/work-orders?status=all"
+  },
+  "currentState": {
+    "profile": {
+      "ranchName": "the test ranch",
+      "currentUser": "Cody Codex",
+      "role": "owner"
+    },
+    "team": {
+      "totalVisible": 6,
+      "managerCount": 1,
+      "workerCount": 4,
+      "members": [
+        {
+          "name": "Aubrey Jensen Manager 162225",
+          "username": "aubrey-mgr-162225",
+          "role": "Manager",
+          "pay": "$32.00 / hr",
+          "status": "Active"
+        },
+        {
+          "name": "Cody Codex",
+          "username": "cody",
+          "role": "Owner",
+          "pay": "$0.00 / hr",
+          "status": "Active"
+        },
+        {
+          "name": "Lane Morris Forgetful 170111",
+          "username": "lane-forgetful-170111",
+          "role": "Regular Worker",
+          "pay": "$20.00 / hr",
+          "status": "Active"
+        },
+        {
+          "name": "Milo Test Worker 783163",
+          "username": "milo-worker-783163",
+          "role": "Regular Worker",
+          "pay": "$18.75 / hr",
+          "status": "Active"
+        },
+        {
+          "name": "Reed Dalton Reliable 162225",
+          "username": "reed-reliable-162225",
+          "role": "Regular Worker",
+          "pay": "$24.50 / hr",
+          "status": "Active"
+        },
+        {
+          "name": "Ty Brooks Badtech 170111",
+          "username": "ty-badtech-170111",
+          "role": "Regular Worker",
+          "pay": "$19.50 / hr",
+          "status": "Active"
+        }
+      ]
+    },
+    "herd": {
+      "totalFromStats": 21,
+      "activeFromStats": 21,
+      "rowsVisible": 21,
+      "sample": [
+        {
+          "tagAndInternal": "MTR-162225-C01MTR-162225-INT-C01",
+          "name": "UnnamedNo alternate ID",
+          "speciesClass": "CattleCow",
+          "sex": "female",
+          "status": "active",
+          "location": "Unassigned"
+        },
+        {
+          "tagAndInternal": "MTRB-170111-C01MTRB-170111-IC01",
+          "name": "UnnamedNo alternate ID",
+          "speciesClass": "CattleCow",
+          "sex": "female",
+          "status": "active",
+          "location": "Unassigned"
+        },
+        {
+          "tagAndInternal": "MTR-MIX-650659-C01MTR-MIX-650659-IC01",
+          "name": "UnnamedNo alternate ID",
+          "speciesClass": "CattleCalf",
+          "sex": "female",
+          "status": "active",
+          "location": "Unassigned"
+        },
+        {
+          "tagAndInternal": "MTR-MIX-650659-C02MTR-MIX-650659-IC02",
+          "name": "UnnamedNo alternate ID",
+          "speciesClass": "CattleCalf",
+          "sex": "male",
+          "status": "active",
+          "location": "Unassigned"
+        },
+        {
+          "tagAndInternal": "MTR-MIX-650659-C03MTR-MIX-650659-IC03",
+          "name": "UnnamedNo alternate ID",
+          "speciesClass": "CattleCalf",
+          "sex": "female",
+          "status": "active",
+          "location": "Unassigned"
+        },
+        {
+          "tagAndInternal": "MTR-MIX-650659-C04MTR-MIX-650659-IC04",
+          "name": "UnnamedNo alternate ID",
+          "speciesClass": "CattleCalf",
+          "sex": "male",
+          "status": "active",
+          "location": "Unassigned"
+        },
+        {
+          "tagAndInternal": "MTR-MIX-650659-C05MTR-MIX-650659-IC05",
+          "name": "UnnamedNo alternate ID",
+          "speciesClass": "CattleBull",
+          "sex": "male",
+          "status": "active",
+          "location": "Unassigned"
+        },
+        {
+          "tagAndInternal": "MTR-MIX-650659-C06MTR-MIX-650659-IC06",
+          "name": "UnnamedNo alternate ID",
+          "speciesClass": "CattleBull",
+          "sex": "male",
+          "status": "active",
+          "location": "Unassigned"
+        },
+        {
+          "tagAndInternal": "MTR-MIX-650659-C07MTR-MIX-650659-IC07",
+          "name": "UnnamedNo alternate ID",
+          "speciesClass": "CattleBull",
+          "sex": "male",
+          "status": "active",
+          "location": "Unassigned"
+        },
+        {
+          "tagAndInternal": "MTR-MIX-650659-C08MTR-MIX-650659-IC08",
+          "name": "UnnamedNo alternate ID",
+          "speciesClass": "CattleSteer",
+          "sex": "castrated male",
+          "status": "active",
+          "location": "Unassigned"
+        },
+        {
+          "tagAndInternal": "MTR-MIX-650659-C09MTR-MIX-650659-IC09",
+          "name": "UnnamedNo alternate ID",
+          "speciesClass": "CattleSteer",
+          "sex": "castrated male",
+          "status": "active",
+          "location": "Unassigned"
+        },
+        {
+          "tagAndInternal": "MTR-MIX-650659-C10MTR-MIX-650659-IC10",
+          "name": "UnnamedNo alternate ID",
+          "speciesClass": "CattleSteer",
+          "sex": "castrated male",
+          "status": "active",
+          "location": "Unassigned"
+        },
+        {
+          "tagAndInternal": "MTR-MIX-650659-C11MTR-MIX-650659-IC11",
+          "name": "UnnamedNo alternate ID",
+          "speciesClass": "CattleSteer",
+          "sex": "castrated male",
+          "status": "active",
+          "location": "Unassigned"
+        },
+        {
+          "tagAndInternal": "MTR-MIX-650659-C12MTR-MIX-650659-IC12",
+          "name": "UnnamedNo alternate ID",
+          "speciesClass": "CattleSteer",
+          "sex": "castrated male",
+          "status": "active",
+          "location": "Unassigned"
+        },
+        {
+          "tagAndInternal": "MTR-MIX-650659-H01MTR-MIX-650659-IH01",
+          "name": "JuniperNo alternate ID",
+          "speciesClass": "HorseMare",
+          "sex": "female",
+          "status": "active",
+          "location": "Unassigned"
+        },
+        {
+          "tagAndInternal": "MTR-SEQ-372643-1MTR-SEQI-372643-1",
+          "name": "UnnamedNo alternate ID",
+          "speciesClass": "CattleCow",
+          "sex": "female",
+          "status": "active",
+          "location": "Unassigned"
+        },
+        {
+          "tagAndInternal": "MTR-SEQ-372643-2MTR-SEQI-372643-2",
+          "name": "UnnamedNo alternate ID",
+          "speciesClass": "CattleCow",
+          "sex": "female",
+          "status": "active",
+          "location": "Unassigned"
+        },
+        {
+          "tagAndInternal": "MTR-SEQ-372643-3MTR-SEQI-372643-3",
+          "name": "UnnamedNo alternate ID",
+          "speciesClass": "CattleCow",
+          "sex": "female",
+          "status": "active",
+          "location": "Unassigned"
+        },
+        {
+          "tagAndInternal": "MTR-SEQ-372643-4MTR-SEQI-372643-4",
+          "name": "UnnamedNo alternate ID",
+          "speciesClass": "CattleCow",
+          "sex": "female",
+          "status": "active",
+          "location": "Unassigned"
+        },
+        {
+          "tagAndInternal": "MTR-SEQ-372643-5MTR-SEQI-372643-5",
+          "name": "UnnamedNo alternate ID",
+          "speciesClass": "CattleCow",
+          "sex": "female",
+          "status": "active",
+          "location": "Unassigned"
+        }
+      ]
+    },
+    "land": {
+      "rowsVisible": 1,
+      "units": [
+        {
+          "nameAndCode": "Target Lot 783163TGT-783163",
+          "type": "lot",
+          "acreage": "—",
+          "occupancy": "0 total0 horses",
+          "status": "active"
+        }
+      ]
+    },
+    "workOrders": {
+      "hasSectionError": false,
+      "orders": [
+        {
+          "title": "Urgent Fence Repair Manager 772487",
+          "status": "in progressOverdue",
+          "priority": "highUrgent",
+          "assignees": "Ty Brooks Badtech 170111",
+          "due": "May 14, 2026 (overdue)",
+          "pay": "Regular",
+          "review": "Not required"
+        },
+        {
+          "title": "Move and Check Cattle - Lower Field 411116",
+          "status": "openOverdue",
+          "priority": "highUrgent",
+          "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+          "due": "May 12, 2026 (overdue)",
+          "pay": "Regular",
+          "review": "Not required"
+        },
+        {
+          "title": "Recurring Water Check 411116RecurringGenerated May 13, 2026",
+          "status": "openOverdue",
+          "priority": "normalUrgent",
+          "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+          "due": "May 13, 2026 (overdue)",
+          "pay": "Regular",
+          "review": "Not required"
+        },
+        {
+          "title": "Water Check - North Trough 967497",
+          "status": "openOverdue",
+          "priority": "normalUrgent",
+          "assignees": "Reed Dalton Reliable 162225, Lane Morris Forgetful 170111",
+          "due": "May 14, 2026 (overdue)",
+          "pay": "Regular",
+          "review": "Not required"
+        },
+        {
+          "title": "Water Check - North Trough 411116",
+          "status": "openOverdue",
+          "priority": "normalUrgent",
+          "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+          "due": "May 14, 2026 (overdue)",
+          "pay": "Regular",
+          "review": "Not required"
+        },
+        {
+          "title": "Urgent Fence Repair Manager 990045",
+          "status": "completed",
+          "priority": "highUrgent",
+          "assignees": "Ty Brooks Badtech 170111",
+          "due": "May 14, 2026",
+          "pay": "Regular",
+          "review": "Not required"
+        },
+        {
+          "title": "Water points inspectionRecurringGenerated May 14, 2026",
+          "status": "openDue soon",
+          "priority": "highUrgent",
+          "assignees": "Cody Codex",
+          "due": "May 14, 2026 (due soon)",
+          "pay": "Regular",
+          "review": "Not required"
+        },
+        {
+          "title": "Morning livestock checkRecurringGenerated May 14, 2026",
+          "status": "openDue soon",
+          "priority": "highUrgent",
+          "assignees": "Cody Codex",
+          "due": "May 14, 2026 (due soon)",
+          "pay": "Regular",
+          "review": "Not required"
+        },
+        {
+          "title": "Manager Assignment Check 548376",
+          "status": "openDue soon",
+          "priority": "highUrgent",
+          "assignees": "Aubrey Jensen Manager 162225, Reed Dalton Reliable 162225",
+          "due": "May 15, 2026 (due soon)",
+          "pay": "Regular",
+          "review": "Not required"
+        },
+        {
+          "title": "Fence Repair - Creek Lot 411116",
+          "status": "openDue soon",
+          "priority": "highUrgent",
+          "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+          "due": "May 15, 2026 (due soon)",
+          "pay": "Regular",
+          "review": "Not required"
+        },
+        {
+          "title": "Feed Check - Winter Lot 411116",
+          "status": "in progressDue soon",
+          "priority": "normal",
+          "assignees": "Milo Test Worker 783163, Lane Morris Forgetful 170111",
+          "due": "May 15, 2026 (due soon)",
+          "pay": "Regular",
+          "review": "Not required"
+        },
+        {
+          "title": "Water Line Audit Manager 990045",
+          "status": "in progressDue soon",
+          "priority": "normal",
+          "assignees": "Lane Morris Forgetful 170111",
+          "due": "May 15, 2026 (due soon)",
+          "pay": "Regular",
+          "review": "Not required"
+        },
+        {
+          "title": "Water Line Audit Manager 772487",
+          "status": "in progressDue soon",
+          "priority": "normal",
+          "assignees": "Lane Morris Forgetful 170111",
+          "due": "May 15, 2026 (due soon)",
+          "pay": "Regular",
+          "review": "Not required"
+        },
+        {
+          "title": "Water Check - North Trough 269336",
+          "status": "completed",
+          "priority": "normal",
+          "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+          "due": "May 14, 2026",
+          "pay": "Regular",
+          "review": "Review pending"
+        },
+        {
+          "title": "Recurring Water Check 411116RecurringGenerated May 14, 2026",
+          "status": "openDue soon",
+          "priority": "normal",
+          "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+          "due": "May 14, 2026 (due soon)",
+          "pay": "Regular",
+          "review": "Not required"
+        },
+        {
+          "title": "Fence line checkRecurringGenerated May 14, 2026",
+          "status": "openDue soon",
+          "priority": "normal",
+          "assignees": "Cody Codex",
+          "due": "May 14, 2026 (due soon)",
+          "pay": "Regular",
+          "review": "Not required"
+        },
+        {
+          "title": "Feed Check - Winter Lot 269336",
+          "status": "completed",
+          "priority": "normal",
+          "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+          "due": "May 15, 2026",
+          "pay": "Regular",
+          "review": "Review pending"
+        },
+        {
+          "title": "Animal Health Check - Calves 411116",
+          "status": "open",
+          "priority": "normal",
+          "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+          "due": "May 16, 2026",
+          "pay": "Regular",
+          "review": "Not required"
+        },
+        {
+          "title": "Corrected Feed Entry 411116",
+          "status": "cancelled",
+          "priority": "low",
+          "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+          "due": "May 16, 2026",
+          "pay": "Regular",
+          "review": "Not required"
+        },
+        {
+          "title": "Recurring Water Check 411116Recurring",
+          "status": "open",
+          "priority": "normal",
+          "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+          "due": "Not set",
+          "pay": "Regular",
+          "review": "Not required"
+        },
+        {
+          "title": "REG Draft Delete Probe 359507",
+          "status": "draft",
+          "priority": "low",
+          "assignees": "Unassigned",
+          "due": "Not set",
+          "pay": "Regular",
+          "review": "Not required"
+        },
+        {
+          "title": "Recurring Water Check 411116Recurring",
+          "status": "open",
+          "priority": "normal",
+          "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+          "due": "Not set",
+          "pay": "Regular",
+          "review": "Not required"
+        },
+        {
+          "title": "REG Draft 601835",
+          "status": "draft",
+          "priority": "low",
+          "assignees": "Cody Codex",
+          "due": "Not set",
+          "pay": "Regular",
+          "review": "Not required"
+        },
+        {
+          "title": "Recurring Water Check 411116Recurring",
+          "status": "open",
+          "priority": "normal",
+          "assignees": "Reed Dalton Reliable 162225, Milo Test Worker 783163",
+          "due": "Not set",
+          "pay": "Regular",
+          "review": "Not required"
+        }
+      ],
+      "templateTitles": [
+        "Recurring Water Patrol 411116: Recurring Water Check 411116",
+        "morning-livestock-check: Morning livestock check",
+        "water-points-inspection: Water points inspection",
+        "fence-line-check: Fence line check"
+      ],
+      "assigneeChoices": [
+        "Title",
+        "Due date (optional)",
+        "StatusDraftOpenIn progressCompleted",
+        "PriorityLowNormalHigh",
+        "Description",
+        "Work-order payRegular work orderFlat amount onlyChoose regular tracked work or a one-time flat amount paid when the order is completed.",
+        "Incentive pay (optional)If set above $0, choose an incentive timer to make it earnable.",
+        "Incentive timerNo timerSet by hoursSet by specific date",
+        "Assign toCody Codex (owner)Aubrey Jensen Manager 162225 (manager)Reed Dalton Reliable 162225 (worker)Lane Morris Forgetful 170111 (worker)Milo Test Worker 783163 (worker)Ty Brooks Badtech 170111 (worker)Choose one or more active members.",
+        "Cody Codex (owner)",
+        "Aubrey Jensen Manager 162225 (manager)",
+        "Reed Dalton Reliable 162225 (worker)",
+        "Lane Morris Forgetful 170111 (worker)",
+        "Milo Test Worker 783163 (worker)",
+        "Ty Brooks Badtech 170111 (worker)"
+      ]
+    }
+  },
+  "actions": [],
+  "bugs": [],
+  "ux": [],
+  "screenshots": [
+    {
+      "name": "00-after-login",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\resume-owner-1778800453514\\00-after-login.png"
+    },
+    {
+      "name": "01-settings",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\resume-owner-1778800453514\\01-settings.png"
+    },
+    {
+      "name": "02-team",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\resume-owner-1778800453514\\02-team.png"
+    },
+    {
+      "name": "03-herd",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\resume-owner-1778800453514\\03-herd.png"
+    },
+    {
+      "name": "04-land",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\resume-owner-1778800453514\\04-land.png"
+    },
+    {
+      "name": "05-work-orders-before",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\resume-owner-1778800453514\\05-work-orders-before.png"
+    }
+  ],
+  "fatalError": "locator.innerText: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('form').filter({ has: getByRole('button', { name: 'Create work order' }) }).first()\u001b[22m\n"
+}

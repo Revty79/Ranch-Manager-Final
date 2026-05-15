@@ -1,0 +1,82 @@
+
+
+#
+# Fatal error in , line 0
+# Fatal process out of memory: Zone
+#
+#
+#
+#FailureMessage Object: 00000064C59F57F0
+----- Native stack trace -----
+
+ 1: 00007FF7286A39EB node::SetCppgcReference+18459
+ 2: 00007FF72859606F node::TriggerNodeReport+73039
+ 3: 00007FF7294A0142 V8_Fatal+162
+ 4: 00007FF729075CD3 v8::Function::Experimental_IsNopFunction+835
+ 5: 00007FF728B587D4 v8::SnapshotCreator::GetIsolate+53284
+ 6: 00007FF7294E09C4 inflateInit2_+176564
+ 7: 00007FF729530AFA inflateInit2_+504554
+ 8: 00007FF72970E3E6 inflateInit2_+2460630
+ 9: 00007FF72970E146 inflateInit2_+2459958
+10: 00007FF72970E089 inflateInit2_+2459769
+11: 00007FF72970E296 inflateInit2_+2460294
+12: 00007FF7295E29C2 inflateInit2_+1233330
+13: 00007FF7295E4235 inflateInit2_+1239589
+14: 00007FF7295E0692 inflateInit2_+1224322
+15: 00007FF7295E9096 inflateInit2_+1259654
+16: 00007FF7295E2ED9 inflateInit2_+1234633
+17: 00007FF7295E0F53 inflateInit2_+1226563
+18: 00007FF72979090F inflateInit2_+2994431
+19: 00007FF72966DD6D inflateInit2_+1803613
+20: 00007FF72966DCB5 inflateInit2_+1803429
+21: 00007FF7295B302F inflateInit2_+1038367
+22: 00007FF729569434 inflateInit2_+736292
+23: 00007FF72956112F inflateInit2_+702751
+24: 00007FF729561C85 inflateInit2_+705653
+25: 00007FF728FE44E1 v8::SharedValueConveyor::SharedValueConveyor+29329
+26: 00007FF728FB1401 v8::ModuleRequest::GetImportAssertions+45521
+27: 00007FF728598B4D X509_STORE_get_cleanup+829
+28: 00007FF7286F778D uv_poll_stop+237
+29: 00007FF7298C3770 inflateValidate+153984
+30: 00007FF8B7FDE957 BaseThreadInitThunk+23
+31: 00007FF8B9A2427C RtlUserThreadStart+44
+
+<--- Last few GCs --->
+
+[82632:00000271D3E20080]     2091 ms: Scavenge 5.8 (7.0) -> 5.6 (7.0) MB, 0.42 / 0.00 ms  (average mu = 1.000, current mu = 1.000) allocation failure; 
+[82632:00000271D3E20080]     3114 ms: Scavenge 7.4 (7.6) -> 6.9 (11.3) MB, 1000.71 / 0.00 ms  (average mu = 1.000, current mu = 1.000) allocation failure; 
+[82632:00000271D3E20080]     9192 ms: Scavenge 9.2 (11.6) -> 8.3 (9.6) MB, 0.50 / 0.00 ms  (average mu = 1.000, current mu = 1.000) allocation failure; 
+
+
+<--- JS stacktrace --->
+
+FATAL ERROR: NewSpace::EnsureCurrentCapacity Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+ 1: 00007FF7286A39EB 
+ 2: 00007FF728613238 
+ 3: 00007FF72908C771 
+ 4: 00007FF729075EC8 
+ 5: 00007FF728ED7970 
+ 6: 00007FF728EB0E70 
+ 7: 00007FF728EDE5BA 
+ 8: 00007FF728EE107C 
+ 9: 00007FF728ED4690 
+10: 00007FF728EE9D0A 
+11: 00007FF728EF3B04 
+12: 00007FF728F021E1 
+13: 00007FF729046C4C 
+14: 00007FF729046219 
+15: 00007FF728FE2492 
+16: 00007FF729050B49 
+17: 00007FF728F2CFB4 
+18: 00007FF728BB8E17 
+19: 00007FF728BB9989 
+20: 00007FF72913E0FE 
+21: 00007FF729201968 
+22: 00007FF7290AF6A0 
+23: 00007FF6A92B0A51 
+memory allocation of 157453 bytes failed
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+memory allocation of 55395 bytes failed
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

@@ -2,6 +2,7 @@
 
 import { and, eq, isNull, notInArray, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireSectionManage } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
@@ -24,6 +25,23 @@ import {
 export interface TimeActionState {
   error?: string;
   success?: string;
+}
+
+function buildCompletionRedirectPath(
+  result: TimeActionState,
+  requestedPath: string | null,
+): string {
+  const safePath = requestedPath === "/app/today" ? "/app/today" : "/app/time";
+  const params = new URLSearchParams();
+  if (result.error) {
+    params.set("completionResult", "error");
+    params.set("completionMessage", result.error);
+  } else {
+    params.set("completionResult", "success");
+    params.set("completionMessage", result.success ?? "Work order completion saved.");
+  }
+
+  return `${safePath}?${params.toString()}`;
 }
 
 const startWorkSchema = z.object({
@@ -671,6 +689,15 @@ export async function completeWorkOrderAction(
   revalidatePath(`/app/work-orders/${parsed.data.workOrderId}`);
   revalidatePath("/app/payroll");
   return { success: "Work order marked completed." };
+}
+
+export async function completeWorkOrderFormAction(formData: FormData): Promise<void> {
+  const requestedPath =
+    typeof formData.get("redirectPath") === "string"
+      ? String(formData.get("redirectPath"))
+      : null;
+  const result = await completeWorkOrderAction({}, formData);
+  redirect(buildCompletionRedirectPath(result, requestedPath));
 }
 
 export async function endWorkSessionAction(
