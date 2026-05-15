@@ -300,7 +300,7 @@ export default async function WorkerTodayPage({
             ) : (
               <EmptyState
                 title="No assigned work right now"
-                description="New assignments will appear here as soon as a manager dispatches them."
+                description="New assignments will appear here as soon as a manager dispatches them. If you expected work already, check with your manager."
               />
             )}
           </CardContent>

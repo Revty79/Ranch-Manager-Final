@@ -17,14 +17,14 @@ export function FormFieldShell({
   className,
 }: FormFieldShellProps) {
   return (
-    <label className={cn("block space-y-2", className)}>
-      <span className="text-sm font-semibold text-foreground">{label}</span>
+    <div className={cn("block space-y-2", className)}>
+      <p className="text-sm font-semibold text-foreground">{label}</p>
       {children}
       {error ? (
         <span className="block text-xs font-medium text-danger">{error}</span>
       ) : hint ? (
         <span className="block text-xs text-foreground-muted">{hint}</span>
       ) : null}
-    </label>
+    </div>
   );
 }

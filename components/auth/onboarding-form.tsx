@@ -15,9 +15,15 @@ export function OnboardingForm() {
     <form action={formAction} className="space-y-4">
       <FormFieldShell
         label="Ranch name"
-        hint="This name identifies your tenant workspace. You can update it later."
+        hint="Required. Use at least 3 characters. You can update this later."
       >
-        <Input name="ranchName" placeholder="Willow Creek Ranch" required />
+        <Input
+          name="ranchName"
+          placeholder="Willow Creek Ranch"
+          minLength={3}
+          maxLength={80}
+          required
+        />
       </FormFieldShell>
       <FormFieldShell
         label="Payroll cadence default"
@@ -37,7 +43,8 @@ export function OnboardingForm() {
         <input type="checkbox" name="includeStarterTemplates" defaultChecked />
         <span>
           Add starter recurring work-order templates for morning checks, water inspection, and
-          weekly fence checks.
+          weekly fence checks. These templates can generate recurring work items right away after
+          ranch creation.
         </span>
       </label>
       <p className="rounded-xl border bg-surface px-3 py-2 text-xs text-foreground-muted">

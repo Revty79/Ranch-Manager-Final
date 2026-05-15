@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useId, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   createShiftEntryAction,
@@ -172,6 +172,9 @@ function DateTime24Field({
   onChange,
   required = false,
 }: DateTime24FieldProps) {
+  const fieldId = useId();
+  const dateInputId = `${fieldId}-${name}-date`;
+  const fieldLabelId = `${fieldId}-${name}-label`;
   const parts = useMemo(() => toDateTimeParts(value), [value]);
   const hasDate = Boolean(parts.date);
 
@@ -184,15 +187,19 @@ function DateTime24Field({
   };
 
   return (
-    <label className="space-y-1 text-xs">
-      <span className="text-foreground-muted">{label}</span>
+    <div className="space-y-1 text-xs">
+      <p id={fieldLabelId} className="text-foreground-muted">
+        {label}
+      </p>
       <input type="hidden" name={name} value={value} />
       <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_5.5rem_5.5rem]">
         <input
+          id={dateInputId}
           type="date"
           value={parts.date}
           onChange={(event) => update({ date: event.target.value })}
           className="h-10 w-full rounded-xl border bg-surface px-3 text-sm"
+          aria-labelledby={fieldLabelId}
           required={required}
         />
         <select
@@ -222,7 +229,7 @@ function DateTime24Field({
           ))}
         </select>
       </div>
-    </label>
+    </div>
   );
 }
 

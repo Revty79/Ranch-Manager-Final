@@ -77,7 +77,10 @@ export async function updateShiftEntryAction(
   }
 
   const [targetMembership] = await db
-    .select({ email: users.email })
+    .select({
+      email: users.email,
+      role: ranchMemberships.role,
+    })
     .from(ranchMemberships)
     .innerJoin(users, eq(ranchMemberships.userId, users.id))
     .where(
@@ -90,6 +93,9 @@ export async function updateShiftEntryAction(
 
   if (!targetMembership || isPlatformAdminEmail(targetMembership.email)) {
     return { error: "Shift entry not found for this ranch." };
+  }
+  if (context.membership.role === "manager" && targetMembership.role === "owner") {
+    return { error: "Managers cannot edit owner time entries." };
   }
 
   if (!endedAt) {
@@ -157,6 +163,7 @@ export async function createShiftEntryAction(
     .select({
       id: ranchMemberships.id,
       email: users.email,
+      role: ranchMemberships.role,
     })
     .from(ranchMemberships)
     .innerJoin(users, eq(ranchMemberships.userId, users.id))
@@ -170,6 +177,9 @@ export async function createShiftEntryAction(
 
   if (!membership || isPlatformAdminEmail(membership.email)) {
     return { error: "Team member not found in this ranch." };
+  }
+  if (context.membership.role === "manager" && membership.role === "owner") {
+    return { error: "Managers cannot add owner time entries." };
   }
 
   if (!endedAt) {
@@ -250,7 +260,10 @@ export async function updateWorkEntryAction(
   }
 
   const [targetMembership] = await db
-    .select({ email: users.email })
+    .select({
+      email: users.email,
+      role: ranchMemberships.role,
+    })
     .from(ranchMemberships)
     .innerJoin(users, eq(ranchMemberships.userId, users.id))
     .where(
@@ -263,6 +276,9 @@ export async function updateWorkEntryAction(
 
   if (!targetMembership || isPlatformAdminEmail(targetMembership.email)) {
     return { error: "Work timer entry not found for this ranch." };
+  }
+  if (context.membership.role === "manager" && targetMembership.role === "owner") {
+    return { error: "Managers cannot edit owner time entries." };
   }
 
   if (!endedAt) {
@@ -328,7 +344,10 @@ export async function deleteShiftEntryAction(
   }
 
   const [targetMembership] = await db
-    .select({ email: users.email })
+    .select({
+      email: users.email,
+      role: ranchMemberships.role,
+    })
     .from(ranchMemberships)
     .innerJoin(users, eq(ranchMemberships.userId, users.id))
     .where(
@@ -341,6 +360,9 @@ export async function deleteShiftEntryAction(
 
   if (!targetMembership || isPlatformAdminEmail(targetMembership.email)) {
     return { error: "Shift entry not found for this ranch." };
+  }
+  if (context.membership.role === "manager" && targetMembership.role === "owner") {
+    return { error: "Managers cannot delete owner time entries." };
   }
 
   if (!target.endedAt) {
@@ -391,7 +413,10 @@ export async function deleteWorkEntryAction(
   }
 
   const [targetMembership] = await db
-    .select({ email: users.email })
+    .select({
+      email: users.email,
+      role: ranchMemberships.role,
+    })
     .from(ranchMemberships)
     .innerJoin(users, eq(ranchMemberships.userId, users.id))
     .where(
@@ -404,6 +429,9 @@ export async function deleteWorkEntryAction(
 
   if (!targetMembership || isPlatformAdminEmail(targetMembership.email)) {
     return { error: "Work timer entry not found for this ranch." };
+  }
+  if (context.membership.role === "manager" && targetMembership.role === "owner") {
+    return { error: "Managers cannot delete owner time entries." };
   }
 
   if (!target.endedAt) {

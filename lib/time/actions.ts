@@ -38,7 +38,10 @@ function buildCompletionRedirectPath(
     params.set("completionMessage", result.error);
   } else {
     params.set("completionResult", "success");
-    params.set("completionMessage", result.success ?? "Work order completion saved.");
+    params.set(
+      "completionMessage",
+      result.success ?? "Work order completion saved. You can continue with your next task.",
+    );
   }
 
   return `${safePath}?${params.toString()}`;
@@ -688,7 +691,11 @@ export async function completeWorkOrderAction(
   revalidatePath("/app/work-orders");
   revalidatePath(`/app/work-orders/${parsed.data.workOrderId}`);
   revalidatePath("/app/payroll");
-  return { success: "Work order marked completed." };
+  return {
+    success: requiresManagerReview
+      ? "Work order marked completed and submitted for manager review."
+      : "Work order marked completed.",
+  };
 }
 
 export async function completeWorkOrderFormAction(formData: FormData): Promise<void> {

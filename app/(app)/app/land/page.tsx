@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { MapPinned } from "lucide-react";
 import { CreateLandUnitForm } from "@/components/land/create-land-unit-form";
 import { EmptyState } from "@/components/patterns/empty-state";
@@ -25,12 +25,12 @@ import {
 } from "@/lib/land/queries";
 
 function formatAcreage(value: string | null): string {
-  if (!value) return "—";
+  if (!value) return "--";
   return `${Number.parseFloat(value).toFixed(2)} ac`;
 }
 
 function formatDays(value: number | null): string {
-  if (value == null || !Number.isFinite(value)) return "â€”";
+  if (value == null || !Number.isFinite(value)) return "--";
   return `${value.toFixed(1)} days`;
 }
 

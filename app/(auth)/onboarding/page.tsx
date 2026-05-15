@@ -26,13 +26,18 @@ export default async function OnboardingPage() {
           <CardTitle className="text-2xl">Create your ranch workspace</CardTitle>
           <CardDescription className="mt-2">
             One quick setup step with payroll defaults and optional starter recurring work
-            templates. You will be assigned owner role for this ranch account.
+            templates. You will be assigned owner role for this ranch account, then can continue
+            into activation if billing or beta lifetime access is still required.
           </CardDescription>
         </div>
         <OnboardingForm />
         <div className="rounded-xl border bg-surface p-3 text-sm text-foreground-muted">
           <p className="font-semibold text-foreground">After setup</p>
-          <p>Invite your first manager/worker from Team, then open Work Orders and Payroll.</p>
+          <p>
+            Invite your first manager/worker from Team, then open Work Orders and Payroll. If you
+            see an activation wall, complete Stripe checkout or contact support for beta lifetime
+            access review.
+          </p>
         </div>
       </CardContent>
     </Card>

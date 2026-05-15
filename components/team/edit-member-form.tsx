@@ -33,6 +33,8 @@ interface EditMemberFormProps {
   canToggleMemberStatus: boolean;
   canDeleteMember: boolean;
   canAssignOwnerRole: boolean;
+  isCurrentUser: boolean;
+  isManagerReadOnlyOwnerView: boolean;
 }
 
 const initialState: TeamActionState = {};
@@ -51,6 +53,8 @@ export function EditMemberForm({
   canToggleMemberStatus,
   canDeleteMember,
   canAssignOwnerRole,
+  isCurrentUser,
+  isManagerReadOnlyOwnerView,
 }: EditMemberFormProps) {
   const router = useRouter();
   const [updateState, updateAction] = useActionState(updateTeamMemberAction, initialState);
@@ -81,7 +85,9 @@ export function EditMemberForm({
     <div className="space-y-6">
       {!canEditMember ? (
         <p className="rounded-xl border bg-surface px-4 py-3 text-sm text-foreground-muted">
-          Only ranch owners can edit this member profile.
+          {isManagerReadOnlyOwnerView
+            ? "This owner membership is read-only for managers."
+            : "Only ranch owners can edit this member profile."}
         </p>
       ) : null}
       <form action={updateAction} className="grid gap-3 md:grid-cols-2">
@@ -196,6 +202,10 @@ export function EditMemberForm({
             {isActive ? "Deactivate member" : "Activate member"}
           </Button>
         </form>
+      ) : isCurrentUser ? (
+        <p className="rounded-xl border bg-surface px-4 py-3 text-sm text-foreground-muted">
+          You cannot deactivate your own account from this screen.
+        </p>
       ) : null}
 
       {canDeleteMember ? (
@@ -223,6 +233,17 @@ export function EditMemberForm({
             Delete member permanently
           </Button>
         </form>
+      ) : isCurrentUser ? (
+        <div className="space-y-2 rounded-xl border border-border bg-surface p-4">
+          <p className="text-sm font-semibold text-foreground">Permanent delete</p>
+          <p className="text-xs text-foreground-muted">
+            You cannot delete your own membership. Ask another owner if this account must be
+            removed.
+          </p>
+          <Button variant="danger" type="button" disabled>
+            Delete member permanently
+          </Button>
+        </div>
       ) : null}
     </div>
   );

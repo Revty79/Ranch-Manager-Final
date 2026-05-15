@@ -60,7 +60,7 @@ export default async function AppBillingRequiredPage({
       <PageHeader
         eyebrow="Activation"
         title="Activate ranch access"
-        description="This ranch is currently blocked from bundled base product routes. Complete activation below to unlock `/app`."
+        description="This ranch is currently blocked from full app access. Complete one activation path below to continue."
       />
 
       {billingQueryState === "trial_started" ? (
@@ -92,7 +92,8 @@ export default async function AppBillingRequiredPage({
           </div>
           <CardDescription>
             Ranch Manager requires an active subscription or approved beta lifetime access for
-            bundled base production routes, including herd and land management.
+            bundled base production routes. Until activation is complete, main owner/manager routes
+            remain limited.
           </CardDescription>
           <div className="grid gap-2 text-sm sm:grid-cols-2">
             <p>
@@ -152,10 +153,15 @@ export default async function AppBillingRequiredPage({
               <div className="space-y-1">
                 <CardTitle>2) Redeem access code</CardTitle>
                 <CardDescription>
-                  If you were issued a lifetime beta code, apply it here for internal access.
+                  If you were issued a lifetime beta code, apply it here. If you need manual beta
+                  access review, contact support after submitting your request details.
                 </CardDescription>
               </div>
               <CouponCodeForm />
+              <p className="text-xs text-foreground-muted">
+                Manual beta help: email support with ranch name and owner username for lifetime
+                access review.
+              </p>
             </CardContent>
           </Card>
         </section>
@@ -167,8 +173,8 @@ export default async function AppBillingRequiredPage({
               <CardTitle className="text-base">Owner action required</CardTitle>
             </div>
             <CardDescription>
-              Billing controls are owner-only. Contact your ranch owner to activate access, then
-              reload this page.
+              Billing controls are owner-only. Contact your ranch owner to complete Stripe checkout
+              or request beta lifetime access, then reload this page.
             </CardDescription>
             <p className="text-sm text-foreground-muted">
               Your current role: <span className="font-semibold">{context.membership.role}</span>

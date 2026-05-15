@@ -72,6 +72,74 @@ export default async function SettingsPage({
       ? "Stripe subscription"
       : "No active access source";
 
+  if (isWorkerRole) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          eyebrow="Settings"
+          title="My Account"
+          description="View your account and ranch profile. Billing and admin controls are managed by ranch owners."
+        />
+
+        <section className="grid gap-4 lg:grid-cols-2">
+          <Card>
+            <CardContent className="space-y-3 py-6">
+              <CardTitle>Ranch Profile</CardTitle>
+              <CardDescription>Your workspace identity and account role.</CardDescription>
+              <div className="space-y-2 text-sm">
+                <p>
+                  <span className="text-foreground-muted">Ranch:</span> {context.ranch.name}
+                </p>
+                <p>
+                  <span className="text-foreground-muted">Current user:</span>{" "}
+                  {context.user.fullName}
+                </p>
+                <p>
+                  <span className="text-foreground-muted">Role:</span>{" "}
+                  <Badge variant="success">{context.membership.role}</Badge>
+                </p>
+              </div>
+              <p className="rounded-xl border bg-surface px-3 py-2 text-sm text-foreground-muted">
+                Need billing or access changes? Contact your ranch manager or owner.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="space-y-2 py-6">
+              <CardTitle>Support Contact</CardTitle>
+              <CardDescription>
+                Direct contact for access help while your ranch is in active support.
+              </CardDescription>
+              <p className="text-sm">
+                <span className="text-foreground-muted">Email:</span>{" "}
+                <a
+                  href={`mailto:${SUPPORT_EMAIL}`}
+                  className="font-semibold text-accent hover:underline"
+                >
+                  {SUPPORT_EMAIL}
+                </a>
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Card>
+          <CardContent className="space-y-3 py-6">
+            <CardTitle>Ranch Timezone</CardTitle>
+            <CardDescription>
+              Your ranch uses one shared timezone for scheduling and payroll timestamps.
+            </CardDescription>
+            <p className="rounded-xl border bg-surface px-4 py-3 text-sm text-foreground-muted">
+              Current ranch timezone:{" "}
+              <span className="font-semibold text-foreground">{context.ranch.timeZone}</span>.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader

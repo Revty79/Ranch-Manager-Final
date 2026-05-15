@@ -43,8 +43,13 @@ export default async function TeamMemberDetailPage({
   const canEditMember = !(
     context.membership.role === "manager" && member.role === "owner"
   );
-  const canToggleMemberStatus = canEditMember;
-  const canDeleteMember = canEditMember;
+  const isCurrentUser = member.userId === context.user.id;
+  const isManagerReadOnlyOwnerView =
+    context.membership.role === "manager" && member.role === "owner";
+  const canToggleMemberStatus = canEditMember && !isCurrentUser;
+  const canDeleteMember = canEditMember && !isCurrentUser;
+  const canManageTimeEntries =
+    context.membership.role === "owner" || member.role !== "owner";
   const canAssignOwnerRole = context.membership.role === "owner";
   const defaultShiftStartAt = formatDateTimeInputForTimeZone(
     new Date(),
@@ -76,6 +81,12 @@ export default async function TeamMemberDetailPage({
             <Badge>{formatRole(member.role)}</Badge>
             <span className="text-sm text-foreground-muted">@{member.username}</span>
           </div>
+          {isManagerReadOnlyOwnerView ? (
+            <p className="rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
+              Owner membership is view-only for managers. Only ranch owners can change owner role,
+              access, status, payroll, and account controls.
+            </p>
+          ) : null}
           <EditMemberForm
             membershipId={member.membershipId}
             fullName={member.fullName}
@@ -90,6 +101,8 @@ export default async function TeamMemberDetailPage({
             canToggleMemberStatus={canToggleMemberStatus}
             canDeleteMember={canDeleteMember}
             canAssignOwnerRole={canAssignOwnerRole}
+            isCurrentUser={isCurrentUser}
+            isManagerReadOnlyOwnerView={isManagerReadOnlyOwnerView}
           />
         </CardContent>
       </Card>
@@ -118,22 +131,29 @@ export default async function TeamMemberDetailPage({
               Review and correct recent clock-in/clock-out history if this member missed an entry.
             </CardDescription>
           </div>
-          <TimeEntryAdjustments
-            membershipId={member.membershipId}
-            shiftRows={recentShifts.map((shift) => ({
-              id: shift.id,
-              startedAtIso: shift.startedAt.toISOString(),
-              endedAtIso: shift.endedAt ? shift.endedAt.toISOString() : null,
-            }))}
-            workRows={recentWorkSessions.map((entry) => ({
-              id: entry.id,
-              workOrderTitle: entry.workOrderTitle,
-              startedAtIso: entry.startedAt.toISOString(),
-              endedAtIso: entry.endedAt ? entry.endedAt.toISOString() : null,
-            }))}
-            timeZone={context.user.timeZone}
-            defaultShiftStartAt={defaultShiftStartAt}
-          />
+          {canManageTimeEntries ? (
+            <TimeEntryAdjustments
+              membershipId={member.membershipId}
+              shiftRows={recentShifts.map((shift) => ({
+                id: shift.id,
+                startedAtIso: shift.startedAt.toISOString(),
+                endedAtIso: shift.endedAt ? shift.endedAt.toISOString() : null,
+              }))}
+              workRows={recentWorkSessions.map((entry) => ({
+                id: entry.id,
+                workOrderTitle: entry.workOrderTitle,
+                startedAtIso: entry.startedAt.toISOString(),
+                endedAtIso: entry.endedAt ? entry.endedAt.toISOString() : null,
+              }))}
+              timeZone={context.user.timeZone}
+              defaultShiftStartAt={defaultShiftStartAt}
+            />
+          ) : (
+            <p className="rounded-xl border bg-surface px-4 py-3 text-sm text-foreground-muted">
+              Managers can view owner profile history but cannot edit owner clock or work-time
+              records.
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>
