@@ -1,0 +1,291 @@
+{
+  "startedAt": "2026-05-15T15:33:57.214Z",
+  "baseUrl": "http://208.88.9.175:3002",
+  "credentials": {
+    "fullName": "Tessa Morgan",
+    "username": "tessa-morgan-qa-237214",
+    "email": "tessa.morgan+qa237214@example.test",
+    "password": "Trailhead!2026"
+  },
+  "ranch": {
+    "name": "Marysvale QA Ranch",
+    "payrollCadence": "biweekly",
+    "includeStarterTemplates": true,
+    "context": "Utah mountain ranch operation"
+  },
+  "steps": [
+    {
+      "ts": "2026-05-15T15:33:57.641Z",
+      "name": "open_signup_start"
+    },
+    {
+      "ts": "2026-05-15T15:34:01.221Z",
+      "name": "signup_validation_short_password"
+    },
+    {
+      "ts": "2026-05-15T15:34:02.719Z",
+      "name": "signup_create_account"
+    },
+    {
+      "ts": "2026-05-15T15:34:34.210Z",
+      "name": "01-after-signup-submit",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\fresh-onboarding-1778859237214\\01-after-signup-submit.png"
+    },
+    {
+      "ts": "2026-05-15T15:34:34.210Z",
+      "name": "onboarding_capture"
+    },
+    {
+      "ts": "2026-05-15T15:34:34.218Z",
+      "name": "post_onboarding_state"
+    },
+    {
+      "ts": "2026-05-15T15:34:35.665Z",
+      "name": "03-app-root-after-onboarding",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\fresh-onboarding-1778859237214\\03-app-root-after-onboarding.png"
+    },
+    {
+      "ts": "2026-05-15T15:34:35.665Z",
+      "name": "open_settings"
+    },
+    {
+      "ts": "2026-05-15T15:34:37.268Z",
+      "name": "04-settings-pause-state",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\fresh-onboarding-1778859237214\\04-settings-pause-state.png"
+    }
+  ],
+  "signup": {
+    "initialUrl": "http://208.88.9.175:3002/signup",
+    "headings": [
+      "Create your account",
+      "Operations-first from sign-in to daily use"
+    ],
+    "bodySnippet": "Ranch Manager Product Pricing Demo Log in View demo Start account Create your account Set up your owner account, choose a username, and start your ranch workspace. Full name Username Use 3-40 letters, numbers, dots, dashes, or underscores. Email Password Use at least 8 characters. Create account Already have an account? Log in Operations-first from sign-in to daily use The same visual language you see on public pages carries directly into the app workspace so onboarding feels consistent and trustworthy. - Team setup with role-aware controls - Work-order assignment and status visibility - Shift and task time tracking readiness - Payroll summary and billing access foundations - Herd and land unit foundations in the bundled base plan",
+    "fields": [
+      {
+        "name": "$ACTION_REF_1",
+        "type": "hidden",
+        "required": false,
+        "label": "",
+        "placeholder": ""
+      },
+      {
+        "name": "$ACTION_1:0",
+        "type": "hidden",
+        "required": false,
+        "label": "",
+        "placeholder": ""
+      },
+      {
+        "name": "$ACTION_1:1",
+        "type": "hidden",
+        "required": false,
+        "label": "",
+        "placeholder": ""
+      },
+      {
+        "name": "$ACTION_KEY",
+        "type": "hidden",
+        "required": false,
+        "label": "",
+        "placeholder": ""
+      },
+      {
+        "name": "fullName",
+        "type": "input",
+        "required": true,
+        "label": "Full name",
+        "placeholder": "Casey Rivers"
+      },
+      {
+        "name": "username",
+        "type": "input",
+        "required": true,
+        "label": "UsernameUse 3-40 letters, numbers, dots, dashes, or underscores.",
+        "placeholder": "casey-rivers"
+      },
+      {
+        "name": "email",
+        "type": "email",
+        "required": true,
+        "label": "Email",
+        "placeholder": "casey@ranch.com"
+      },
+      {
+        "name": "password",
+        "type": "password",
+        "required": true,
+        "label": "PasswordUse at least 8 characters.",
+        "placeholder": "Create a password"
+      }
+    ],
+    "shortPasswordError": "Password must be at least 8 characters.",
+    "afterSubmitUrl": "http://208.88.9.175:3002/signup"
+  },
+  "onboarding": {
+    "urlAtEntry": "http://208.88.9.175:3002/signup",
+    "headings": [
+      "Create your account",
+      "Operations-first from sign-in to daily use"
+    ],
+    "bodySnippet": "Ranch Manager Product Pricing Demo Log in View demo Start account Create your account Set up your owner account, choose a username, and start your ranch workspace. Full name Username Use 3-40 letters, numbers, dots, dashes, or underscores. Email Password Use at least 8 characters. Password must be at least 8 characters. Create account Already have an account? Log in Operations-first from sign-in to daily use The same visual language you see on public pages carries directly into the app workspace so onboarding feels consistent and trustworthy. - Team setup with role-aware controls - Work-order assignment and status visibility - Shift and task time tracking readiness - Payroll summary and billing access foundations - Herd and land unit foundations in the bundled base plan"
+  },
+  "postOnboarding": {
+    "url": "http://208.88.9.175:3002/signup",
+    "headings": [
+      "Create your account",
+      "Operations-first from sign-in to daily use"
+    ],
+    "bodySnippet": "Ranch Manager Product Pricing Demo Log in View demo Start account Create your account Set up your owner account, choose a username, and start your ranch workspace. Full name Username Use 3-40 letters, numbers, dots, dashes, or underscores. Email Password Use at least 8 characters. Password must be at least 8 characters. Create account Already have an account? Log in Operations-first from sign-in to daily use The same visual language you see on public pages carries directly into the app workspace so onboarding feels consistent and trustworthy. - Team setup with role-aware controls - Work-order assignment and status visibility - Shift and task time tracking readiness - Payroll summary and billing access foundations - Herd and land unit foundations in the bundled base plan",
+    "detectedBillingBlocked": false,
+    "appRootUrl": "http://208.88.9.175:3002/login"
+  },
+  "settings": {
+    "urlAtEntry": "http://208.88.9.175:3002/login",
+    "headings": [
+      "Log in",
+      "Operations-first from sign-in to daily use"
+    ],
+    "bodySnippetBeforeAction": "Ranch Manager Product Pricing Demo Log in View demo Start account Log in Access your ranch workspace with your username and password. Username Password Log in New here? Create an account Operations-first from sign-in to daily use The same visual language you see on public pages carries directly into the app workspace so onboarding feels consistent and trustworthy. - Team setup with role-aware controls - Work-order assignment and status visibility - Shift and task time tracking readiness - Payroll summary and billing access foundations - Herd and land unit foundations in the bundled base plan",
+    "platformAdminAccessBefore": null,
+    "accessState": null,
+    "subscriptionStatus": null,
+    "accessSource": null,
+    "betaLifetimeAccess": null,
+    "adminAccessAction": "none",
+    "bodySnippetAfterAction": "Ranch Manager Product Pricing Demo Log in View demo Start account Log in Access your ranch workspace with your username and password. Username Password Log in New here? Create an account Operations-first from sign-in to daily use The same visual language you see on public pages carries directly into the app workspace so onboarding feels consistent and trustworthy. - Team setup with role-aware controls - Work-order assignment and status visibility - Shift and task time tracking readiness - Payroll summary and billing access foundations - Herd and land unit foundations in the bundled base plan",
+    "platformAdminAccessAfter": null,
+    "couponSectionVisible": false,
+    "supportEmailVisible": false
+  },
+  "pauseState": {
+    "currentUrl": "http://208.88.9.175:3002/login",
+    "route": "/login",
+    "readyForManualGrant": true
+  },
+  "artifacts": {
+    "outDir": "D:\\Ranch Manager Final\\test-artifacts\\fresh-onboarding-1778859237214",
+    "screenshots": [
+      "D:\\Ranch Manager Final\\test-artifacts\\fresh-onboarding-1778859237214\\01-after-signup-submit.png",
+      "D:\\Ranch Manager Final\\test-artifacts\\fresh-onboarding-1778859237214\\03-app-root-after-onboarding.png",
+      "D:\\Ranch Manager Final\\test-artifacts\\fresh-onboarding-1778859237214\\04-settings-pause-state.png"
+    ]
+  },
+  "errors": [
+    {
+      "type": "request_failed",
+      "method": "GET",
+      "url": "http://208.88.9.175:3002/login?_rsc=ynvfz",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "request_failed",
+      "method": "GET",
+      "url": "http://208.88.9.175:3002/signup?_rsc=ynvfz",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "request_failed",
+      "method": "GET",
+      "url": "http://208.88.9.175:3002/demo?_rsc=ynvfz",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "request_failed",
+      "method": "GET",
+      "url": "http://208.88.9.175:3002/demo?_rsc=1o94a",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "request_failed",
+      "method": "GET",
+      "url": "http://208.88.9.175:3002/login?_rsc=1o94a",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "request_failed",
+      "method": "GET",
+      "url": "http://208.88.9.175:3002/signup?_rsc=1o94a",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "request_failed",
+      "method": "POST",
+      "url": "http://208.88.9.175:3002/signup",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "request_failed",
+      "method": "GET",
+      "url": "http://208.88.9.175:3002/demo?_rsc=17yrj",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "request_failed",
+      "method": "GET",
+      "url": "http://208.88.9.175:3002/signup?_rsc=17yrj",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "request_failed",
+      "method": "GET",
+      "url": "http://208.88.9.175:3002/login?_rsc=17yrj",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "request_failed",
+      "method": "GET",
+      "url": "http://208.88.9.175:3002/demo?_rsc=to9i9",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "request_failed",
+      "method": "GET",
+      "url": "http://208.88.9.175:3002/login?_rsc=to9i9",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "request_failed",
+      "method": "GET",
+      "url": "http://208.88.9.175:3002/signup?_rsc=to9i9",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "request_failed",
+      "method": "GET",
+      "url": "http://208.88.9.175:3002/signup?_rsc=17yrj",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "request_failed",
+      "method": "GET",
+      "url": "http://208.88.9.175:3002/demo?_rsc=17yrj",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "request_failed",
+      "method": "GET",
+      "url": "http://208.88.9.175:3002/login?_rsc=17yrj",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "request_failed",
+      "method": "GET",
+      "url": "http://208.88.9.175:3002/demo?_rsc=to9i9",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "request_failed",
+      "method": "GET",
+      "url": "http://208.88.9.175:3002/login?_rsc=to9i9",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "request_failed",
+      "method": "GET",
+      "url": "http://208.88.9.175:3002/signup?_rsc=to9i9",
+      "error": "net::ERR_ABORTED"
+    }
+  ],
+  "finishedAt": "2026-05-15T15:34:37.269Z"
+}

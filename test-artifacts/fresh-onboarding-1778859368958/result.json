@@ -1,0 +1,246 @@
+{
+  "startedAt": "2026-05-15T15:36:08.958Z",
+  "baseUrl": "http://208.88.9.175:3002",
+  "credentials": {
+    "fullName": "Tessa Morgan",
+    "username": "tessa-morgan-qa-368958",
+    "email": "tessa.morgan.qa.368958@example.com",
+    "password": "Trailhead!2026"
+  },
+  "ranch": {
+    "name": "Marysvale QA Ranch",
+    "payrollCadence": "biweekly",
+    "includeStarterTemplates": true,
+    "context": "Utah mountain ranch operation"
+  },
+  "steps": [
+    {
+      "ts": "2026-05-15T15:36:09.118Z",
+      "name": "open_signup_start"
+    },
+    {
+      "ts": "2026-05-15T15:36:09.978Z",
+      "name": "signup_validation_short_password"
+    },
+    {
+      "ts": "2026-05-15T15:36:11.447Z",
+      "name": "signup_create_account"
+    },
+    {
+      "ts": "2026-05-15T15:36:43.033Z",
+      "name": "01-after-signup-submit",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\fresh-onboarding-1778859368958\\01-after-signup-submit.png"
+    },
+    {
+      "ts": "2026-05-15T15:36:43.033Z",
+      "name": "onboarding_capture"
+    },
+    {
+      "ts": "2026-05-15T15:36:43.432Z",
+      "name": "onboarding_submit"
+    },
+    {
+      "ts": "2026-05-15T15:36:45.377Z",
+      "name": "02-after-onboarding-submit",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\fresh-onboarding-1778859368958\\02-after-onboarding-submit.png"
+    },
+    {
+      "ts": "2026-05-15T15:36:45.377Z",
+      "name": "post_onboarding_state"
+    },
+    {
+      "ts": "2026-05-15T15:36:46.802Z",
+      "name": "03-app-root-after-onboarding",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\fresh-onboarding-1778859368958\\03-app-root-after-onboarding.png"
+    },
+    {
+      "ts": "2026-05-15T15:36:46.802Z",
+      "name": "open_settings"
+    },
+    {
+      "ts": "2026-05-15T15:36:48.337Z",
+      "name": "settings_enable_admin_access"
+    },
+    {
+      "ts": "2026-05-15T15:36:50.236Z",
+      "name": "04-settings-pause-state",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\fresh-onboarding-1778859368958\\04-settings-pause-state.png"
+    }
+  ],
+  "signup": {
+    "initialUrl": "http://208.88.9.175:3002/signup",
+    "headings": [
+      "Create your account",
+      "Operations-first from sign-in to daily use"
+    ],
+    "bodySnippet": "Ranch Manager Product Pricing Demo Log in View demo Start account Create your account Set up your owner account, choose a username, and start your ranch workspace. Full name Username Use 3-40 letters, numbers, dots, dashes, or underscores. Email Password Use at least 8 characters. Create account Already have an account? Log in Operations-first from sign-in to daily use The same visual language you see on public pages carries directly into the app workspace so onboarding feels consistent and trustworthy. - Team setup with role-aware controls - Work-order assignment and status visibility - Shift and task time tracking readiness - Payroll summary and billing access foundations - Herd and land unit foundations in the bundled base plan",
+    "fields": [
+      {
+        "name": "$ACTION_REF_1",
+        "type": "hidden",
+        "required": false,
+        "label": "",
+        "placeholder": ""
+      },
+      {
+        "name": "$ACTION_1:0",
+        "type": "hidden",
+        "required": false,
+        "label": "",
+        "placeholder": ""
+      },
+      {
+        "name": "$ACTION_1:1",
+        "type": "hidden",
+        "required": false,
+        "label": "",
+        "placeholder": ""
+      },
+      {
+        "name": "$ACTION_KEY",
+        "type": "hidden",
+        "required": false,
+        "label": "",
+        "placeholder": ""
+      },
+      {
+        "name": "fullName",
+        "type": "input",
+        "required": true,
+        "label": "Full name",
+        "placeholder": "Casey Rivers"
+      },
+      {
+        "name": "username",
+        "type": "input",
+        "required": true,
+        "label": "UsernameUse 3-40 letters, numbers, dots, dashes, or underscores.",
+        "placeholder": "casey-rivers"
+      },
+      {
+        "name": "email",
+        "type": "email",
+        "required": true,
+        "label": "Email",
+        "placeholder": "casey@ranch.com"
+      },
+      {
+        "name": "password",
+        "type": "password",
+        "required": true,
+        "label": "PasswordUse at least 8 characters.",
+        "placeholder": "Create a password"
+      }
+    ],
+    "shortPasswordError": "Password must be at least 8 characters.",
+    "afterSubmitUrl": "http://208.88.9.175:3002/signup",
+    "postSubmitError": "",
+    "validationPopup": {
+      "name": "FORM"
+    }
+  },
+  "onboarding": {
+    "urlAtEntry": "http://208.88.9.175:3002/onboarding",
+    "headings": [
+      "Create your ranch workspace",
+      "Operations-first from sign-in to daily use"
+    ],
+    "bodySnippet": "Ranch Manager Product Pricing Demo Log in View demo Start account Create your ranch workspace One quick setup step with payroll defaults and optional starter recurring work templates. You will be assigned owner role for this ranch account. Ranch name This name identifies your tenant workspace. You can update it later. Payroll cadence default Weekly (7-day periods) Biweekly (14-day periods) Monthly (30-day periods) Sets your initial payroll settings so reporting and period setup start with practical defaults. Add starter recurring work-order templates for morning checks, water inspection, and weekly fence checks. You will start as owner. Invite managers and workers from Team after setup. Create ranch workspace After setup Invite your first manager/worker from Team, then open Work Orders and Payroll. Operations-first from sign-in to daily use The same visual language you see on public pages carries directly into the app workspace so onboarding feels consistent and trustworthy. - Team setup with role-aware controls - Work-order assignment and status visibility - Shift and task time tracking readiness - Payroll summary and billing access foundations - Herd and land unit foundations in ",
+    "fields": [
+      {
+        "name": "ranchName",
+        "type": "input",
+        "required": true,
+        "label": "Ranch nameThis name identifies your tenant workspace. You can update it later.",
+        "placeholder": "Willow Creek Ranch"
+      },
+      {
+        "name": "payrollCadence",
+        "type": "select",
+        "required": false,
+        "label": "Payroll cadence defaultWeekly (7-day periods)Biweekly (14-day periods)Monthly (30-day periods)Sets your initial payroll settings so reporting and period setup start with practical defaults.",
+        "placeholder": ""
+      },
+      {
+        "name": "includeStarterTemplates",
+        "type": "checkbox",
+        "required": false,
+        "label": "Add starter recurring work-order templates for morning checks, water inspection, and weekly fence checks.",
+        "placeholder": "",
+        "checked": true
+      }
+    ],
+    "emptyRanchValidationMessage": "Please fill out this field.",
+    "includeStarterTemplatesChecked": true,
+    "afterSubmitUrl": "http://208.88.9.175:3002/onboarding"
+  },
+  "postOnboarding": {
+    "url": "http://208.88.9.175:3002/app/billing-required",
+    "headings": [
+      "Activate ranch access",
+      "Billing access is required",
+      "1) Start subscription",
+      "2) Redeem access code",
+      "Need activation help?"
+    ],
+    "bodySnippet": "RANCH Marysvale QA Ranch owner access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @tessa-morgan-qa-368958 Settings Log out ACTIVATION Activate ranch access This ranch is currently blocked from bundled base product routes. Complete activation below to unlock `/app`. Billing access is required Ranch Manager requires an active subscription or approved beta lifetime access for bundled base production routes, including herd and land management. Current status: inactive Beta lifetime access: Not enabled 1) Start subscription Launch Stripe checkout for this ranch owner account and activate paid access. Start Stripe checkout 2) Redeem access code If you were issued a lifetime beta code, apply it here for internal access. Apply coupon code Need activation help? If checkout fails or your code is not being accepted, contact support for manual review. Support: brannan.pearson.ranch@gmail.com",
+    "detectedBillingBlocked": true,
+    "appRootUrl": "http://208.88.9.175:3002/app/billing-required"
+  },
+  "settings": {
+    "urlAtEntry": "http://208.88.9.175:3002/app/settings",
+    "headings": [
+      "Account & Billing",
+      "Ranch Profile",
+      "Subscription Access",
+      "Ranch Timezone",
+      "Support Contact"
+    ],
+    "bodySnippetBeforeAction": "RANCH Marysvale QA Ranch owner access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @tessa-morgan-qa-368958 Settings Log out SETTINGS Account & Billing Ranch identity, role context, and bundled base subscription access state. Ranch Profile Core tenant context for this workspace. Ranch: Marysvale QA Ranch Current user: Tessa Morgan Role: owner Platform admin access: Blocked Admin Access Failsafe This switch controls whether platform admins can enter this ranch workspace from the admin control center. Default is blocked. Allow admin access Subscription Access Paid access unlocks the bundled base app (crew, work, time, payroll, herd, and land) unless beta lifetime access is enabled. Access state: Billing required Subscription status: inactive Access source: No active access source Plan: Bundled Base Plan Stripe customer: Not created yet Stripe subscription: Not active yet Current period end: Not available Beta lifetime access: Not enabled Start Stripe checkout Customer portal becomes available after first Stripe checkout creates a customer record. Have a coupon code? Ranch Timezone Owners set one timezone for this ranch. All members in this ranch use it for payroll, scheduling, and timestamp rendering. Timezone Save ranch timezone Use browser timezone Current ranch timezone: UTC | Browser timezone: America/Denver Support Contact Direct contact for access or billing help while supporting client ranches. Email: brannan.pearson.ranch@gmail.com",
+    "platformAdminAccessBefore": "Blocked",
+    "accessState": "Billing required",
+    "subscriptionStatus": "inactive",
+    "accessSource": "No active access source Plan: Bundled Base Plan Stripe customer: Not created yet Stripe subscription: Not active yet Current period end: Not available Beta lifetime access: Not enabled Start Stripe checkout Customer portal becomes available after first Stripe checkout creates a customer record. Have a coupon code? Ranch Timezone Owners set one timezone for this ranch. All members in this ranch use it for payroll, scheduling, and timestamp rendering. Timezone Save ranch timezone Use browser timezone Current ranch timezone: UTC | Browser timezone: America/Denver Support Contact Direct contact for access or billing help while supporting client ranches. Email: brannan.pearson.ranch@gmail.com",
+    "betaLifetimeAccess": "Not enabled",
+    "adminAccessAction": "clicked_allow_admin_access",
+    "bodySnippetAfterAction": "RANCH Marysvale QA Ranch owner access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @tessa-morgan-qa-368958 Settings Log out SETTINGS Account & Billing Ranch identity, role context, and bundled base subscription access state. Ranch Profile Core tenant context for this workspace. Ranch: Marysvale QA Ranch Current user: Tessa Morgan Role: owner Platform admin access: Allowed Admin Access Failsafe This switch controls whether platform admins can enter this ranch workspace from the admin control center. Default is blocked. Block admin access Subscription Access Paid access unlocks the bundled base app (crew, work, time, payroll, herd, and land) unless beta lifetime access is enabled. Access state: Billing required Subscription status: inactive Access source: No active access source Plan: Bundled Base Plan Stripe customer: Not created yet Stripe subscription: Not active yet Current period end: Not available Beta lifetime access: Not enabled Start Stripe checkout Customer portal becomes available after first Stripe checkout creates a customer record. Have a coupon code? Apply coupon code Ranch Timezone Owners set one timezone for this ranch. All members in this ranch use it for payroll, scheduling, and timestamp rendering. Timezone Save ranch timezone Use browser timezone Current ranch timezone: UTC | Browser timezone: America/Denver Support Contact Direct contact for access or billing help while supporting client ranches. Email: brannan.pearson.ranch@gmail.com",
+    "platformAdminAccessAfter": "Allowed",
+    "couponSectionVisible": false,
+    "supportEmailVisible": true
+  },
+  "pauseState": {
+    "currentUrl": "http://208.88.9.175:3002/app/settings",
+    "route": "/app/settings",
+    "readyForManualGrant": true
+  },
+  "artifacts": {
+    "outDir": "D:\\Ranch Manager Final\\test-artifacts\\fresh-onboarding-1778859368958",
+    "screenshots": [
+      "D:\\Ranch Manager Final\\test-artifacts\\fresh-onboarding-1778859368958\\01-after-signup-submit.png",
+      "D:\\Ranch Manager Final\\test-artifacts\\fresh-onboarding-1778859368958\\02-after-onboarding-submit.png",
+      "D:\\Ranch Manager Final\\test-artifacts\\fresh-onboarding-1778859368958\\03-app-root-after-onboarding.png",
+      "D:\\Ranch Manager Final\\test-artifacts\\fresh-onboarding-1778859368958\\04-settings-pause-state.png"
+    ]
+  },
+  "errors": [
+    {
+      "type": "request_failed",
+      "method": "POST",
+      "url": "http://208.88.9.175:3002/signup",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "request_failed",
+      "method": "POST",
+      "url": "http://208.88.9.175:3002/onboarding",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "request_failed",
+      "method": "POST",
+      "url": "http://208.88.9.175:3002/app/settings",
+      "error": "net::ERR_ABORTED"
+    }
+  ],
+  "finishedAt": "2026-05-15T15:36:50.237Z"
+}

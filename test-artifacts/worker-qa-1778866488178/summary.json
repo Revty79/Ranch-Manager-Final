@@ -1,0 +1,852 @@
+{
+  "startedAt": "2026-05-15T17:34:48.179Z",
+  "outDir": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178",
+  "workers": {
+    "reed": {
+      "persona": "reliable",
+      "username": "reed-reliable-155246",
+      "passwordResetTriggered": true,
+      "newPassword": "WorkerPass#2026!",
+      "loginWorked": true,
+      "passwordUsed": "RanchPass123!",
+      "finalUrlAfterLogin": "http://208.88.9.175:3002/app",
+      "screenshots": [
+        {
+          "name": "after-login",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\reed-after-login.png"
+        },
+        {
+          "name": "visibility-last-route",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\reed-visibility-last-route.png"
+        },
+        {
+          "name": "today",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\reed-today.png"
+        },
+        {
+          "name": "workorders",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\reed-workorders.png"
+        },
+        {
+          "name": "settings",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\reed-settings.png"
+        },
+        {
+          "name": "herd",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\reed-herd.png"
+        },
+        {
+          "name": "land",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\reed-land.png"
+        },
+        {
+          "name": "reliable-after-complete",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\reed-reliable-after-complete.png"
+        },
+        {
+          "name": "general-permission-attempts",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\reed-general-permission-attempts.png"
+        }
+      ],
+      "visibility": {
+        "/app": {
+          "route": "/app",
+          "finalUrl": "http://208.88.9.175:3002/app",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out APP HOME Operations Dash"
+        },
+        "/app/today": {
+          "route": "/app/today",
+          "finalUrl": "http://208.88.9.175:3002/app/today",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out WORKER TODAY Today Your "
+        },
+        "/app/work-orders": {
+          "route": "/app/work-orders",
+          "finalUrl": "http://208.88.9.175:3002/app/work-orders",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out WORK ORDERS Assigned Wor"
+        },
+        "/app/time": {
+          "route": "/app/time",
+          "finalUrl": "http://208.88.9.175:3002/app/time",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out TIME Shift & Task Time S"
+        },
+        "/app/team": {
+          "route": "/app/team",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out ACCESS You do not have a"
+        },
+        "/app/payroll": {
+          "route": "/app/payroll",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out ACCESS You do not have a"
+        },
+        "/app/settings": {
+          "route": "/app/settings",
+          "finalUrl": "http://208.88.9.175:3002/app/settings",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out SETTINGS Account & Billi"
+        },
+        "/app/herd": {
+          "route": "/app/herd",
+          "finalUrl": "http://208.88.9.175:3002/app/herd",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out HERD Animal Registry Tra"
+        },
+        "/app/land": {
+          "route": "/app/land",
+          "finalUrl": "http://208.88.9.175:3002/app/land",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out LAND Land Units One shar"
+        },
+        "/app/needs-attention": {
+          "route": "/app/needs-attention",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out ACCESS You do not have a"
+        },
+        "/admin": {
+          "route": "/admin",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out ACCESS You do not have a"
+        },
+        "/checkout": {
+          "route": "/checkout",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out ACCESS You do not have a"
+        },
+        "/app/work-orders/00000000-0000-0000-0000-000000000000": {
+          "route": "/app/work-orders/00000000-0000-0000-0000-000000000000",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out ACCESS You do not have a"
+        }
+      },
+      "todaySummary": {
+        "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out WORKER TODAY Today Your shift state, current work, and next action in one place. Open Communication Open Work Orders SHIFT Not started ACTIVE WORK TIMER None ASSIGNED OPEN WORK 3 URGENT/UNREAD ALERTS 0 0 urgent threads, 0 unread private Next best action Clock in to start your shift, then start your first work timer. Shift status No active shift For lunch or breaks, clock out and clock back in when you return. Clock in Work timer No active work timer Select work order Water check 155246 Move/check cattle 155246 Weekly water patrol order 155246 Start work timer Select work order to complete Water ch",
+        "hasShiftControls": true,
+        "hasWorkTimerControls": true
+      },
+      "workOrdersSummary": {
+        "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out WORK ORDERS Assigned Work Prioritized queue for today, with overdue and urgent work surfaced first. DO NEXT Water check 155246 Overdue Due: May 15, 2026 (overdue) active (3) in progress (0) completed (0) cancelled (0) all (3) Water check 155246 open Not required Overdue Check all troughs in North Pasture and Creek Lot before 9 AM. Priority: high Due: May 15, 2026 (overdue) Pay: Regular Incentive: Not set No incentive pay configured Move/check cattle 155246 draft Not required Prep move from North Pasture to Lower Field and verify gate hardware. Priority: normal Due: May 17, 2026 Pay: Regular Incent",
+        "hasCreateForm": false,
+        "hasEditLinks": false,
+        "assignedCards": []
+      },
+      "settingsVisibility": {
+        "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out SETTINGS Account & Billing Ranch identity, role context, and bundled base subscription access state. Ranch Profile Core tenant context for this workspace. Ranch: Marysvale QA Ranch Current user: Reed Dalton Reliable 155246 Role: worker Admin and billing settings are managed by ranch owners. Subscription Access Paid access unlocks the bundled base app (crew, work, time, payroll, herd, and land) unless beta lifetime access is enabled. Billing details are visible to managers and owners. If billing questions come up, contact your ranch manager or owner. Billing controls are owner-only. Ranch Timezone ",
+        "hasBillingWords": true,
+        "hasOwnerOnlyCopy": true,
+        "hasLifetimeCopy": true,
+        "hasRequestAccessCopy": false,
+        "hasStripeButtons": false
+      },
+      "herdLand": {
+        "/app/herd": {
+          "finalUrl": "http://208.88.9.175:3002/app/herd",
+          "denied": false,
+          "hasCreateUi": true,
+          "hasEditUi": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out HERD Animal Registry Track cattle, horses, and other livestock species in one operational registry with structured lifecycle history and current location visibility. TOTAL 30 All registry records ACTIVE 30 Ready for operations SOLD 0 Disposition recorded DECEASED 0 Loss history retained ARCHIVED 0 Hidde"
+        },
+        "/app/land": {
+          "finalUrl": "http://208.88.9.175:3002/app/land",
+          "denied": false,
+          "hasCreateUi": true,
+          "hasEditUi": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out LAND Land Units One shared model for pastures, lots, corrals, pens, stalls, and horse-friendly occupancy workflows. TOTAL UNITS 5 All configured spaces ACTIVE UNITS 5 Ready for occupancy HANDLING SPACES 0 Corrals, pens, stalls, barn/holding OCCUPIED NOW 0 Units with active occupants Filter land units Se"
+        }
+      },
+      "actions": [
+        "Clocked in (if not already active).",
+        "Started work timer on assigned task.",
+        "Added long/messy completion note.",
+        "Submitted completion proof for one assigned task.",
+        "Attempted to access manager/owner pages and to edit/reassign work as worker."
+      ],
+      "timerOptions": [
+        "Water check 155246",
+        "Move/check cattle 155246",
+        "Weekly water patrol order 155246"
+      ],
+      "completeFeedback": "Select work order to complete Move/check cattle 155246 Weekly water patrol order 155246 Add completion proof (recommended) Complete selected work order",
+      "assignedAfterCompletion": [],
+      "restrictedAttempts": [
+        {
+          "route": "/app/team",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out ACCESS You do not have a"
+        },
+        {
+          "route": "/app/payroll",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out ACCESS You do not have a"
+        },
+        {
+          "route": "/app/settings",
+          "finalUrl": "http://208.88.9.175:3002/app/settings",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out SETTINGS Account & Billi"
+        },
+        {
+          "route": "/app/herd",
+          "finalUrl": "http://208.88.9.175:3002/app/herd",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out HERD Animal Registry Tra"
+        },
+        {
+          "route": "/app/land",
+          "finalUrl": "http://208.88.9.175:3002/app/land",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out LAND Land Units One shar"
+        },
+        {
+          "route": "/app/needs-attention",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out ACCESS You do not have a"
+        },
+        {
+          "route": "/admin",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out ACCESS You do not have a"
+        },
+        {
+          "route": "/checkout",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out ACCESS You do not have a"
+        },
+        {
+          "route": "/app/work-orders/00000000-0000-0000-0000-000000000000",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out ACCESS You do not have a"
+        }
+      ],
+      "reassignAttempt": {
+        "hasEditLink": false,
+        "hasAssigneeCheckboxes": false,
+        "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out WORK ORDERS Assigned Work Prioritized queue for today, with overdue and urgent work surfaced first. DO N"
+      },
+      "directWorkOrderDetailAttempt": {
+        "route": "/app/work-orders/00000000-0000-0000-0000-000000000000",
+        "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+        "denied": true,
+        "hasSectionError": false,
+        "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @reed-reliable-155246 Settings Log out ACCESS You do not have a"
+      }
+    },
+    "lane": {
+      "persona": "forgetful",
+      "username": "lane-forgetful-155246",
+      "passwordResetTriggered": true,
+      "newPassword": "WorkerPass#2026!",
+      "loginWorked": true,
+      "passwordUsed": "RanchPass123!",
+      "finalUrlAfterLogin": "http://208.88.9.175:3002/app",
+      "screenshots": [
+        {
+          "name": "after-login",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\lane-after-login.png"
+        },
+        {
+          "name": "visibility-last-route",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\lane-visibility-last-route.png"
+        },
+        {
+          "name": "today",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\lane-today.png"
+        },
+        {
+          "name": "workorders",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\lane-workorders.png"
+        },
+        {
+          "name": "settings",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\lane-settings.png"
+        },
+        {
+          "name": "herd",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\lane-herd.png"
+        },
+        {
+          "name": "land",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\lane-land.png"
+        },
+        {
+          "name": "forgetful-returned",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\lane-forgetful-returned.png"
+        },
+        {
+          "name": "general-permission-attempts",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\lane-general-permission-attempts.png"
+        }
+      ],
+      "visibility": {
+        "/app": {
+          "route": "/app",
+          "finalUrl": "http://208.88.9.175:3002/app",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out APP HOME Operations Das"
+        },
+        "/app/today": {
+          "route": "/app/today",
+          "finalUrl": "http://208.88.9.175:3002/app/today",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out WORKER TODAY Today Your"
+        },
+        "/app/work-orders": {
+          "route": "/app/work-orders",
+          "finalUrl": "http://208.88.9.175:3002/app/work-orders",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out WORK ORDERS Assigned Wo"
+        },
+        "/app/time": {
+          "route": "/app/time",
+          "finalUrl": "http://208.88.9.175:3002/app/time",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out TIME Shift & Task Time "
+        },
+        "/app/team": {
+          "route": "/app/team",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out ACCESS You do not have "
+        },
+        "/app/payroll": {
+          "route": "/app/payroll",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out ACCESS You do not have "
+        },
+        "/app/settings": {
+          "route": "/app/settings",
+          "finalUrl": "http://208.88.9.175:3002/app/settings",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out SETTINGS Account & Bill"
+        },
+        "/app/herd": {
+          "route": "/app/herd",
+          "finalUrl": "http://208.88.9.175:3002/app/herd",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out HERD Animal Registry Tr"
+        },
+        "/app/land": {
+          "route": "/app/land",
+          "finalUrl": "http://208.88.9.175:3002/app/land",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out LAND Land Units One sha"
+        },
+        "/app/needs-attention": {
+          "route": "/app/needs-attention",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out ACCESS You do not have "
+        },
+        "/admin": {
+          "route": "/admin",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out ACCESS You do not have "
+        },
+        "/checkout": {
+          "route": "/checkout",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out ACCESS You do not have "
+        },
+        "/app/work-orders/00000000-0000-0000-0000-000000000000": {
+          "route": "/app/work-orders/00000000-0000-0000-0000-000000000000",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out ACCESS You do not have "
+        }
+      },
+      "todaySummary": {
+        "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out WORKER TODAY Today Your shift state, current work, and next action in one place. Open Communication Open Work Orders SHIFT Not started ACTIVE WORK TIMER None ASSIGNED OPEN WORK 0 URGENT/UNREAD ALERTS 0 0 urgent threads, 0 unread private Next best action Clock in to start your shift, then start your first work timer. Shift status No active shift For lunch or breaks, clock out and clock back in when you return. Clock in Work timer No active work timer No available work orders to track right now. Assigned work Tasks currently assigned to your membership. No assigned work right now New assignments wi",
+        "hasShiftControls": true,
+        "hasWorkTimerControls": false
+      },
+      "workOrdersSummary": {
+        "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out WORK ORDERS Assigned Work Prioritized queue for today, with overdue and urgent work surfaced first. active (0) in progress (0) completed (1) cancelled (0) all (1) No work orders in this queue Switch queue tabs to see in-progress, completed, or cancelled assignments.",
+        "hasCreateForm": false,
+        "hasEditLinks": false,
+        "assignedCards": []
+      },
+      "settingsVisibility": {
+        "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out SETTINGS Account & Billing Ranch identity, role context, and bundled base subscription access state. Ranch Profile Core tenant context for this workspace. Ranch: Marysvale QA Ranch Current user: Lane Morris Forgetful 155246 Role: worker Admin and billing settings are managed by ranch owners. Subscription Access Paid access unlocks the bundled base app (crew, work, time, payroll, herd, and land) unless beta lifetime access is enabled. Billing details are visible to managers and owners. If billing questions come up, contact your ranch manager or owner. Billing controls are owner-only. Ranch Timezon",
+        "hasBillingWords": true,
+        "hasOwnerOnlyCopy": true,
+        "hasLifetimeCopy": true,
+        "hasRequestAccessCopy": false,
+        "hasStripeButtons": false
+      },
+      "herdLand": {
+        "/app/herd": {
+          "finalUrl": "http://208.88.9.175:3002/app/herd",
+          "denied": false,
+          "hasCreateUi": true,
+          "hasEditUi": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out HERD Animal Registry Track cattle, horses, and other livestock species in one operational registry with structured lifecycle history and current location visibility. TOTAL 30 All registry records ACTIVE 30 Ready for operations SOLD 0 Disposition recorded DECEASED 0 Loss history retained ARCHIVED 0 Hidd"
+        },
+        "/app/land": {
+          "finalUrl": "http://208.88.9.175:3002/app/land",
+          "denied": false,
+          "hasCreateUi": true,
+          "hasEditUi": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out LAND Land Units One shared model for pastures, lots, corrals, pens, stalls, and horse-friendly occupancy workflows. TOTAL UNITS 5 All configured spaces ACTIVE UNITS 5 Ready for occupancy HANDLING SPACES 0 Corrals, pens, stalls, barn/holding OCCUPIED NOW 0 Units with active occupants Filter land units S"
+        }
+      },
+      "actions": [
+        "Clocked in before starting task.",
+        "Left Today screen without completing task.",
+        "Attempted to access manager/owner pages and to edit/reassign work as worker."
+      ],
+      "returnedTodayState": {
+        "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out WORKER TODAY Today Your shift state, current work, and next action in one place. Open Communication Open Work Orders SHIFT Active Since May 15, 05:36 PM ACTIVE WORK TIMER None ASSIGNED OPEN WORK 0 URGENT/UNREAD ALERTS 0 0 u",
+        "hasActiveTimerMessage": true,
+        "hasReminderLikeText": true
+      },
+      "restrictedAttempts": [
+        {
+          "route": "/app/team",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out ACCESS You do not have "
+        },
+        {
+          "route": "/app/payroll",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out ACCESS You do not have "
+        },
+        {
+          "route": "/app/settings",
+          "finalUrl": "http://208.88.9.175:3002/app/settings",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out SETTINGS Account & Bill"
+        },
+        {
+          "route": "/app/herd",
+          "finalUrl": "http://208.88.9.175:3002/app/herd",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out HERD Animal Registry Tr"
+        },
+        {
+          "route": "/app/land",
+          "finalUrl": "http://208.88.9.175:3002/app/land",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out LAND Land Units One sha"
+        },
+        {
+          "route": "/app/needs-attention",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out ACCESS You do not have "
+        },
+        {
+          "route": "/admin",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out ACCESS You do not have "
+        },
+        {
+          "route": "/checkout",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out ACCESS You do not have "
+        },
+        {
+          "route": "/app/work-orders/00000000-0000-0000-0000-000000000000",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out ACCESS You do not have "
+        }
+      ],
+      "reassignAttempt": {
+        "hasEditLink": false,
+        "hasAssigneeCheckboxes": false,
+        "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out WORK ORDERS Assigned Work Prioritized queue for today, with overdue and urgent work surfaced first. act"
+      },
+      "directWorkOrderDetailAttempt": {
+        "route": "/app/work-orders/00000000-0000-0000-0000-000000000000",
+        "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+        "denied": true,
+        "hasSectionError": false,
+        "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @lane-forgetful-155246 Settings Log out ACCESS You do not have "
+      }
+    },
+    "ty": {
+      "persona": "general",
+      "username": "ty-worker-298925",
+      "passwordResetTriggered": true,
+      "newPassword": "WorkerPass#2026!",
+      "loginWorked": true,
+      "passwordUsed": "RanchPass123!",
+      "finalUrlAfterLogin": "http://208.88.9.175:3002/app",
+      "screenshots": [
+        {
+          "name": "after-login",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\ty-after-login.png"
+        },
+        {
+          "name": "visibility-last-route",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\ty-visibility-last-route.png"
+        },
+        {
+          "name": "today",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\ty-today.png"
+        },
+        {
+          "name": "workorders",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\ty-workorders.png"
+        },
+        {
+          "name": "settings",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\ty-settings.png"
+        },
+        {
+          "name": "herd",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\ty-herd.png"
+        },
+        {
+          "name": "land",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\ty-land.png"
+        },
+        {
+          "name": "general-permission-attempts",
+          "file": "D:\\Ranch Manager Final\\test-artifacts\\worker-qa-1778866488178\\ty-general-permission-attempts.png"
+        }
+      ],
+      "visibility": {
+        "/app": {
+          "route": "/app",
+          "finalUrl": "http://208.88.9.175:3002/app",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out APP HOME Operations Dashboar"
+        },
+        "/app/today": {
+          "route": "/app/today",
+          "finalUrl": "http://208.88.9.175:3002/app/today",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out WORKER TODAY Today Your shif"
+        },
+        "/app/work-orders": {
+          "route": "/app/work-orders",
+          "finalUrl": "http://208.88.9.175:3002/app/work-orders",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out WORK ORDERS Assigned Work Pr"
+        },
+        "/app/time": {
+          "route": "/app/time",
+          "finalUrl": "http://208.88.9.175:3002/app/time",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out TIME Shift & Task Time Start"
+        },
+        "/app/team": {
+          "route": "/app/team",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out ACCESS You do not have acces"
+        },
+        "/app/payroll": {
+          "route": "/app/payroll",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out ACCESS You do not have acces"
+        },
+        "/app/settings": {
+          "route": "/app/settings",
+          "finalUrl": "http://208.88.9.175:3002/app/settings",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out SETTINGS Account & Billing R"
+        },
+        "/app/herd": {
+          "route": "/app/herd",
+          "finalUrl": "http://208.88.9.175:3002/app/herd",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out HERD Animal Registry Track c"
+        },
+        "/app/land": {
+          "route": "/app/land",
+          "finalUrl": "http://208.88.9.175:3002/app/land",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out LAND Land Units One shared m"
+        },
+        "/app/needs-attention": {
+          "route": "/app/needs-attention",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out ACCESS You do not have acces"
+        },
+        "/admin": {
+          "route": "/admin",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out ACCESS You do not have acces"
+        },
+        "/checkout": {
+          "route": "/checkout",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out ACCESS You do not have acces"
+        },
+        "/app/work-orders/00000000-0000-0000-0000-000000000000": {
+          "route": "/app/work-orders/00000000-0000-0000-0000-000000000000",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out ACCESS You do not have acces"
+        }
+      },
+      "todaySummary": {
+        "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out WORKER TODAY Today Your shift state, current work, and next action in one place. Open Communication Open Work Orders SHIFT Not started ACTIVE WORK TIMER None ASSIGNED OPEN WORK 0 URGENT/UNREAD ALERTS 0 0 urgent threads, 0 unread private Next best action Clock in to start your shift, then start your first work timer. Shift status No active shift For lunch or breaks, clock out and clock back in when you return. Clock in Work timer No active work timer No available work orders to track right now. Assigned work Tasks currently assigned to your membership. No assigned work right now New assignments will ap",
+        "hasShiftControls": true,
+        "hasWorkTimerControls": false
+      },
+      "workOrdersSummary": {
+        "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out WORK ORDERS Assigned Work Prioritized queue for today, with overdue and urgent work surfaced first. active (0) in progress (0) completed (0) cancelled (0) all (0) No work orders in this queue Switch queue tabs to see in-progress, completed, or cancelled assignments.",
+        "hasCreateForm": false,
+        "hasEditLinks": false,
+        "assignedCards": []
+      },
+      "settingsVisibility": {
+        "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out SETTINGS Account & Billing Ranch identity, role context, and bundled base subscription access state. Ranch Profile Core tenant context for this workspace. Ranch: Marysvale QA Ranch Current user: Ty Brooks Worker 298925 Role: worker Admin and billing settings are managed by ranch owners. Subscription Access Paid access unlocks the bundled base app (crew, work, time, payroll, herd, and land) unless beta lifetime access is enabled. Billing details are visible to managers and owners. If billing questions come up, contact your ranch manager or owner. Billing controls are owner-only. Ranch Timezone Owners s",
+        "hasBillingWords": true,
+        "hasOwnerOnlyCopy": true,
+        "hasLifetimeCopy": true,
+        "hasRequestAccessCopy": false,
+        "hasStripeButtons": false
+      },
+      "herdLand": {
+        "/app/herd": {
+          "finalUrl": "http://208.88.9.175:3002/app/herd",
+          "denied": false,
+          "hasCreateUi": true,
+          "hasEditUi": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out HERD Animal Registry Track cattle, horses, and other livestock species in one operational registry with structured lifecycle history and current location visibility. TOTAL 30 All registry records ACTIVE 30 Ready for operations SOLD 0 Disposition recorded DECEASED 0 Loss history retained ARCHIVED 0 Hidden fr"
+        },
+        "/app/land": {
+          "finalUrl": "http://208.88.9.175:3002/app/land",
+          "denied": false,
+          "hasCreateUi": true,
+          "hasEditUi": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out LAND Land Units One shared model for pastures, lots, corrals, pens, stalls, and horse-friendly occupancy workflows. TOTAL UNITS 5 All configured spaces ACTIVE UNITS 5 Ready for occupancy HANDLING SPACES 0 Corrals, pens, stalls, barn/holding OCCUPIED NOW 0 Units with active occupants Filter land units Search"
+        }
+      },
+      "actions": [
+        "Attempted to access manager/owner pages and to edit/reassign work as worker."
+      ],
+      "restrictedAttempts": [
+        {
+          "route": "/app/team",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out ACCESS You do not have acces"
+        },
+        {
+          "route": "/app/payroll",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out ACCESS You do not have acces"
+        },
+        {
+          "route": "/app/settings",
+          "finalUrl": "http://208.88.9.175:3002/app/settings",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out SETTINGS Account & Billing R"
+        },
+        {
+          "route": "/app/herd",
+          "finalUrl": "http://208.88.9.175:3002/app/herd",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out HERD Animal Registry Track c"
+        },
+        {
+          "route": "/app/land",
+          "finalUrl": "http://208.88.9.175:3002/app/land",
+          "denied": false,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out LAND Land Units One shared m"
+        },
+        {
+          "route": "/app/needs-attention",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out ACCESS You do not have acces"
+        },
+        {
+          "route": "/admin",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out ACCESS You do not have acces"
+        },
+        {
+          "route": "/checkout",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out ACCESS You do not have acces"
+        },
+        {
+          "route": "/app/work-orders/00000000-0000-0000-0000-000000000000",
+          "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+          "denied": true,
+          "hasSectionError": false,
+          "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out ACCESS You do not have acces"
+        }
+      ],
+      "reassignAttempt": {
+        "hasEditLink": false,
+        "hasAssigneeCheckboxes": false,
+        "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out WORK ORDERS Assigned Work Prioritized queue for today, with overdue and urgent work surfaced first. active ("
+      },
+      "directWorkOrderDetailAttempt": {
+        "route": "/app/work-orders/00000000-0000-0000-0000-000000000000",
+        "finalUrl": "http://208.88.9.175:3002/app/access-denied",
+        "denied": true,
+        "hasSectionError": false,
+        "sample": "RANCH Marysvale QA Ranch worker access Dashboard Today Communication Work Orders Time Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @ty-worker-298925 Settings Log out ACCESS You do not have acces"
+      }
+    }
+  },
+  "blockers": [],
+  "bugs": [],
+  "permissionFindings": [],
+  "ux": [],
+  "runtimeErrors": [
+    {
+      "workerKey": "lane",
+      "type": "pageerror",
+      "message": "Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "url": "http://208.88.9.175:3002/app/access-denied"
+    },
+    {
+      "workerKey": "lane",
+      "type": "pageerror",
+      "message": "Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "url": "http://208.88.9.175:3002/app/land"
+    },
+    {
+      "workerKey": "lane",
+      "type": "pageerror",
+      "message": "Cannot read properties of null (reading 'parentNode')",
+      "url": "http://208.88.9.175:3002/app/land"
+    },
+    {
+      "workerKey": "lane",
+      "type": "pageerror",
+      "message": "Cannot read properties of null (reading 'parentNode')",
+      "url": "http://208.88.9.175:3002/app/land"
+    },
+    {
+      "workerKey": "lane",
+      "type": "pageerror",
+      "message": "Cannot read properties of null (reading 'parentNode')",
+      "url": "http://208.88.9.175:3002/app/land"
+    },
+    {
+      "workerKey": "lane",
+      "type": "pageerror",
+      "message": "Cannot read properties of null (reading 'parentNode')",
+      "url": "http://208.88.9.175:3002/app/land"
+    },
+    {
+      "workerKey": "lane",
+      "type": "pageerror",
+      "message": "Cannot read properties of null (reading 'parentNode')",
+      "url": "http://208.88.9.175:3002/app/land"
+    },
+    {
+      "workerKey": "lane",
+      "type": "pageerror",
+      "message": "Cannot read properties of null (reading 'parentNode')",
+      "url": "http://208.88.9.175:3002/app/land"
+    },
+    {
+      "workerKey": "lane",
+      "type": "pageerror",
+      "message": "Cannot read properties of null (reading 'parentNode')",
+      "url": "http://208.88.9.175:3002/app/land"
+    },
+    {
+      "workerKey": "ty",
+      "type": "pageerror",
+      "message": "Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "url": "http://208.88.9.175:3002/app/access-denied"
+    }
+  ],
+  "mobile": {}
+}

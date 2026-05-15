@@ -1,0 +1,555 @@
+{
+  "settings": {
+    "url": "http://208.88.9.175:3002/app/settings",
+    "accessState": "Access enabled",
+    "subscriptionStatus": "active",
+    "betaLifetime": "Enabled",
+    "adminFailsafe": "Allowed",
+    "showsStripeButton": false
+  },
+  "team": [
+    [
+      "Aubrey Jensen Manager 155246",
+      "aubrey-mgr-155246",
+      "Manager",
+      "$32.00 / hr",
+      "$0.00",
+      "Active",
+      "Edit"
+    ],
+    [
+      "Lane Morris Forgetful 155246",
+      "lane-forgetful-155246",
+      "Regular Worker",
+      "$20.00 / hr",
+      "$0.00",
+      "Active",
+      "Edit"
+    ],
+    [
+      "Reed Dalton Reliable 155246",
+      "reed-reliable-155246",
+      "Regular Worker",
+      "$24.50 / hr",
+      "$0.00",
+      "Active",
+      "Edit"
+    ],
+    [
+      "Tessa Morgan",
+      "tessa-morgan-qa-368958",
+      "Owner",
+      "$0.00 / hr",
+      "$0.00",
+      "Active",
+      "Edit"
+    ],
+    [
+      "Ty Brooks Worker 298925",
+      "ty-worker-298925",
+      "Regular Worker",
+      "$19.75 / hr",
+      "$0.00",
+      "Active",
+      "Edit"
+    ]
+  ],
+  "land": [
+    [
+      "Creek LotCL-419341",
+      "pasture",
+      "28.00 ac",
+      "24.00 ac",
+      "0 total0 horses",
+      "Need animals linked to this grazing period or active occupancy, positive herd demand basis",
+      "active",
+      "Open"
+    ],
+    [
+      "Holding PenHP-419341",
+      "pasture",
+      "2.00 ac",
+      "2.00 ac",
+      "0 total0 horses",
+      "Need animals linked to this grazing period or active occupancy, positive herd demand basis",
+      "active",
+      "Open"
+    ],
+    [
+      "Lower FieldLF-298925",
+      "field",
+      "65.00 ac",
+      "58.00 ac",
+      "0 total0 horses",
+      "Need animals linked to this grazing period or active occupancy, positive herd demand basis",
+      "active",
+      "Open"
+    ],
+    [
+      "North PastureNP-298925",
+      "pasture",
+      "120.00 ac",
+      "108.00 ac",
+      "0 total0 horses",
+      "Need animals linked to this grazing period or active occupancy, positive herd demand basis",
+      "active",
+      "Open"
+    ],
+    [
+      "Winter LotWL-419341",
+      "pasture",
+      "38.00 ac",
+      "33.00 ac",
+      "0 total0 horses",
+      "Need animals linked to this grazing period or active occupancy, positive herd demand basis",
+      "active",
+      "Open"
+    ]
+  ],
+  "herd": [
+    [
+      "MSV2-419341-C01INT-MSV2-419341-C01",
+      "UnnamedNo alternate ID",
+      "CattleCow",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV2-419341-C02INT-MSV2-419341-C02",
+      "UnnamedNo alternate ID",
+      "CattleCow",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV2-419341-C03INT-MSV2-419341-C03",
+      "UnnamedNo alternate ID",
+      "CattleCow",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV2-419341-C04INT-MSV2-419341-C04",
+      "UnnamedNo alternate ID",
+      "CattleCow",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV2-419341-C05INT-MSV2-419341-C05",
+      "UnnamedNo alternate ID",
+      "CattleCow",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV2-419341-C06INT-MSV2-419341-C06",
+      "UnnamedNo alternate ID",
+      "CattleCow",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV2-419341-C07INT-MSV2-419341-C07",
+      "UnnamedNo alternate ID",
+      "CattleCow",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV2-419341-C08INT-MSV2-419341-C08",
+      "UnnamedNo alternate ID",
+      "CattleCow",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV2-419341-C09INT-MSV2-419341-C09",
+      "UnnamedNo alternate ID",
+      "CattleCalf",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV2-419341-C10INT-MSV2-419341-C10",
+      "UnnamedNo alternate ID",
+      "CattleCalf",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV2-419341-C11INT-MSV2-419341-C11",
+      "UnnamedNo alternate ID",
+      "CattleCalf",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV2-419341-C12INT-MSV2-419341-C12",
+      "UnnamedNo alternate ID",
+      "CattleCalf",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV2-419341-C13INT-MSV2-419341-C13",
+      "UnnamedNo alternate ID",
+      "CattleBull",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV2-419341-C14INT-MSV2-419341-C14",
+      "UnnamedNo alternate ID",
+      "CattleBull",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV2-419341-C15INT-MSV2-419341-C15",
+      "UnnamedNo alternate ID",
+      "CattleBull",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV2-419341-C16INT-MSV2-419341-C16",
+      "UnnamedNo alternate ID",
+      "CattleSteer",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV2-419341-C17INT-MSV2-419341-C17",
+      "UnnamedNo alternate ID",
+      "CattleSteer",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV2-419341-C18INT-MSV2-419341-C18",
+      "UnnamedNo alternate ID",
+      "CattleSteer",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV2-419341-C19INT-MSV2-419341-C19",
+      "UnnamedNo alternate ID",
+      "CattleSteer",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV2-419341-C20INT-MSV2-419341-C20",
+      "UnnamedNo alternate ID",
+      "CattleSteer",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV2-419341-H01INT-MSV2-419341-H01",
+      "JuniperNo alternate ID",
+      "CattleMare",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV2-419341-H02INT-MSV2-419341-H02",
+      "DustyNo alternate ID",
+      "CattleGelding",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV-298925-C01MSV-298925-INT-C01",
+      "UnnamedNo alternate ID",
+      "CattleCow",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSV-298925-C02MSV-298925-INT-C02",
+      "UnnamedNo alternate ID",
+      "CattleCow",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSVH-658926-H01INT-MSVH-658926-H01",
+      "Juniper Horse QANo alternate ID",
+      "HorseMare",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSVH-731496-H01INT-MSVH-731496-H01",
+      "Juniper Horse QANo alternate ID",
+      "HorseMare",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MSVH-731496-H02INT-MSVH-731496-H02",
+      "Dusty Horse QANo alternate ID",
+      "HorseGelding",
+      "male",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MTR-155246-C01MTR-155246-INT-C01",
+      "UnnamedNo alternate ID",
+      "CattleCow",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MTR-155246-C02MTR-155246-INT-C02",
+      "UnnamedNo alternate ID",
+      "CattleCow",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ],
+    [
+      "MTR-155246-C03MTR-155246-INT-C03",
+      "UnnamedNo alternate ID",
+      "CattleCow",
+      "female",
+      "active",
+      "Unassigned",
+      "May 15, 2026",
+      "Open"
+    ]
+  ],
+  "herdStats": {
+    "total": "30",
+    "active": "30"
+  },
+  "workOrders": [
+    [
+      "Fence repair 155246",
+      "openOverdue",
+      "highUrgent",
+      "Unassigned",
+      "May 14, 2026 (overdue)",
+      "Regular",
+      "Not required",
+      "No incentive pay configured",
+      "Edit"
+    ],
+    [
+      "Water check 155246",
+      "openOverdue",
+      "highUrgent",
+      "Reed Dalton Reliable 155246",
+      "May 15, 2026 (overdue)",
+      "Regular",
+      "Not required",
+      "No incentive pay configured",
+      "Edit"
+    ],
+    [
+      "Feed check 155246",
+      "openOverdue",
+      "normalUrgent",
+      "Unassigned",
+      "May 15, 2026 (overdue)",
+      "Regular",
+      "Not required",
+      "No incentive pay configured",
+      "Edit"
+    ],
+    [
+      "Water points inspectionRecurringGenerated May 15, 2026",
+      "openDue soon",
+      "highUrgent",
+      "Tessa Morgan",
+      "May 15, 2026 (due soon)",
+      "Regular",
+      "Not required",
+      "No incentive pay configured",
+      "Edit"
+    ],
+    [
+      "Morning livestock checkRecurringGenerated May 15, 2026",
+      "openDue soon",
+      "highUrgent",
+      "Tessa Morgan",
+      "May 15, 2026 (due soon)",
+      "Regular",
+      "Not required",
+      "No incentive pay configured",
+      "Edit"
+    ],
+    [
+      "Animal health check 155246",
+      "openDue soon",
+      "highUrgent",
+      "Aubrey Jensen Manager 155246",
+      "May 16, 2026 (due soon)",
+      "Regular",
+      "Not required",
+      "No incentive pay configured",
+      "Edit"
+    ],
+    [
+      "Morning livestock checkRecurring",
+      "open",
+      "highUrgent",
+      "Tessa Morgan",
+      "Not set",
+      "Regular",
+      "Not required",
+      "No incentive pay configured",
+      "Edit"
+    ],
+    [
+      "Fence line checkRecurringGenerated May 15, 2026",
+      "openDue soon",
+      "normal",
+      "Tessa Morgan",
+      "May 15, 2026 (due soon)",
+      "Regular",
+      "Not required",
+      "No incentive pay configured",
+      "Edit"
+    ],
+    [
+      "Move/check cattle 155246",
+      "draft",
+      "normal",
+      "Reed Dalton Reliable 155246",
+      "May 17, 2026",
+      "Regular",
+      "Not required",
+      "No incentive pay configured",
+      "Edit"
+    ],
+    [
+      "MISTAKEN cleanup QA 532046",
+      "cancelled",
+      "low",
+      "Unassigned",
+      "Not set",
+      "Regular",
+      "Not required",
+      "No incentive pay configured",
+      "Edit"
+    ],
+    [
+      "Weekly water patrol order 155246Recurring",
+      "open",
+      "normal",
+      "Reed Dalton Reliable 155246",
+      "Not set",
+      "Regular",
+      "Not required",
+      "No incentive pay configured",
+      "Edit"
+    ],
+    [
+      "Corrected task 155246",
+      "open",
+      "low",
+      "Unassigned",
+      "Not set",
+      "Regular",
+      "Not required",
+      "No incentive pay configured",
+      "Edit"
+    ]
+  ],
+  "templates": [
+    "Weekly water patrol 155246: Weekly water patrol order 155246",
+    "morning-livestock-check: Morning livestock check",
+    "water-points-inspection: Water points inspection",
+    "fence-line-check: Fence line check"
+  ]
+}

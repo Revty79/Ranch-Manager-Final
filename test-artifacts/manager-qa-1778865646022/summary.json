@@ -1,0 +1,394 @@
+{
+  "runId": "646022",
+  "startedAt": "2026-05-15T17:20:46.022Z",
+  "manager": {
+    "username": "aubrey-mgr-155246"
+  },
+  "login": {
+    "passwordResetTriggered": true,
+    "passwordSetTo": "RanchMgr#2026!",
+    "success": true,
+    "passwordUsed": "RanchPass123!",
+    "finalUrl": "http://208.88.9.175:3002/app"
+  },
+  "access": {
+    "/app": {
+      "landedUrl": "http://208.88.9.175:3002/app",
+      "h1": "Operations Dashboard",
+      "blocked": false,
+      "sectionError": false
+    },
+    "/app/today": {
+      "landedUrl": "http://208.88.9.175:3002/app/today",
+      "h1": "Today",
+      "blocked": false,
+      "sectionError": false
+    },
+    "/app/needs-attention": {
+      "landedUrl": "http://208.88.9.175:3002/app/needs-attention",
+      "h1": "Needs Attention",
+      "blocked": false,
+      "sectionError": false
+    },
+    "/app/work-orders?status=all": {
+      "landedUrl": "http://208.88.9.175:3002/app/work-orders?status=all",
+      "h1": "Work Order Queue",
+      "blocked": false,
+      "sectionError": false
+    },
+    "/app/team?status=all": {
+      "landedUrl": "http://208.88.9.175:3002/app/team?status=all",
+      "h1": "Team Management",
+      "blocked": false,
+      "sectionError": false
+    },
+    "/app/herd": {
+      "landedUrl": "http://208.88.9.175:3002/app/herd",
+      "h1": "Animal Registry",
+      "blocked": false,
+      "sectionError": false
+    },
+    "/app/land": {
+      "landedUrl": "http://208.88.9.175:3002/app/land",
+      "h1": "Land Units",
+      "blocked": false,
+      "sectionError": false
+    },
+    "/app/payroll": {
+      "landedUrl": "http://208.88.9.175:3002/app/payroll",
+      "h1": "Payroll Summary",
+      "blocked": false,
+      "sectionError": false
+    },
+    "/app/settings": {
+      "landedUrl": "http://208.88.9.175:3002/app/settings",
+      "h1": "Account & Billing",
+      "blocked": false,
+      "sectionError": false
+    }
+  },
+  "workOrders": {
+    "statusViews": {
+      "all": {
+        "count": 12,
+        "sample": [
+          {
+            "title": "Fence repair 155246",
+            "status": "openOverdue",
+            "priority": "highUrgent",
+            "assignees": "Unassigned",
+            "due": "May 14, 2026 (overdue)"
+          },
+          {
+            "title": "Water check 155246",
+            "status": "openOverdue",
+            "priority": "highUrgent",
+            "assignees": "Reed Dalton Reliable 155246",
+            "due": "May 15, 2026 (overdue)"
+          },
+          {
+            "title": "Feed check 155246",
+            "status": "openOverdue",
+            "priority": "normalUrgent",
+            "assignees": "Unassigned",
+            "due": "May 15, 2026 (overdue)"
+          },
+          {
+            "title": "Water points inspectionRecurringGenerated May 15, 2026",
+            "status": "openDue soon",
+            "priority": "highUrgent",
+            "assignees": "Tessa Morgan",
+            "due": "May 15, 2026 (due soon)"
+          },
+          {
+            "title": "Morning livestock checkRecurringGenerated May 15, 2026",
+            "status": "openDue soon",
+            "priority": "highUrgent",
+            "assignees": "Tessa Morgan",
+            "due": "May 15, 2026 (due soon)"
+          },
+          {
+            "title": "Animal health check 155246",
+            "status": "openDue soon",
+            "priority": "highUrgent",
+            "assignees": "Aubrey Jensen Manager 155246",
+            "due": "May 16, 2026 (due soon)"
+          },
+          {
+            "title": "Morning livestock checkRecurring",
+            "status": "open",
+            "priority": "highUrgent",
+            "assignees": "Tessa Morgan",
+            "due": "Not set"
+          },
+          {
+            "title": "Fence line checkRecurringGenerated May 15, 2026",
+            "status": "openDue soon",
+            "priority": "normal",
+            "assignees": "Tessa Morgan",
+            "due": "May 15, 2026 (due soon)"
+          }
+        ]
+      },
+      "open": {
+        "count": 10,
+        "sample": [
+          {
+            "title": "Fence repair 155246",
+            "status": "openOverdue",
+            "priority": "highUrgent",
+            "assignees": "Unassigned",
+            "due": "May 14, 2026 (overdue)"
+          },
+          {
+            "title": "Water check 155246",
+            "status": "openOverdue",
+            "priority": "highUrgent",
+            "assignees": "Reed Dalton Reliable 155246",
+            "due": "May 15, 2026 (overdue)"
+          },
+          {
+            "title": "Feed check 155246",
+            "status": "openOverdue",
+            "priority": "normalUrgent",
+            "assignees": "Unassigned",
+            "due": "May 15, 2026 (overdue)"
+          },
+          {
+            "title": "Water points inspectionRecurringGenerated May 15, 2026",
+            "status": "openDue soon",
+            "priority": "highUrgent",
+            "assignees": "Tessa Morgan",
+            "due": "May 15, 2026 (due soon)"
+          },
+          {
+            "title": "Morning livestock checkRecurringGenerated May 15, 2026",
+            "status": "openDue soon",
+            "priority": "highUrgent",
+            "assignees": "Tessa Morgan",
+            "due": "May 15, 2026 (due soon)"
+          },
+          {
+            "title": "Animal health check 155246",
+            "status": "openDue soon",
+            "priority": "highUrgent",
+            "assignees": "Aubrey Jensen Manager 155246",
+            "due": "May 16, 2026 (due soon)"
+          },
+          {
+            "title": "Morning livestock checkRecurring",
+            "status": "open",
+            "priority": "highUrgent",
+            "assignees": "Tessa Morgan",
+            "due": "Not set"
+          },
+          {
+            "title": "Fence line checkRecurringGenerated May 15, 2026",
+            "status": "openDue soon",
+            "priority": "normal",
+            "assignees": "Tessa Morgan",
+            "due": "May 15, 2026 (due soon)"
+          }
+        ]
+      },
+      "in_progress": {
+        "count": 0,
+        "sample": []
+      },
+      "completed": {
+        "count": 0,
+        "sample": []
+      },
+      "cancelled": {
+        "count": 1,
+        "sample": [
+          {
+            "title": "MISTAKEN cleanup QA 532046",
+            "status": "cancelled",
+            "priority": "low",
+            "assignees": "Unassigned",
+            "due": "Not set"
+          }
+        ]
+      },
+      "draft": {
+        "count": 1,
+        "sample": [
+          {
+            "title": "Move/check cattle 155246",
+            "status": "draft",
+            "priority": "normal",
+            "assignees": "Reed Dalton Reliable 155246",
+            "due": "May 17, 2026"
+          }
+        ]
+      }
+    },
+    "createdTask": {
+      "title": "Manager QA Task 646022",
+      "exists": true,
+      "row": "Manager QA Task 646022 open Due soon normal Reed Dalton Reliable 155246 May 16, 2026 (due soon) Regular Not required No incentive pay configured Edit"
+    },
+    "reassignment": {
+      "task": "Manager QA Task 646022",
+      "correctedFrom": "Reed Dalton Reliable 155246",
+      "correctedTo": "Lane Morris Forgetful 155246",
+      "rowText": "Manager QA Task 646022 open Due soon normal Lane Morris Forgetful 155246 May 16, 2026 (due soon) Regular Not required No incentive pay configured Edit"
+    },
+    "statusFlow": [
+      {
+        "task": "Manager QA Task 646022",
+        "status": "open",
+        "ok": true
+      },
+      {
+        "task": "Manager QA Task 646022",
+        "status": "in_progress",
+        "ok": true
+      },
+      {
+        "task": "Manager QA Task 646022",
+        "status": "completed",
+        "ok": true
+      }
+    ],
+    "mistakenAssignmentFix": {
+      "supported": true,
+      "observed": true
+    },
+    "visibility": {
+      "recurringSearchCount": 0,
+      "recurringSample": [],
+      "cancelledCount": 1,
+      "draftCount": 1,
+      "recurringCount": 1,
+      "cancelledSample": [
+        "MISTAKEN cleanup QA 532046"
+      ],
+      "draftSample": [
+        "Move/check cattle 155246"
+      ],
+      "recurringSample2": [
+        "Weekly water patrol order 155246Recurring"
+      ]
+    },
+    "overdueUrgent": {
+      "rowText": "Fence repair 155246 open Overdue high Urgent Unassigned May 14, 2026 (overdue) Regular Not required No incentive pay configured Edit",
+      "rowHasOverdue": true,
+      "rowHasUrgent": true,
+      "overdueCard": "3",
+      "urgentCard": "7"
+    },
+    "statusFlowCompletedVisible": true
+  },
+  "ownerOnlyChecks": {
+    "adminRoute": {
+      "finalUrl": "http://208.88.9.175:3002/app/settings",
+      "blocked": true,
+      "sample": "RANCH Marysvale QA Ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-155246 Settings Log o"
+    },
+    "checkoutRoute": {
+      "finalUrl": "http://208.88.9.175:3002/app/settings",
+      "blocked": true,
+      "sample": "RANCH Marysvale QA Ranch manager access Dashboard Today Needs Attention Team Communication Work Orders Time Payroll Herd Land Settings OPERATIONS Plan, track, and pay with one workspace. @aubrey-mgr-155246 Settings Log o"
+    },
+    "settingsOwnerControls": {
+      "hasStripeStartButton": false,
+      "hasCustomerPortalButton": false,
+      "hasAdminFailsafeToggle": false,
+      "hasOwnerOnlyMessage": true
+    }
+  },
+  "ownerMembershipEdit": {
+    "ownerRowFound": true,
+    "editRoute": "http://208.88.9.175:3002/app/team/b459319e-7937-4661-92c5-a12c1f1b734c",
+    "hasSaveButton": false,
+    "saveResult": "not_attempted",
+    "ownerEditSignals": {
+      "showsRoleField": true,
+      "showsPermissionWarning": true
+    }
+  },
+  "herdLand": {
+    "herd": {
+      "accessOk": true,
+      "rowCount": 30,
+      "canSeeCreateAnimalForm": true,
+      "sample": [
+        "MSV2-419341-C01INT-MSV2-419341-C01",
+        "MSV2-419341-C02INT-MSV2-419341-C02",
+        "MSV2-419341-C03INT-MSV2-419341-C03",
+        "MSV2-419341-C04INT-MSV2-419341-C04",
+        "MSV2-419341-C05INT-MSV2-419341-C05"
+      ]
+    },
+    "land": {
+      "accessOk": true,
+      "rowCount": 5,
+      "canSeeCreateLandForm": true,
+      "sample": [
+        "Creek LotCL-419341",
+        "Holding PenHP-419341",
+        "Lower FieldLF-298925",
+        "North PastureNP-298925",
+        "Winter LotWL-419341"
+      ]
+    }
+  },
+  "runtimeErrors": [
+    {
+      "type": "pageerror",
+      "message": "Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+    },
+    {
+      "type": "pageerror",
+      "message": "Cannot read properties of null (reading 'parentNode')"
+    }
+  ],
+  "blockers": [],
+  "bugs": [
+    "Runtime/client errors observed during manager flow."
+  ],
+  "permissionProblems": [],
+  "uxFriction": [],
+  "cleanupObservations": [
+    "Cancelled/voided work orders are visible in cancelled status view.",
+    "Draft work orders are visible to manager in draft status view.",
+    "Recurring-generated work orders are visible to manager and searchable."
+  ],
+  "screenshots": [
+    {
+      "name": "00-after-login",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778865646022\\00-after-login.png"
+    },
+    {
+      "name": "01-settings-as-manager",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778865646022\\01-settings-as-manager.png"
+    },
+    {
+      "name": "02-workorders-status-review",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778865646022\\02-workorders-status-review.png"
+    },
+    {
+      "name": "03-status-flow-completed-view",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778865646022\\03-status-flow-completed-view.png"
+    },
+    {
+      "name": "04-overdue-urgent-check",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778865646022\\04-overdue-urgent-check.png"
+    },
+    {
+      "name": "05-owner-only-route-checks",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778865646022\\05-owner-only-route-checks.png"
+    },
+    {
+      "name": "06-owner-membership-edit-attempt",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778865646022\\06-owner-membership-edit-attempt.png"
+    },
+    {
+      "name": "07-herd-land-manager",
+      "file": "D:\\Ranch Manager Final\\test-artifacts\\manager-qa-1778865646022\\07-herd-land-manager.png"
+    }
+  ],
+  "finishedAt": "2026-05-15T17:21:43.814Z"
+}
