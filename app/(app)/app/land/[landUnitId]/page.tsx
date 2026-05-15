@@ -4,6 +4,7 @@ import { Clock3, MapPin, MoveRight, Tractor } from "lucide-react";
 import { BulkMoveAnimalsForm } from "@/components/land/bulk-move-animals-form";
 import { EditLandUnitForm } from "@/components/land/edit-land-unit-form";
 import { MoveAnimalForm } from "@/components/land/move-animal-form";
+import { MoveAnimalGroupForm } from "@/components/land/move-animal-group-form";
 import { RemoveAnimalFromUnitForm } from "@/components/land/remove-animal-from-unit-form";
 import { SplitHerdMoveForm } from "@/components/land/split-herd-move-form";
 import { EmptyState } from "@/components/patterns/empty-state";
@@ -97,6 +98,7 @@ export default async function LandUnitDetailPage({
     sourceAnimalClassOptions,
     movementHistory,
     movementAnimalOptions,
+    movementGroupOptions,
     destinationUnitOptions,
   } = profile;
 
@@ -291,6 +293,14 @@ export default async function LandUnitDetailPage({
                       fromLandUnitId={landUnit.id}
                       destinationUnits={destinationUnitOptions}
                       animalClassOptions={sourceAnimalClassOptions}
+                    />
+                  </div>
+                  <div className="h-px bg-border" />
+                  <div className="space-y-2">
+                    <p className="text-sm font-semibold">Move herd/group into this unit</p>
+                    <MoveAnimalGroupForm
+                      landUnitId={landUnit.id}
+                      groupOptions={movementGroupOptions}
                     />
                   </div>
                 </div>

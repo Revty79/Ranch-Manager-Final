@@ -7,6 +7,8 @@ import { requireSectionManage } from "@/lib/auth/context";
 import { db } from "@/lib/db/client";
 import {
   animalEvents,
+  animalGroupMemberships,
+  animalGroups,
   animalLocationAssignments,
   animals,
   landUnits,
@@ -106,6 +108,13 @@ const assignAnimalSchema = z.object({
   landUnitId: z.string().uuid(),
   animalId: z.string().uuid(),
   movementReason: movementReasonSchema.default("other"),
+  notes: optionalTextSchema,
+});
+
+const assignAnimalGroupSchema = z.object({
+  landUnitId: z.string().uuid(),
+  animalGroupId: z.string().uuid(),
+  movementReason: movementReasonSchema.default("grazing_rotation"),
   notes: optionalTextSchema,
 });
 
@@ -499,9 +508,12 @@ export async function bulkAssignAnimalsToLandUnitAction(
       ),
     );
 
-  const activeByAnimalId = new Map(
-    activeAssignments.map((assignment) => [assignment.animalId, assignment] as const),
-  );
+  const activeByAnimalId = new Map<string, (typeof activeAssignments)[number]>();
+  for (const assignment of activeAssignments) {
+    if (!activeByAnimalId.has(assignment.animalId)) {
+      activeByAnimalId.set(assignment.animalId, assignment);
+    }
+  }
 
   const animalsToMove = candidateAnimals.filter(
     (animal) => activeByAnimalId.get(animal.id)?.landUnitId !== targetUnit.id,
@@ -569,6 +581,215 @@ export async function bulkAssignAnimalsToLandUnitAction(
 
   return {
     success: `Moved ${animalsToMove.length} ${speciesLabel} to ${targetUnit.name}.`,
+  };
+}
+
+export async function moveAnimalGroupToLandUnitAction(
+  _prevState: LandActionState,
+  formData: FormData,
+): Promise<LandActionState> {
+  const context = await requireSectionManage("land");
+  const parsed = assignAnimalGroupSchema.safeParse({
+    landUnitId: formData.get("landUnitId"),
+    animalGroupId: formData.get("animalGroupId"),
+    movementReason: formData.get("movementReason"),
+    notes: formData.get("notes"),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid herd/group move request." };
+  }
+
+  const [landUnitRows, groupRows] = await Promise.all([
+    db
+      .select({
+        id: landUnits.id,
+        name: landUnits.name,
+        isActive: landUnits.isActive,
+      })
+      .from(landUnits)
+      .where(and(eq(landUnits.id, parsed.data.landUnitId), eq(landUnits.ranchId, context.ranch.id)))
+      .limit(1),
+    db
+      .select({
+        id: animalGroups.id,
+        name: animalGroups.name,
+        isActive: animalGroups.isActive,
+      })
+      .from(animalGroups)
+      .where(
+        and(
+          eq(animalGroups.id, parsed.data.animalGroupId),
+          eq(animalGroups.ranchId, context.ranch.id),
+        ),
+      )
+      .limit(1),
+  ]);
+
+  const targetUnit = landUnitRows[0];
+  const targetGroup = groupRows[0];
+
+  if (!targetUnit) {
+    return { error: "Land unit not found for this ranch." };
+  }
+  if (!targetUnit.isActive) {
+    return { error: "Cannot assign into an inactive land unit." };
+  }
+  if (!targetGroup) {
+    return { error: "Herd/group not found for this ranch." };
+  }
+  if (!targetGroup.isActive) {
+    return { error: "This herd/group is paused. Activate it before moving members." };
+  }
+
+  const groupAnimalRows = await db
+    .select({
+      animalId: animals.id,
+    })
+    .from(animalGroupMemberships)
+    .innerJoin(animals, eq(animalGroupMemberships.animalId, animals.id))
+    .where(
+      and(
+        eq(animalGroupMemberships.ranchId, context.ranch.id),
+        eq(animalGroupMemberships.animalGroupId, targetGroup.id),
+        eq(animalGroupMemberships.isActive, true),
+        eq(animals.ranchId, context.ranch.id),
+        eq(animals.status, "active"),
+        eq(animals.isArchived, false),
+      ),
+    );
+
+  if (!groupAnimalRows.length) {
+    return { error: `No active animals found in ${targetGroup.name}.` };
+  }
+
+  const groupAnimalIds = [...new Set(groupAnimalRows.map((row) => row.animalId))];
+  const activeAssignments = await db
+    .select({
+      assignmentId: animalLocationAssignments.id,
+      animalId: animalLocationAssignments.animalId,
+      landUnitId: animalLocationAssignments.landUnitId,
+      landUnitName: landUnits.name,
+    })
+    .from(animalLocationAssignments)
+    .innerJoin(landUnits, eq(animalLocationAssignments.landUnitId, landUnits.id))
+    .where(
+      and(
+        eq(animalLocationAssignments.ranchId, context.ranch.id),
+        eq(animalLocationAssignments.isActive, true),
+        inArray(animalLocationAssignments.animalId, groupAnimalIds),
+      ),
+    );
+
+  const activeByAnimalId = new Map(
+    activeAssignments.map((assignment) => [assignment.animalId, assignment] as const),
+  );
+  const animalsToMove = groupAnimalIds.filter(
+    (animalId) => activeByAnimalId.get(animalId)?.landUnitId !== targetUnit.id,
+  );
+
+  if (!animalsToMove.length) {
+    return {
+      success: `All active animals in ${targetGroup.name} are already in ${targetUnit.name}.`,
+    };
+  }
+
+  const alreadyInTargetCount = groupAnimalIds.length - animalsToMove.length;
+  const movementTime = new Date();
+  const movementNotes = normalizeText(parsed.data.notes);
+  const movementBatchKey = `group-${targetGroup.id}-${movementTime.getTime()}`;
+
+  await db.transaction(async (tx) => {
+    const assignmentIdsToClose = [
+      ...new Set(
+        activeAssignments
+          .filter((assignment) => animalsToMove.includes(assignment.animalId))
+          .map((assignment) => assignment.assignmentId),
+      ),
+    ];
+
+    if (assignmentIdsToClose.length) {
+      await tx
+        .update(animalLocationAssignments)
+        .set({
+          isActive: false,
+          endedAt: movementTime,
+        })
+        .where(inArray(animalLocationAssignments.id, assignmentIdsToClose));
+    }
+
+    await tx.insert(animalLocationAssignments).values(
+      animalsToMove.map((animalId) => ({
+        ranchId: context.ranch.id,
+        animalId,
+        landUnitId: targetUnit.id,
+        movementReason: parsed.data.movementReason,
+        movementBatchKey,
+        notes: movementNotes,
+        assignedAt: movementTime,
+        isActive: true,
+        assignedByMembershipId: context.membership.id,
+      })),
+    );
+
+    await tx.insert(animalEvents).values(
+      animalsToMove.map((animalId) => {
+        const previous = activeByAnimalId.get(animalId);
+        return {
+          ranchId: context.ranch.id,
+          animalId,
+          animalGroupId: targetGroup.id,
+          eventType: "movement" as const,
+          occurredAt: movementTime,
+          summary: movementSummary({
+            toUnit: targetUnit.name,
+            fromUnit: previous?.landUnitName ?? null,
+          }),
+          details: movementNotes,
+          eventData: {
+            movementBatchKey,
+            movementSource: "land_group_move",
+            animalGroupId: targetGroup.id,
+            animalGroupName: targetGroup.name,
+            fromLandUnitId: previous?.landUnitId ?? null,
+            fromLandUnitName: previous?.landUnitName ?? null,
+            toLandUnitId: targetUnit.id,
+            toLandUnitName: targetUnit.name,
+          },
+          recordedByMembershipId: context.membership.id,
+        };
+      }),
+    );
+  });
+
+  revalidatePath("/app");
+  revalidatePath("/app/land");
+  revalidatePath("/app/land/grazing");
+  revalidatePath(`/app/land/${targetUnit.id}`);
+  revalidatePath("/app/herd");
+
+  const sourceLandUnitIds = [
+    ...new Set(
+      animalsToMove
+        .map((animalId) => activeByAnimalId.get(animalId)?.landUnitId ?? null)
+        .filter((landUnitId): landUnitId is string => Boolean(landUnitId)),
+    ),
+  ];
+  for (const landUnitId of sourceLandUnitIds) {
+    revalidatePath(`/app/land/${landUnitId}`);
+  }
+
+  for (const animalId of animalsToMove) {
+    revalidatePath(`/app/herd/${animalId}`);
+  }
+
+  const alreadyInTargetSuffix =
+    alreadyInTargetCount > 0
+      ? ` ${alreadyInTargetCount} already in ${targetUnit.name}.`
+      : "";
+
+  return {
+    success: `Moved ${animalsToMove.length} animals from ${targetGroup.name} to ${targetUnit.name}.${alreadyInTargetSuffix}`,
   };
 }
 

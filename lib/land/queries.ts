@@ -11,6 +11,8 @@ import {
 } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
+  animalGroupMemberships,
+  animalGroups,
   animalLocationAssignments,
   animals,
   landUnits,
@@ -287,6 +289,12 @@ export interface LandMovementAnimalOption {
   currentLandUnitName: string | null;
 }
 
+export interface LandMovementGroupOption {
+  id: string;
+  name: string;
+  memberCount: number;
+}
+
 export interface LandUnitProfile {
   landUnit: Omit<LandUnitListRow, "updatedAt" | "currentLoadGrazingEstimate"> & {
     createdAt: Date;
@@ -300,6 +308,7 @@ export interface LandUnitProfile {
   sourceAnimalClassOptions: string[];
   movementHistory: LandMovementHistoryRow[];
   movementAnimalOptions: LandMovementAnimalOption[];
+  movementGroupOptions: LandMovementGroupOption[];
   destinationUnitOptions: Array<{ id: string; name: string; unitType: LandUnitType }>;
 }
 
@@ -372,6 +381,7 @@ export async function getLandUnitProfile(
     currentOccupants,
     movementHistory,
     movementAnimalRows,
+    movementGroupRows,
     destinationUnitOptions,
     settingsRow,
   ] =
@@ -451,6 +461,33 @@ export async function getLandUnitProfile(
         asc(animals.displayName),
         asc(animals.tagId),
       ),
+    db
+      .select({
+        id: animalGroups.id,
+        name: animalGroups.name,
+        memberCount: sql<number>`count(distinct ${animals.id})::int`,
+      })
+      .from(animalGroups)
+      .leftJoin(
+        animalGroupMemberships,
+        and(
+          eq(animalGroupMemberships.animalGroupId, animalGroups.id),
+          eq(animalGroupMemberships.ranchId, ranchId),
+          eq(animalGroupMemberships.isActive, true),
+        ),
+      )
+      .leftJoin(
+        animals,
+        and(
+          eq(animalGroupMemberships.animalId, animals.id),
+          eq(animals.ranchId, ranchId),
+          eq(animals.status, "active"),
+          eq(animals.isArchived, false),
+        ),
+      )
+      .where(and(eq(animalGroups.ranchId, ranchId), eq(animalGroups.isActive, true)))
+      .groupBy(animalGroups.id, animalGroups.name)
+      .orderBy(asc(animalGroups.name)),
     db
       .select({
         id: landUnits.id,
@@ -549,6 +586,7 @@ export async function getLandUnitProfile(
     sourceAnimalClassOptions,
     movementHistory,
     movementAnimalOptions,
+    movementGroupOptions: movementGroupRows,
     destinationUnitOptions,
   };
 }
