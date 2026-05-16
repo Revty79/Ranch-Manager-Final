@@ -670,3 +670,4 @@ export async function cancelMaintenanceRecordAction(
   revalidateEquipmentPaths(maintenance.equipmentId);
   return { success: `Cancelled "${maintenance.title}".` };
 }
+

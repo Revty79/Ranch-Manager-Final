@@ -340,7 +340,7 @@ export default async function EquipmentDetailPage({
                   <div key={maintenance.id} className="rounded-xl border bg-surface px-3 py-2 text-sm">
                     <p className="font-semibold">{maintenance.title}</p>
                     <p className="text-foreground-muted">
-                      {formatMaintenanceType(maintenance.maintenanceType)} • Completed{" "}
+                      {formatMaintenanceType(maintenance.maintenanceType)} - Completed{" "}
                       {formatDate(maintenance.completedOn)}
                     </p>
                     {maintenance.relatedWorkOrderId ? (
@@ -379,7 +379,7 @@ export default async function EquipmentDetailPage({
                   <div key={maintenance.id} className="rounded-xl border bg-surface px-3 py-2 text-sm">
                     <p className="font-semibold">{maintenance.title}</p>
                     <p className="text-foreground-muted">
-                      {formatMaintenanceType(maintenance.maintenanceType)} • Cancelled
+                      {formatMaintenanceType(maintenance.maintenanceType)} - Cancelled
                     </p>
                     {maintenance.notes ? (
                       <p className="text-foreground-muted">Notes: {maintenance.notes}</p>
@@ -398,4 +398,3 @@ export default async function EquipmentDetailPage({
     </div>
   );
 }
-

@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { FormFieldShell } from "@/components/patterns/form-field-shell";
 import { Input } from "@/components/ui/input";
@@ -16,7 +17,14 @@ interface MoveAnimalFormProps {
 }
 
 export function MoveAnimalForm({ landUnitId, animalOptions }: MoveAnimalFormProps) {
+  const router = useRouter();
   const [state, formAction] = useActionState(assignAnimalToLandUnitAction, initialState);
+
+  useEffect(() => {
+    if (state.success) {
+      router.refresh();
+    }
+  }, [router, state.success]);
 
   return (
     <form action={formAction} className="space-y-3">
@@ -64,3 +72,4 @@ export function MoveAnimalForm({ landUnitId, animalOptions }: MoveAnimalFormProp
     </form>
   );
 }
+

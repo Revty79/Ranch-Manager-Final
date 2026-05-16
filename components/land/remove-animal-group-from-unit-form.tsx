@@ -5,27 +5,26 @@ import { useRouter } from "next/navigation";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { FormFieldShell } from "@/components/patterns/form-field-shell";
 import { Input } from "@/components/ui/input";
-import { movementReasonOptions } from "@/lib/land/constants";
 import {
-  moveAnimalGroupToLandUnitAction,
+  removeAnimalGroupFromLandUnitAction,
   type LandActionState,
 } from "@/lib/land/actions";
 import type { LandMovementGroupOption } from "@/lib/land/queries";
 
 const initialState: LandActionState = {};
 
-interface MoveAnimalGroupFormProps {
+interface RemoveAnimalGroupFromUnitFormProps {
   landUnitId: string;
   groupOptions: LandMovementGroupOption[];
 }
 
-export function MoveAnimalGroupForm({
+export function RemoveAnimalGroupFromUnitForm({
   landUnitId,
   groupOptions,
-}: MoveAnimalGroupFormProps) {
+}: RemoveAnimalGroupFromUnitFormProps) {
   const router = useRouter();
   const [state, formAction] = useActionState(
-    moveAnimalGroupToLandUnitAction,
+    removeAnimalGroupFromLandUnitAction,
     initialState,
   );
 
@@ -48,8 +47,8 @@ export function MoveAnimalGroupForm({
       <input type="hidden" name="landUnitId" value={landUnitId} />
 
       <FormFieldShell
-        label="Saved herd/group"
-        hint="Move all active animals in a saved herd/group into this land unit. This updates current occupancy and preserves movement history."
+        label="Herd/group to remove"
+        hint="Closes active assignment records for group members currently in this unit."
       >
         <select
           name="animalGroupId"
@@ -68,32 +67,19 @@ export function MoveAnimalGroupForm({
         </select>
       </FormFieldShell>
 
-      <FormFieldShell label="Movement reason">
-        <select
-          name="movementReason"
-          defaultValue="grazing_rotation"
-          className="h-10 w-full rounded-xl border bg-surface px-3 text-sm"
-        >
-          {movementReasonOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </FormFieldShell>
-
-      <FormFieldShell label="Movement notes (optional)">
+      <FormFieldShell label="Notes (optional)">
         <Input
           name="notes"
-          placeholder="Example: Move spring cow-calf herd to fresh rotation."
+          placeholder="Example: Pulled this herd out before pasture rest window."
         />
       </FormFieldShell>
 
       {state.error ? <p className="text-sm font-medium text-danger">{state.error}</p> : null}
       {state.success ? <p className="text-sm font-medium text-accent">{state.success}</p> : null}
+
       <SubmitButton
-        label="Move herd/group into unit"
-        pendingLabel="Moving herd/group..."
+        label="Remove herd/group from this unit"
+        pendingLabel="Removing herd/group..."
         className="w-full md:w-fit"
       />
     </form>

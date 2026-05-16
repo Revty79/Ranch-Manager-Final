@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { FormFieldShell } from "@/components/patterns/form-field-shell";
 import { Input } from "@/components/ui/input";
@@ -25,10 +26,17 @@ export function SplitHerdMoveForm({
   destinationUnits,
   animalClassOptions,
 }: SplitHerdMoveFormProps) {
+  const router = useRouter();
   const [state, formAction] = useActionState(
     bulkMoveHeadcountFromUnitAction,
     initialState,
   );
+
+  useEffect(() => {
+    if (state.success) {
+      router.refresh();
+    }
+  }, [router, state.success]);
 
   if (!destinationUnits.length) {
     return (
@@ -132,3 +140,4 @@ export function SplitHerdMoveForm({
     </form>
   );
 }
+

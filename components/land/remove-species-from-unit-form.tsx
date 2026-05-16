@@ -7,21 +7,24 @@ import { FormFieldShell } from "@/components/patterns/form-field-shell";
 import { Input } from "@/components/ui/input";
 import { animalSpeciesOptions } from "@/lib/herd/constants";
 import {
-  bulkAssignAnimalsToLandUnitAction,
+  removeAnimalsBySpeciesFromLandUnitAction,
   type LandActionState,
 } from "@/lib/land/actions";
-import { movementReasonOptions } from "@/lib/land/constants";
 
 const initialState: LandActionState = {};
 
-interface BulkMoveAnimalsFormProps {
+interface RemoveSpeciesFromUnitFormProps {
   landUnitId: string;
+  animalClassOptions: string[];
 }
 
-export function BulkMoveAnimalsForm({ landUnitId }: BulkMoveAnimalsFormProps) {
+export function RemoveSpeciesFromUnitForm({
+  landUnitId,
+  animalClassOptions,
+}: RemoveSpeciesFromUnitFormProps) {
   const router = useRouter();
   const [state, formAction] = useActionState(
-    bulkAssignAnimalsToLandUnitAction,
+    removeAnimalsBySpeciesFromLandUnitAction,
     initialState,
   );
 
@@ -35,7 +38,7 @@ export function BulkMoveAnimalsForm({ landUnitId }: BulkMoveAnimalsFormProps) {
     <form action={formAction} className="space-y-3">
       <input type="hidden" name="landUnitId" value={landUnitId} />
 
-      <FormFieldShell label="Species to move">
+      <FormFieldShell label="Species">
         <select
           name="species"
           required
@@ -50,37 +53,34 @@ export function BulkMoveAnimalsForm({ landUnitId }: BulkMoveAnimalsFormProps) {
         </select>
       </FormFieldShell>
 
-      <FormFieldShell label="Movement reason">
+      <FormFieldShell label="Class filter (optional)">
         <select
-          name="movementReason"
-          defaultValue="grazing_rotation"
+          name="animalClass"
+          defaultValue=""
           className="h-10 w-full rounded-xl border bg-surface px-3 text-sm"
         >
-          {movementReasonOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
+          <option value="">All classes in selected species</option>
+          {animalClassOptions.map((value) => (
+            <option key={value} value={value}>
+              {value}
             </option>
           ))}
         </select>
       </FormFieldShell>
 
-      <FormFieldShell label="Movement notes (optional)">
+      <FormFieldShell label="Notes (optional)">
         <Input
           name="notes"
-          placeholder="Example: Move all cows for rotation cycle 3."
+          placeholder="Example: Removed bulls from this pen after processing."
         />
       </FormFieldShell>
-
-      <p className="text-xs text-foreground-muted">
-        This moves all active, non-archived animals of the selected species into this unit.
-      </p>
 
       {state.error ? <p className="text-sm font-medium text-danger">{state.error}</p> : null}
       {state.success ? <p className="text-sm font-medium text-accent">{state.success}</p> : null}
 
       <SubmitButton
-        label="Move all selected species"
-        pendingLabel="Moving animals..."
+        label="Remove by species from this unit"
+        pendingLabel="Removing animals..."
         className="w-full md:w-fit"
       />
     </form>

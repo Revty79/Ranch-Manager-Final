@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { removeAnimalFromLandUnitAction, type LandActionState } from "@/lib/land/actions";
 
 const initialState: LandActionState = {};
@@ -14,7 +15,14 @@ export function RemoveAnimalFromUnitForm({
   landUnitId,
   animalId,
 }: RemoveAnimalFromUnitFormProps) {
+  const router = useRouter();
   const [state, formAction] = useActionState(removeAnimalFromLandUnitAction, initialState);
+
+  useEffect(() => {
+    if (state.success) {
+      router.refresh();
+    }
+  }, [router, state.success]);
 
   return (
     <form action={formAction} className="space-y-1">
@@ -31,3 +39,4 @@ export function RemoveAnimalFromUnitForm({
     </form>
   );
 }
+

@@ -26,11 +26,18 @@ interface CreateMaintenanceRecordFormProps {
 }
 
 function formatWorkOrderOptionLabel(option: LinkableWorkOrderOption): string {
-  const dueLabel = option.dueAt
+  const dueAt =
+    option.dueAt instanceof Date
+      ? option.dueAt
+      : option.dueAt
+        ? new Date(option.dueAt)
+        : null;
+  const dueLabel =
+    dueAt && !Number.isNaN(dueAt.getTime())
     ? new Intl.DateTimeFormat("en-US", {
         month: "short",
         day: "numeric",
-      }).format(option.dueAt)
+      }).format(dueAt)
     : "No due date";
   return `${option.title} (${option.status.replace("_", " ")}, ${dueLabel})`;
 }
@@ -169,4 +176,3 @@ export function CreateMaintenanceRecordForm({
     </form>
   );
 }
-

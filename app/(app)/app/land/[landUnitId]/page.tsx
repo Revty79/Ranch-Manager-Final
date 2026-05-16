@@ -5,7 +5,9 @@ import { BulkMoveAnimalsForm } from "@/components/land/bulk-move-animals-form";
 import { EditLandUnitForm } from "@/components/land/edit-land-unit-form";
 import { MoveAnimalForm } from "@/components/land/move-animal-form";
 import { MoveAnimalGroupForm } from "@/components/land/move-animal-group-form";
+import { RemoveAnimalGroupFromUnitForm } from "@/components/land/remove-animal-group-from-unit-form";
 import { RemoveAnimalFromUnitForm } from "@/components/land/remove-animal-from-unit-form";
+import { RemoveSpeciesFromUnitForm } from "@/components/land/remove-species-from-unit-form";
 import { SplitHerdMoveForm } from "@/components/land/split-herd-move-form";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { PageHeader } from "@/components/patterns/page-header";
@@ -275,40 +277,59 @@ export default async function LandUnitDetailPage({
               Moves preserve history and update current occupancy immediately across herd and land views.
             </CardDescription>
             {canManage ? (
-              landUnit.isActive ? (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <p className="text-sm font-semibold">Single-animal move</p>
-                    <MoveAnimalForm landUnitId={landUnit.id} animalOptions={movementAnimalOptions} />
-                  </div>
-                  <div className="h-px bg-border" />
-                  <div className="space-y-2">
-                    <p className="text-sm font-semibold">Bulk move by species</p>
-                    <BulkMoveAnimalsForm landUnitId={landUnit.id} />
-                  </div>
-                  <div className="h-px bg-border" />
-                  <div className="space-y-2">
-                    <p className="text-sm font-semibold">Split herd move from this unit</p>
-                    <SplitHerdMoveForm
-                      fromLandUnitId={landUnit.id}
-                      destinationUnits={destinationUnitOptions}
-                      animalClassOptions={sourceAnimalClassOptions}
-                    />
-                  </div>
-                  <div className="h-px bg-border" />
-                  <div className="space-y-2">
-                    <p className="text-sm font-semibold">Move herd/group into this unit</p>
-                    <MoveAnimalGroupForm
-                      landUnitId={landUnit.id}
-                      groupOptions={movementGroupOptions}
-                    />
-                  </div>
+              <div className="space-y-4">
+                {landUnit.isActive ? (
+                  <>
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold">Single-animal move</p>
+                      <MoveAnimalForm landUnitId={landUnit.id} animalOptions={movementAnimalOptions} />
+                    </div>
+                    <div className="h-px bg-border" />
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold">Bulk move by species</p>
+                      <BulkMoveAnimalsForm landUnitId={landUnit.id} />
+                    </div>
+                    <div className="h-px bg-border" />
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold">Split herd move from this unit</p>
+                      <SplitHerdMoveForm
+                        fromLandUnitId={landUnit.id}
+                        destinationUnits={destinationUnitOptions}
+                        animalClassOptions={sourceAnimalClassOptions}
+                      />
+                    </div>
+                    <div className="h-px bg-border" />
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold">Move herd/group into this unit</p>
+                      <MoveAnimalGroupForm
+                        landUnitId={landUnit.id}
+                        groupOptions={movementGroupOptions}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <p className="rounded-xl border bg-surface px-4 py-3 text-sm text-foreground-muted">
+                    This land unit is inactive. Reactivate it before assigning animals into it.
+                  </p>
+                )}
+
+                <div className="h-px bg-border" />
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold">Remove herd/group from this unit</p>
+                  <RemoveAnimalGroupFromUnitForm
+                    landUnitId={landUnit.id}
+                    groupOptions={movementGroupOptions}
+                  />
                 </div>
-              ) : (
-                <p className="rounded-xl border bg-surface px-4 py-3 text-sm text-foreground-muted">
-                  This land unit is inactive. Reactivate it before assigning animals.
-                </p>
-              )
+                <div className="h-px bg-border" />
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold">Remove by species from this unit</p>
+                  <RemoveSpeciesFromUnitForm
+                    landUnitId={landUnit.id}
+                    animalClassOptions={sourceAnimalClassOptions}
+                  />
+                </div>
+              </div>
             ) : (
               <p className="rounded-xl border bg-surface px-4 py-3 text-sm text-foreground-muted">
                 Owners and managers can record movements. Your role is{" "}
